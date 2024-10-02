@@ -24,8 +24,15 @@ dependencies {
     implementation("io.ktor:ktor-server-core-jvm")
     implementation("io.ktor:ktor-server-auth-jvm")
     implementation("io.ktor:ktor-server-auth-jwt-jvm")
+
+    // Serialization
     implementation("io.ktor:ktor-server-content-negotiation-jvm")
     implementation("io.ktor:ktor-serialization-jackson-jvm")
+
+    // Dependency Injection
+    implementation("io.insert-koin:koin-ktor:4.0.0") // Koin for Ktor integration
+    implementation("io.insert-koin:koin-core:4.0.0") // Core Koin library
+
     implementation("io.ktor:ktor-server-netty-jvm")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     testImplementation("io.ktor:ktor-server-test-host-jvm")
