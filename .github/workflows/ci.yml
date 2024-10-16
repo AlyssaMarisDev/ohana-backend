@@ -15,17 +15,15 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
 
-    defaults:
-      run:
-        working-directory: OhanaMembers
-
     steps:
     - uses: actions/checkout@v4
+
+    - name: cd into working directory
+      run: cd ./OhanaMembers/
       
     - name: Set up JDK 11
       uses: actions/setup-java@v4
@@ -61,12 +59,12 @@ jobs:
     permissions:
       contents: write
 
-    defaults:
-      run:
-        working-directory: OhanaMembers
-
     steps:
     - uses: actions/checkout@v4
+
+    - name: cd into working directory
+      run: cd ./OhanaMembers/
+      
     - name: Set up JDK 11
       uses: actions/setup-java@v4
       with:
