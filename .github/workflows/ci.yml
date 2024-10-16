@@ -23,7 +23,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: cd into working directory
-      run: cd ./OhanaMembers/
+      run: cd OhanaMembers
       
     - name: Set up JDK 11
       uses: actions/setup-java@v4
@@ -63,7 +63,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: cd into working directory
-      run: cd ./OhanaMembers/
+      run: cd OhanaMembers
       
     - name: Set up JDK 11
       uses: actions/setup-java@v4
