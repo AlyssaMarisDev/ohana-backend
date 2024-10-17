@@ -12,4 +12,4 @@ plugins {
 }
 
 rootProject.name = "OhanaMembers"
-include("app")
+include("src")
