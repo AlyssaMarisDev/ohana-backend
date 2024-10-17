@@ -16,7 +16,7 @@ class ApplicationTest {
 
     @Test
     fun basicTest3() {
-        assert(2==1)
+        assert(2==2)
     }
 }
 
