@@ -1,13 +1,26 @@
 package com.example
 
-import com.example.plugins.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.testing.*
-import kotlin.test.*
+import org.junit.jupiter.api.Test
+
 
 class ApplicationTest {
+    @Test
+    fun basicTest() {
+        assert(2==2)
+    }
+
+    @Test
+    fun basicTest2() {
+        assert(2==2)
+    }
+
+    @Test
+    fun basicTest3() {
+        assert(2==1)
+    }
+}
+
+
 //    @Test
 //    fun testRoot() = testApplication {
 //        application {
@@ -18,4 +31,3 @@ class ApplicationTest {
 //            assertEquals("Hello World!", bodyAsText())
 //        }
 //    }
-}
