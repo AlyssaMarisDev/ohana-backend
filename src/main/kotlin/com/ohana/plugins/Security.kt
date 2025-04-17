@@ -7,23 +7,18 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 
 fun Application.configureSecurity() {
-    // Please read the jwt property from the config file if you are using EngineMain
-    val jwtAudience = "jwt-audience"
-    val jwtDomain = "https://jwt-provider-domain/"
-    val jwtRealm = "ktor sample app"
-    val jwtSecret = "secret"
-    authentication {
-        jwt {
-            realm = jwtRealm
+    install(Authentication) {
+        jwt("auth-jwt") {
+            realm = "Ohana"
             verifier(
                 JWT
-                    .require(Algorithm.HMAC256(jwtSecret))
-                    .withAudience(jwtAudience)
-                    .withIssuer(jwtDomain)
+                    .require(Algorithm.HMAC256("secret"))
+                    .withAudience("Ohana")
+                    .withIssuer("https://ohana.com")
                     .build()
             )
             validate { credential ->
-                if (credential.payload.audience.contains(jwtAudience)) JWTPrincipal(credential.payload) else null
+                if (credential.payload.audience.contains("Ohana")) JWTPrincipal(credential.payload) else null
             }
         }
     }

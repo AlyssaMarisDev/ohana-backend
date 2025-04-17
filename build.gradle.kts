@@ -6,11 +6,11 @@ plugins {
     id("io.ktor.plugin") version "3.0.0-rc-1"
 }
 
-group = "com.example"
+group = "com.ohana"
 version = "0.0.1"
 
 application {
-    mainClass.set("com.example.ApplicationKt")
+    mainClass.set("com.ohana.ApplicationKt")
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
