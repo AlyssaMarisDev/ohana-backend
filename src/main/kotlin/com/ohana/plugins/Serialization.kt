@@ -1,4 +1,4 @@
-package com.example.plugins
+package com.ohana.plugins
 
 import com.fasterxml.jackson.databind.*
 import io.ktor.serialization.jackson.*

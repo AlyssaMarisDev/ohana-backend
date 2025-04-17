@@ -1,7 +1,7 @@
-package com.example.services
+package com.ohana.handlers
 
-import com.example.data.MemberRepository
-import com.example.models.Member
+import com.ohana.data.MemberRepository
+import com.ohana.models.Member
 
 class GetSingleMemberService (private val memberRepository : MemberRepository) {
     suspend fun run(id: Int) : Member? {

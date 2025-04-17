@@ -1,4 +1,4 @@
-package com.example.plugins
+package com.ohana.plugins
 
 import io.ktor.server.application.*
 import org.jetbrains.exposed.sql.Database

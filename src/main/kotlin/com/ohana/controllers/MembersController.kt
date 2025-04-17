@@ -1,6 +1,6 @@
-package com.example.controllers
+package com.ohana.controllers
 
-import com.example.services.GetSingleMemberService
+import com.ohana.handlers.GetSingleMemberService
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*

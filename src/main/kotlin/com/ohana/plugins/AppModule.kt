@@ -1,8 +1,8 @@
-package com.example.plugins
+package com.ohana.plugins
 
-import com.example.controllers.MembersController
-import com.example.data.MemberRepository
-import com.example.services.GetSingleMemberService
+import com.ohana.controllers.MembersController
+import com.ohana.data.MemberRepository
+import com.ohana.handlers.GetSingleMemberService
 import org.koin.dsl.module
 
 // Define a Koin module to provide dependencies
