@@ -1,20 +1,20 @@
-package com.ohana.controllers
+package com.ohana.members.controllers
 
-import com.ohana.handlers.GetSingleMemberService
+import com.ohana.members.handlers.GetSingleMemberByIdHandler
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 class MembersController(
-    private val getSingleMemberService: GetSingleMemberService
+    private val getSingleMemberByIdHandler: GetSingleMemberByIdHandler
 ) {
     fun Route.registerMemberRoutes() {
         route("/members") {
             get("/{id}") {
                 val id = call.parameters["id"]?.toIntOrNull()
-                val member = id?.let { getSingleMemberService.run(it) }
-                if (member != null) {
-                    call.respond(member)
+                val response = id?.let { getSingleMemberByIdHandler.handle(it) }
+                if (response != null) {
+                    call.respond(response)
                 } else {
                     call.respond(HttpStatusCode.NotFound, "Member not found")
                 }

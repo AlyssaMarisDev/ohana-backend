@@ -1,6 +1,6 @@
 package com.ohana.plugins
 
-import com.ohana.controllers.MembersController
+import com.ohana.members.controllers.MembersController
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject

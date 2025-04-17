@@ -1,13 +1,16 @@
 package com.ohana.plugins
 
 import io.ktor.server.application.*
-import org.jetbrains.exposed.sql.Database
+import org.flywaydb.core.Flyway
+
 
 fun Application.configureDatabase() {
-    Database.connect(
-        url = "jdbc:mysql://localhost:3306/OhanaMembers?useSSL=false&serverTimezone=UTC",
-        driver = "com.mysql.cj.jdbc.Driver",
-        user = "root",
-        password = "development"
-    )
+    Flyway.configure()
+        .dataSource(
+            "jdbc:mysql://localhost:3306/OhanaMembers?useSSL=false&serverTimezone=UTC",
+            "root",
+            "root"
+        )
+        .load()
+        .migrate()
 }

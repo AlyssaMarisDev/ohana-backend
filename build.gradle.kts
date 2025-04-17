@@ -41,11 +41,13 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.2")
 
-    implementation("org.jetbrains.exposed:exposed-core:0.55.0")
-    implementation("org.jetbrains.exposed:exposed-dao:0.55.0")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.55.0")
-    implementation("org.jetbrains.exposed:exposed-java-time:0.55.0")
+    // Database
+    implementation("org.jdbi:jdbi3-core:3.27.0")
+    implementation("org.jdbi:jdbi3-kotlin:3.27.0")
+    implementation("org.jdbi:jdbi3-sqlobject:3.27.0")
+    implementation("org.jdbi:jdbi3-kotlin-sqlobject:3.27.0")
     implementation("com.mysql:mysql-connector-j:9.0.0")
+    implementation("org.flywaydb:flyway-core:9.0.0")
 }
 
 tasks.test {
