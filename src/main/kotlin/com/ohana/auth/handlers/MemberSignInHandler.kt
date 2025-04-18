@@ -10,14 +10,14 @@ import org.koin.core.component.KoinComponent
 class MemberSignInHandler(
     private val jdbi: Jdbi
 ): KoinComponent {
-    fun handle(request: Request): String {
+    fun handle(request: Request): Response {
         val member = findMemberByEmail(request.email)
         
         if (member == null || member.password != Hasher.hashPassword(request.password, member.salt)) {
             throw AuthorizationException("Invalid email or password")
         }
 
-        return JwtCreator.generateToken(member.id)
+        return Response(JwtCreator.generateToken(member.id))
     }
 
     private fun findMemberByEmail(email: String): Member? {
@@ -45,5 +45,9 @@ class MemberSignInHandler(
     data class Request(
         val email: String,
         val password: String
+    )
+
+    data class Response(
+        val token: String
     )
 }

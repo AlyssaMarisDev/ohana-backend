@@ -9,13 +9,13 @@ import com.ohana.auth.utils.JwtCreator
 class RegisterNewMemberHandler(
     private val jdbi: Jdbi
 ): KoinComponent {
-    fun handle(request: Request): String {
+    fun handle(request: Request): Response {
         val salt = Hasher.generateSalt()
         val hashedPassword = Hasher.hashPassword(request.password, salt)
 
         val memberId = insertMember(request.name, request.email, hashedPassword, salt)
 
-        return JwtCreator.generateToken(memberId)
+        return Response(JwtCreator.generateToken(memberId))
     }
 
     fun insertMember(name: String, email: String, password: String, salt: ByteArray): Int {
@@ -36,5 +36,9 @@ class RegisterNewMemberHandler(
         val name: String,
         val email: String,
         val password: String
+    )
+
+    data class Response(
+        val token: String
     )
 }

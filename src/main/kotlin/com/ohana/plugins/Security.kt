@@ -18,7 +18,11 @@ fun Application.configureSecurity() {
                     .build()
             )
             validate { credential ->
-                if (credential.payload.audience.contains("Ohana")) JWTPrincipal(credential.payload) else null
+                if (credential.payload.audience.contains("Ohana")) {
+                    JWTPrincipal(credential.payload)
+                } else {
+                    null
+                }
             }
         }
     }

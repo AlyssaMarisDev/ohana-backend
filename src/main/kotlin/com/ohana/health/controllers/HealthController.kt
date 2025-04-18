@@ -5,6 +5,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.http.HttpStatusCode
 import org.koin.core.component.KoinComponent
+import io.ktor.server.auth.*
 
 class HealthController {
     fun Route.registerHealthRoutes() {
