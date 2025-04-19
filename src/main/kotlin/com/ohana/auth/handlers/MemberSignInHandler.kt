@@ -3,6 +3,7 @@ package com.ohana.auth.handlers
 import com.ohana.auth.utils.Hasher
 import com.ohana.auth.utils.JwtCreator
 import com.ohana.exceptions.AuthorizationException
+import com.ohana.utils.DatabaseUtils.Companion.fetch
 import com.ohana.utils.DatabaseUtils.Companion.query
 import org.jdbi.v3.core.Jdbi
 import org.koin.core.component.KoinComponent
@@ -10,6 +11,15 @@ import org.koin.core.component.KoinComponent
 class MemberSignInHandler(
     private val jdbi: Jdbi,
 ) : KoinComponent {
+    data class Request(
+        val email: String,
+        val password: String,
+    )
+
+    data class Response(
+        val token: String,
+    )
+
     suspend fun handle(request: Request): Response {
         val member = findMemberByEmail(request.email)
 
@@ -22,31 +32,17 @@ class MemberSignInHandler(
 
     private suspend fun findMemberByEmail(email: String): Member? =
         query(jdbi) { handle ->
-            handle
-                .createQuery("SELECT id, password, salt FROM members WHERE email = :email")
-                .bind("email", email)
-                .map { rs, _ ->
-                    Member(
-                        id = rs.getInt("id"),
-                        password = rs.getString("password"),
-                        salt = rs.getBytes("salt"),
-                    )
-                }.findOne()
-                .orElse(null)
+            fetch(
+                handle,
+                "SELECT id, password, salt FROM members WHERE email = :email",
+                mapOf("email" to email),
+                Member::class,
+            ).firstOrNull()
         }
 
-    data class Member(
+    private data class Member(
         val id: Int,
         val password: String,
         val salt: ByteArray,
-    )
-
-    data class Request(
-        val email: String,
-        val password: String,
-    )
-
-    data class Response(
-        val token: String,
     )
 }

@@ -3,7 +3,8 @@ package com.ohana.auth.handlers
 import com.ohana.auth.utils.Hasher
 import com.ohana.auth.utils.JwtCreator
 import com.ohana.exceptions.ConflictException
-import com.ohana.exceptions.DbException
+import com.ohana.utils.DatabaseUtils.Companion.fetch
+import com.ohana.utils.DatabaseUtils.Companion.insert
 import com.ohana.utils.DatabaseUtils.Companion.transaction
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
@@ -12,6 +13,16 @@ import org.koin.core.component.KoinComponent
 class RegisterNewMemberHandler(
     private val jdbi: Jdbi,
 ) : KoinComponent {
+    data class Request(
+        val name: String,
+        val email: String,
+        val password: String,
+    )
+
+    data class Response(
+        val token: String,
+    )
+
     suspend fun handle(request: Request): Response {
         val salt = Hasher.generateSalt()
         val hashedPassword = Hasher.hashPassword(request.password, salt)
@@ -38,35 +49,29 @@ class RegisterNewMemberHandler(
         password: String,
         salt: ByteArray,
     ): Int =
-        handle
-            .createUpdate("INSERT INTO members (name, email, password, salt) VALUES (:name, :email, :password, :salt)")
-            .bind("name", name)
-            .bind("email", email)
-            .bind("password", password)
-            .bind("salt", salt)
-            .executeAndReturnGeneratedKeys("id")
-            .mapTo(Int::class.java)
-            .findOne()
-            .orElseThrow { throw DbException("Failed to insert member") }
+        insert(
+            handle,
+            "INSERT INTO members (name, email, password, salt) VALUES (:name, :email, :password, :salt)",
+            mapOf(
+                "name" to name,
+                "email" to email,
+                "password" to password,
+                "salt" to salt,
+            ),
+        )
 
     private fun findMemberByEmail(
         handle: Handle,
         email: String,
-    ): Int? =
-        handle
-            .createQuery("SELECT id FROM members WHERE email = :email")
-            .bind("email", email)
-            .mapTo(Int::class.java)
-            .findFirst()
-            .orElse(null)
+    ): Member? =
+        fetch(
+            handle,
+            "SELECT id FROM members WHERE email = :email",
+            mapOf("email" to email),
+            Member::class,
+        ).firstOrNull()
 
-    data class Request(
-        val name: String,
-        val email: String,
-        val password: String,
-    )
-
-    data class Response(
-        val token: String,
+    private data class Member(
+        val id: Int,
     )
 }
