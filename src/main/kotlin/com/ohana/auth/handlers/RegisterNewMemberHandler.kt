@@ -4,12 +4,12 @@ import org.jdbi.v3.core.Jdbi
 import org.koin.core.component.KoinComponent
 import com.ohana.auth.utils.Hasher
 import com.ohana.auth.utils.JwtCreator
-
+import com.ohana.utils.TransactionHandler.Companion.transaction
 
 class RegisterNewMemberHandler(
     private val jdbi: Jdbi
 ): KoinComponent {
-    fun handle(request: Request): Response {
+    suspend fun handle(request: Request): Response {
         val salt = Hasher.generateSalt()
         val hashedPassword = Hasher.hashPassword(request.password, salt)
 
@@ -18,8 +18,8 @@ class RegisterNewMemberHandler(
         return Response(JwtCreator.generateToken(memberId))
     }
 
-    fun insertMember(name: String, email: String, password: String, salt: ByteArray): Int {
-        return jdbi.withHandle<Int, Exception> { handle ->
+    suspend fun insertMember(name: String, email: String, password: String, salt: ByteArray): Int {
+        return transaction(jdbi) { handle ->
             handle.createUpdate("INSERT INTO members (name, email, password, salt) VALUES (:name, :email, :password, :salt)")
                 .bind("name", name)
                 .bind("email", email)

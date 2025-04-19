@@ -1,11 +1,14 @@
 package com.ohana.members.handlers
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.Handle
+import com.ohana.utils.TransactionHandler.Companion.transaction
 
 class UpdateMemberByIdHandler(private val jdbi: Jdbi) {
     suspend fun handle(id: Int, request: Request): Response? {
-        return jdbi.inTransaction<Response?, Exception> { handle ->
+        return transaction(jdbi) { handle ->
             // Perform the update
             val updatedRows = updateMember(handle, id, request)
 

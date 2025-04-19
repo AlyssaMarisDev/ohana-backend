@@ -1,27 +1,34 @@
 package com.ohana.members.handlers
 
 import org.jdbi.v3.core.Jdbi
+import org.jdbi.v3.core.Handle
+import com.ohana.utils.TransactionHandler.Companion.query
 
 class GetSingleMemberByIdHandler (private val jdbi: Jdbi) {
     suspend fun handle(id: Int) : Response? {
-        val response = jdbi.withHandle<Response, Exception> { handle ->
-            handle.createQuery("SELECT id, name, age, gender, email FROM members WHERE id = :id")
-                .bind("id", id)
-                .map { rs, _ ->
-                    Response(
-                        id = rs.getInt("id"),
-                        name = rs.getString("name"),
-                        age = rs.getInt("age"),
-                        gender = rs.getString("gender"),
-                        email = rs.getString("email")
-                    )
-                }
-                .findFirst()
-                .orElse(null)
+        val response = query(jdbi) { handle ->
+            fetchSingleMemberById(handle, id)
         }
 
         return response
     }
+
+    fun fetchSingleMemberById(handle: Handle, id: Int): Response? {
+        return handle.createQuery("SELECT id, name, age, gender, email FROM members WHERE id = :id")
+        .bind("id", id)
+        .map { rs, _ ->
+            Response(
+                id = rs.getInt("id"),
+                name = rs.getString("name"),
+                age = rs.getInt("age"),
+                gender = rs.getString("gender"),
+                email = rs.getString("email")
+            )
+        }
+        .findFirst()
+        .orElse(null)
+    }
+    
     
     data class Response(
         val id: Int,

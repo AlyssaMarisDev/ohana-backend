@@ -2,12 +2,12 @@
 
 ## High Priority
 
-- [ ] Account Creation
-  - [ ] API endpoints for account creation and profile management
-  - [ ] Database schema design and integration
+- [x] Account Creation
+  - [x] API endpoints for account creation and profile management
+  - [x] Database schema design and integration
 
-- [ ] Authentication
-  - [ ] Implement secure authentication mechanisms for account creation and login
+- [x] Authentication
+  - [x] Implement secure authentication mechanisms for account creation and login
   - [ ] Token generation and validation
 
 - [ ] Google Calendar Integration
@@ -50,4 +50,4 @@
   - [ ] Data migration and backup strategies
 
 - [ ] Security
-  - [ ] Ensure data privacy and protection, especially for financial transactions 
+  - [ ] Ensure data privacy and protection, especially for financial transactions

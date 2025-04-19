@@ -1,15 +1,13 @@
 package com.ohana.members.controllers
 
-import com.ohana.members.handlers.GetSingleMemberByIdHandler
 import com.ohana.members.handlers.GetAllMembersHandler
+import com.ohana.members.handlers.GetSingleMemberByIdHandler
 import com.ohana.members.handlers.UpdateMemberByIdHandler
-import io.ktor.server.request.*
 import io.ktor.http.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.koin.core.component.KoinComponent
-import io.ktor.server.auth.*
-
 
 class MembersController(
     private val getSingleMemberByIdHandler: GetSingleMemberByIdHandler,
@@ -46,4 +44,3 @@ class MembersController(
         }
     }
 }
-
