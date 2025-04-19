@@ -21,12 +21,22 @@ class DatabaseUtils(
         suspend fun <T> transaction(
             jdbi: Jdbi,
             block: (Handle) -> T,
-        ): T =
+        ): T {
+            logger.debug("Starting transaction")
+            var result: T? = null
+
             withContext(Dispatchers.IO) {
                 jdbi.inTransaction<T, Exception> { handle ->
+
                     try {
-                        block(handle)
+                        logger.debug("Starting block")
+                        result = block(handle)
+                        logger.debug("Block completed")
+
+                        result
                     } catch (e: Exception) {
+                        logger.error("Transaction failed: ${e.message}", e)
+
                         if (e is KnownError) {
                             throw e
                         }
@@ -36,15 +46,29 @@ class DatabaseUtils(
                 }
             }
 
+            logger.debug("Transaction completed")
+
+            return result ?: throw DbException("Transaction failed: No result returned")
+        }
+
         suspend fun <T> query(
             jdbi: Jdbi,
             block: (Handle) -> T,
-        ): T =
+        ): T {
+            logger.debug("Starting handle")
+            var result: T? = null
+
             withContext(Dispatchers.IO) {
                 jdbi.withHandle<T, Exception> { handle ->
                     try {
-                        block(handle)
+                        logger.debug("Starting block")
+                        result = block(handle)
+                        logger.debug("Block completed")
+
+                        result
                     } catch (e: Exception) {
+                        logger.error("Query failed: ${e.message}", e)
+
                         if (e is KnownError) {
                             throw e
                         }
@@ -54,22 +78,34 @@ class DatabaseUtils(
                 }
             }
 
+            logger.debug("Handle completed")
+
+            return result ?: throw DbException("Handle failed: No result returned")
+        }
+
         fun insert(
             handle: Handle,
             insertQuery: String,
             params: Map<String, Any?>,
         ): Int {
+            logger.debug("Starting insert")
             var insert = handle.createUpdate(insertQuery)
 
             params.forEach { (key, value) ->
                 insert = insert.bind(key, value)
             }
 
-            return insert
+            logger.debug("Inserting")
+
+            val inserted = insert
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Int::class.java)
                 .findOne()
                 .orElseThrow { throw DbException("Failed to insert") }
+
+            logger.debug("Insert completed")
+
+            return inserted
         }
 
         fun update(
@@ -77,13 +113,20 @@ class DatabaseUtils(
             updateQuery: String,
             params: Map<String, Any?>,
         ): Int {
+            logger.debug("Starting update")
             var update = handle.createUpdate(updateQuery)
 
             params.forEach { (key, value) ->
                 update = update.bind(key, value)
             }
 
-            return update.execute()
+            logger.debug("Updating")
+
+            val updated = update.execute()
+
+            logger.debug("Update completed")
+
+            return updated
         }
 
         fun <T : Any> fetch(
@@ -92,16 +135,23 @@ class DatabaseUtils(
             params: Map<String, Any>,
             clazz: KClass<T>,
         ): List<T> {
+            logger.debug("Starting fetch")
             var fetch = handle.createQuery(query)
 
             params.forEach { (key, value) ->
                 fetch = fetch.bind(key, value)
             }
 
-            return fetch
+            logger.debug("Fetching")
+
+            val fetched = fetch
                 .map { rs, _ ->
                     mapRowToObject(rs, clazz)
                 }.toList()
+
+            logger.debug("Fetch completed")
+
+            return fetched
         }
 
         private fun <T : Any> mapRowToObject(
