@@ -1,6 +1,5 @@
 package com.ohana.auth.controllers
 
-import com.ohana.auth.exceptions.AuthorizationException
 import com.ohana.auth.handlers.MemberSignInHandler
 import com.ohana.auth.handlers.RegisterNewMemberHandler
 import io.ktor.http.*
@@ -22,13 +21,8 @@ class AuthController(
 
         post("/login") {
             val member = call.receive<MemberSignInHandler.Request>()
-
-            try {
-                val token = memberSignInHandler.handle(member)
-                call.respond(HttpStatusCode.OK, token)
-            } catch (e: AuthorizationException) {
-                call.respond(HttpStatusCode.Unauthorized, e.message ?: "Invalid email or password")
-            }
+            val token = memberSignInHandler.handle(member)
+            call.respond(HttpStatusCode.OK, token)
         }
     }
 }

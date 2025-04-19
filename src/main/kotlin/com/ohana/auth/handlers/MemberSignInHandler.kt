@@ -1,8 +1,8 @@
 package com.ohana.auth.handlers
 
-import com.ohana.auth.exceptions.AuthorizationException
 import com.ohana.auth.utils.Hasher
 import com.ohana.auth.utils.JwtCreator
+import com.ohana.exceptions.AuthorizationException
 import com.ohana.utils.DatabaseUtils.Companion.query
 import org.jdbi.v3.core.Jdbi
 import org.koin.core.component.KoinComponent
@@ -11,9 +11,7 @@ class MemberSignInHandler(
     private val jdbi: Jdbi,
 ) : KoinComponent {
     suspend fun handle(request: Request): Response {
-        val member =
-
-            findMemberByEmail(request.email)
+        val member = findMemberByEmail(request.email)
 
         if (member == null || member.password != Hasher.hashPassword(request.password, member.salt)) {
             throw AuthorizationException("Invalid email or password")

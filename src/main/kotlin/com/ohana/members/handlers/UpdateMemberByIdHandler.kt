@@ -1,5 +1,7 @@
 package com.ohana.members.handlers
 
+import com.ohana.exceptions.DbException
+import com.ohana.exceptions.NotFoundException
 import com.ohana.utils.DatabaseUtils.Companion.transaction
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
@@ -10,17 +12,20 @@ class UpdateMemberByIdHandler(
     suspend fun handle(
         id: Int,
         request: Request,
-    ): Response? =
+    ): Response =
         transaction(jdbi) { handle ->
+            // Fetch to check if the member exists
+            fetchMemberById(handle, id)
+
             // Perform the update
             val updatedRows = updateMember(handle, id, request)
 
             if (updatedRows == 0) {
-                throw Exception("Failed to update member")
+                throw DbException("Failed to update member")
             }
 
-            // Fetch the updated row
-            fetchUpdatedMember(handle, id)
+            // Return the updated member
+            fetchMemberById(handle, id)
         }
 
     private fun updateMember(
@@ -45,10 +50,10 @@ class UpdateMemberByIdHandler(
             .execute()
     }
 
-    private fun fetchUpdatedMember(
+    private fun fetchMemberById(
         handle: Handle,
         id: Int,
-    ): Response? {
+    ): Response {
         val selectQuery = """
             SELECT id, name, age, gender, email
             FROM members
@@ -67,7 +72,7 @@ class UpdateMemberByIdHandler(
                     email = rs.getString("email"),
                 )
             }.findOne()
-            .orElse(null)
+            .orElseThrow { throw NotFoundException("Member not found") }
     }
 
     data class Request(

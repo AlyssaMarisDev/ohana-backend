@@ -1,5 +1,6 @@
 package com.ohana.members.controllers
 
+import com.ohana.exceptions.ValidationException
 import com.ohana.members.handlers.GetAllMembersHandler
 import com.ohana.members.handlers.GetSingleMemberByIdHandler
 import com.ohana.members.handlers.UpdateMemberByIdHandler
@@ -18,13 +19,9 @@ class MembersController(
         authenticate("auth-jwt") {
             route("/members") {
                 get("/{id}") {
-                    val id = call.parameters["id"]?.toIntOrNull()
-                    val response = id?.let { getSingleMemberByIdHandler.handle(it) }
-                    if (response != null) {
-                        call.respond(HttpStatusCode.OK, response)
-                    } else {
-                        call.respond(HttpStatusCode.NotFound, "Member not found")
-                    }
+                    val id = call.parameters["id"]?.toIntOrNull() ?: throw ValidationException("Member ID must be an integer")
+                    val response = getSingleMemberByIdHandler.handle(id)
+                    call.respond(HttpStatusCode.OK, response)
                 }
 
                 get("") {
@@ -33,12 +30,10 @@ class MembersController(
                 }
 
                 put("/{id}") {
-                    val id = call.parameters["id"]?.toIntOrNull()
+                    val id = call.parameters["id"]?.toIntOrNull() ?: throw ValidationException("Member ID must be an integer")
                     val request = call.receive<UpdateMemberByIdHandler.Request>()
-                    val response = id?.let { updateMemberByIdHandler.handle(it, request) }
-                    if (response != null) {
-                        call.respond(HttpStatusCode.OK, response)
-                    }
+                    val response = updateMemberByIdHandler.handle(id, request)
+                    call.respond(HttpStatusCode.OK, response)
                 }
             }
         }

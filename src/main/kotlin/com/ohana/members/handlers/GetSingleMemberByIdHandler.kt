@@ -1,5 +1,6 @@
 package com.ohana.members.handlers
 
+import com.ohana.exceptions.NotFoundException
 import com.ohana.utils.DatabaseUtils.Companion.query
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
@@ -7,19 +8,15 @@ import org.jdbi.v3.core.Jdbi
 class GetSingleMemberByIdHandler(
     private val jdbi: Jdbi,
 ) {
-    suspend fun handle(id: Int): Response? {
-        val response =
-            query(jdbi) { handle ->
-                fetchSingleMemberById(handle, id)
-            }
-
-        return response
-    }
+    suspend fun handle(id: Int): Response =
+        query(jdbi) { handle ->
+            fetchSingleMemberById(handle, id)
+        }
 
     fun fetchSingleMemberById(
         handle: Handle,
         id: Int,
-    ): Response? =
+    ): Response =
         handle
             .createQuery("SELECT id, name, age, gender, email FROM members WHERE id = :id")
             .bind("id", id)
@@ -31,8 +28,8 @@ class GetSingleMemberByIdHandler(
                     gender = rs.getString("gender"),
                     email = rs.getString("email"),
                 )
-            }.findFirst()
-            .orElse(null)
+            }.findOne()
+            .orElseThrow { throw NotFoundException("Member not found") }
 
     data class Response(
         val id: Int,
