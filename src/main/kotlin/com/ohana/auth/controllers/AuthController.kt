@@ -1,18 +1,17 @@
 package com.ohana.auth.controllers
 
+import com.ohana.auth.exceptions.AuthorizationException
+import com.ohana.auth.handlers.MemberSignInHandler
+import com.ohana.auth.handlers.RegisterNewMemberHandler
+import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import com.ohana.auth.handlers.RegisterNewMemberHandler
-import com.ohana.auth.handlers.MemberSignInHandler
-import io.ktor.server.request.*
-import io.ktor.http.*
-import com.ohana.auth.exceptions.AuthorizationException
-import org.koin.core.component.KoinComponent
 
 class AuthController(
     private val registerNewMemberHandler: RegisterNewMemberHandler,
-    private val memberSignInHandler: MemberSignInHandler
+    private val memberSignInHandler: MemberSignInHandler,
 ) {
     fun Route.registerAuthRoutes() {
         post("/register") {

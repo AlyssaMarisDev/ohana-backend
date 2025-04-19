@@ -8,13 +8,13 @@ import java.util.Date
 
 class JwtCreator {
     companion object {
-        fun generateToken(userId: Int): String {
-            return JWT.create()
+        fun generateToken(userId: Int): String =
+            JWT
+                .create()
                 .withAudience("Ohana")
                 .withIssuer("https://ohana.com")
                 .withClaim("userId", userId)
                 .withExpiresAt(Date.from(Instant.now().plus(30, ChronoUnit.DAYS))) // 30 days expiry
                 .sign(Algorithm.HMAC256("secret"))
-        }
     }
 }

@@ -1,9 +1,10 @@
-val kotlin_version: String by project
-val logback_version: String by project
+val kotlinVersion: String by project
+val logbackVersion: String by project
 
 plugins {
     kotlin("jvm") version "2.0.20"
     id("io.ktor.plugin") version "3.0.0-rc-1"
+    id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
 }
 
 group = "com.ohana"
@@ -34,7 +35,7 @@ dependencies {
     implementation("io.insert-koin:koin-core:4.0.0") // Core Koin library
 
     implementation("io.ktor:ktor-server-netty-jvm")
-    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
 
     // JUnit 5 Testing dependencies
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.2")
@@ -63,6 +64,18 @@ tasks.test {
     }
 }
 
-tasks.register("b") {
-    dependsOn("assemble")  // Only assemble the project, don't run tests
+tasks.register("format") {
+    dependsOn("ktlintFormat")
+}
+
+tasks.named("build") {
+    dependsOn("ktlintFormat")
+}
+
+ktlint {
+    version.set("1.5.0")
+    android.set(false)
+    outputToConsole.set(true)
+    coloredOutput.set(true)
+    ignoreFailures.set(true)
 }

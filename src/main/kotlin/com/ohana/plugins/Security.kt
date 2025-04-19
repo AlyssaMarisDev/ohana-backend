@@ -11,10 +11,11 @@ fun Application.configureSecurity() {
         jwt("auth-jwt") {
             realm = "Ohana"
             verifier(
-                JWT.require(Algorithm.HMAC256("secret"))
+                JWT
+                    .require(Algorithm.HMAC256("secret"))
                     .withAudience("Ohana")
                     .withIssuer("https://ohana.com")
-                    .build()
+                    .build(),
             )
             validate { credential ->
                 if (credential.payload.audience.contains("Ohana")) {

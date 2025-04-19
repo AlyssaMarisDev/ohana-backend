@@ -12,7 +12,7 @@ import io.ktor.server.routing.*
 class MembersController(
     private val getSingleMemberByIdHandler: GetSingleMemberByIdHandler,
     private val getAllMembersHandler: GetAllMembersHandler,
-    private val updateMemberByIdHandler: UpdateMemberByIdHandler
+    private val updateMemberByIdHandler: UpdateMemberByIdHandler,
 ) {
     fun Route.registerMemberRoutes() {
         authenticate("auth-jwt") {

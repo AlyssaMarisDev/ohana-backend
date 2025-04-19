@@ -12,7 +12,10 @@ class Hasher {
             return salt
         }
 
-        fun hashPassword(password: String, salt: ByteArray): String {
+        fun hashPassword(
+            password: String,
+            salt: ByteArray,
+        ): String {
             val md = MessageDigest.getInstance("SHA-512")
             md.update(salt)
             val hashedPassword = md.digest(password.toByteArray())

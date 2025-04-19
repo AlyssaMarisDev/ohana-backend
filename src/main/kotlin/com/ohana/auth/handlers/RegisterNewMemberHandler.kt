@@ -1,14 +1,14 @@
 package com.ohana.auth.handlers
 
-import org.jdbi.v3.core.Jdbi
-import org.koin.core.component.KoinComponent
 import com.ohana.auth.utils.Hasher
 import com.ohana.auth.utils.JwtCreator
-import com.ohana.utils.TransactionHandler.Companion.transaction
+import com.ohana.utils.DatabaseUtils.Companion.transaction
+import org.jdbi.v3.core.Jdbi
+import org.koin.core.component.KoinComponent
 
 class RegisterNewMemberHandler(
-    private val jdbi: Jdbi
-): KoinComponent {
+    private val jdbi: Jdbi,
+) : KoinComponent {
     suspend fun handle(request: Request): Response {
         val salt = Hasher.generateSalt()
         val hashedPassword = Hasher.hashPassword(request.password, salt)
@@ -18,9 +18,15 @@ class RegisterNewMemberHandler(
         return Response(JwtCreator.generateToken(memberId))
     }
 
-    suspend fun insertMember(name: String, email: String, password: String, salt: ByteArray): Int {
-        return transaction(jdbi) { handle ->
-            handle.createUpdate("INSERT INTO members (name, email, password, salt) VALUES (:name, :email, :password, :salt)")
+    suspend fun insertMember(
+        name: String,
+        email: String,
+        password: String,
+        salt: ByteArray,
+    ): Int =
+        transaction(jdbi) { handle ->
+            handle
+                .createUpdate("INSERT INTO members (name, email, password, salt) VALUES (:name, :email, :password, :salt)")
                 .bind("name", name)
                 .bind("email", email)
                 .bind("password", password)
@@ -30,15 +36,14 @@ class RegisterNewMemberHandler(
                 .findOne()
                 .orElseThrow { throw IllegalStateException("Failed to insert member") }
         }
-    }
 
     data class Request(
         val name: String,
         val email: String,
-        val password: String
+        val password: String,
     )
 
     data class Response(
-        val token: String
+        val token: String,
     )
 }
