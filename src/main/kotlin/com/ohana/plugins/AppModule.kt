@@ -2,6 +2,8 @@ package com.ohana.plugins
 
 import com.ohana.members.controllers.MembersController
 import com.ohana.members.handlers.GetSingleMemberByIdHandler
+import com.ohana.members.handlers.GetAllMembersHandler
+import com.ohana.members.handlers.UpdateMemberByIdHandler
 import com.ohana.auth.handlers.RegisterNewMemberHandler
 import com.ohana.auth.handlers.MemberSignInHandler
 import com.ohana.auth.controllers.AuthController
@@ -16,11 +18,13 @@ val appModule = module {
 
     // Provide a single instance of services
     single { GetSingleMemberByIdHandler(get()) }
+    single { GetAllMembersHandler(get()) }
+    single { UpdateMemberByIdHandler(get()) }
     single { RegisterNewMemberHandler(get()) }
     single { MemberSignInHandler(get()) }
 
     // Provide a single instance of controllers
-    single { MembersController(get()) }
+    single { MembersController(get(), get(), get()) }
     single { HealthController() }
     single { AuthController(get(), get()) }
 }
