@@ -12,6 +12,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.response.*
 import org.slf4j.LoggerFactory
 
@@ -47,6 +48,11 @@ fun Application.configureExceptionHandling() {
         exception<ConflictException> { call, cause ->
             logger.info("Conflict: ${cause.message}")
             call.respond(HttpStatusCode.Conflict, "Conflict: ${cause.message}")
+        }
+
+        exception<BadRequestException> { call, cause ->
+            logger.info("Bad request: ${cause.message}")
+            call.respond(HttpStatusCode.BadRequest, "Bad request: ${cause.message}")
         }
 
         exception<Throwable> { call, cause ->

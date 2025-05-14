@@ -17,9 +17,30 @@ class RegisterNewMemberHandler(
         val name: String,
         val email: String,
         val password: String,
-    )
+    ) {
+        fun validate(): List<String> {
+            val errors = mutableListOf<String>()
+
+            if (name.isEmpty()) errors.add("Name is required")
+            if (name.length < 3) errors.add("Name must be at least 3 characters long")
+            if (email.isEmpty()) errors.add("Email is required")
+            if (!email.matches(Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\$"))) {
+                errors.add("Invalid email format")
+            }
+            if (password.isEmpty()) errors.add("Password is required")
+            if (password.length < 8) errors.add("Password must be at least 8 characters long")
+            if (!password.matches(Regex(".*[A-Z].*"))) errors.add("Password must contain at least one uppercase letter")
+            if (!password.matches(Regex(".*[0-9].*"))) errors.add("Password must contain at least one number")
+            if (!password.matches(Regex(".*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\|,.<>\\/?].*"))) {
+                errors.add("Password must contain at least one special character")
+            }
+
+            return errors
+        }
+    }
 
     data class Response(
+        val id: Int,
         val token: String,
     )
 
@@ -38,7 +59,7 @@ class RegisterNewMemberHandler(
             // Insert the new member
             val memberId = insertMember(handle, request.name, request.email, hashedPassword, salt)
 
-            Response(JwtCreator.generateToken(memberId))
+            Response(memberId, JwtCreator.generateToken(memberId))
         }
     }
 

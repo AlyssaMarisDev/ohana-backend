@@ -8,7 +8,7 @@
 
 - [x] Authentication
   - [x] Implement secure authentication mechanisms for account creation and login
-  - [ ] Token generation and validation
+  - [x] Token generation and validation
 
 - [ ] Google Calendar Integration
   - [ ] API integration with Google Calendar

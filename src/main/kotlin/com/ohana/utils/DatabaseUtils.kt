@@ -97,11 +97,12 @@ class DatabaseUtils(
 
             logger.debug("Inserting")
 
-            val inserted = insert
-                .executeAndReturnGeneratedKeys("id")
-                .mapTo(Int::class.java)
-                .findOne()
-                .orElseThrow { throw DbException("Failed to insert") }
+            val inserted =
+                insert
+                    .executeAndReturnGeneratedKeys("id")
+                    .mapTo(Int::class.java)
+                    .findOne()
+                    .orElseThrow { throw DbException("Failed to insert") }
 
             logger.debug("Insert completed")
 
@@ -144,10 +145,11 @@ class DatabaseUtils(
 
             logger.debug("Fetching")
 
-            val fetched = fetch
-                .map { rs, _ ->
-                    mapRowToObject(rs, clazz)
-                }.toList()
+            val fetched =
+                fetch
+                    .map { rs, _ ->
+                        mapRowToObject(rs, clazz)
+                    }.toList()
 
             logger.debug("Fetch completed")
 

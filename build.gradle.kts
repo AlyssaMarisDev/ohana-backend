@@ -1,9 +1,11 @@
 val kotlinVersion: String by project
+val ktorVersion: String by project
+val koinVersion: String by project
 val logbackVersion: String by project
 
 plugins {
-    kotlin("jvm") version "2.0.20"
-    id("io.ktor.plugin") version "3.0.0-rc-1"
+    kotlin("jvm") version "2.1.20"
+    id("io.ktor.plugin") version "3.1.2"
     id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
 }
 
@@ -22,26 +24,22 @@ repositories {
 }
 
 dependencies {
-    implementation("io.ktor:ktor-server-core-jvm")
-    implementation("io.ktor:ktor-server-auth-jvm")
-    implementation("io.ktor:ktor-server-auth-jwt-jvm")
-    implementation("io.ktor:ktor-server-status-pages")
+    // Web Server
+    implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-auth-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-auth-jwt-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
+    implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
 
     // Serialization
-    implementation("io.ktor:ktor-server-content-negotiation-jvm")
-    implementation("io.ktor:ktor-serialization-jackson-jvm")
+    implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
 
     // Dependency Injection
-    implementation("io.insert-koin:koin-ktor:4.0.0") // Koin for Ktor integration
-    implementation("io.insert-koin:koin-core:4.0.0") // Core Koin library
+    implementation("io.insert-koin:koin-core:$koinVersion")
+    implementation("io.insert-koin:koin-ktor:$koinVersion")
 
-    implementation("io.ktor:ktor-server-netty-jvm")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
-
-    // JUnit 5 Testing dependencies
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.2")
 
     // Database
     implementation("org.jdbi:jdbi3-core:3.27.0")
@@ -50,6 +48,20 @@ dependencies {
     implementation("org.jdbi:jdbi3-kotlin-sqlobject:3.27.0")
     implementation("com.mysql:mysql-connector-j:9.0.0")
     implementation("org.flywaydb:flyway-core:9.0.0")
+
+    // Jackson JSON library
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
+
+    // Testing
+    testImplementation("org.junit.jupiter:junit-jupiter:5.11.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.2")
+    testImplementation("mysql:mysql-connector-mxj:5.0.12")
+    testImplementation("com.h2database:h2:1.4.200")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 }
 
 tasks.test {
@@ -65,8 +77,13 @@ tasks.test {
     }
 }
 
-tasks.register("format") {
-    dependsOn("ktlintFormat")
+tasks.build {
+    dependsOn("assemble")
+}
+
+tasks.named("check") {
+    // Do not include the test task in the check task
+    setDependsOn(listOf("runServerAndTest"))
 }
 
 tasks.named("build") {
@@ -79,4 +96,12 @@ ktlint {
     outputToConsole.set(true)
     coloredOutput.set(true)
     ignoreFailures.set(true)
+}
+
+tasks.register<Exec>("runServerAndTest") {
+    group = "verification"
+    description = "Runs the Ktor server, executes tests, then shuts the server down."
+
+    // Specify the command to run the script
+    commandLine("bash", "runServerAndTest.sh")
 }

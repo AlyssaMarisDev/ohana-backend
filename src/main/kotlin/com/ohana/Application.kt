@@ -7,7 +7,10 @@ import io.ktor.server.netty.*
 import org.koin.ktor.plugin.Koin
 
 fun main() {
-    embeddedServer(Netty, port = 4242, host = "0.0.0.0", module = Application::module)
+    // Read the port from the environment variable, default to 4242 if not set
+    val port = System.getenv("PORT")?.toIntOrNull() ?: 4242
+
+    embeddedServer(Netty, port = port, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
 
