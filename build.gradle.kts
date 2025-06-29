@@ -30,6 +30,7 @@ dependencies {
     implementation("io.ktor:ktor-server-auth-jwt-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-cors:$ktorVersion")
 
     // Serialization
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion")
@@ -81,11 +82,6 @@ tasks.build {
     dependsOn("assemble")
 }
 
-tasks.named("check") {
-    // Do not include the test task in the check task
-    setDependsOn(listOf("runServerAndTest"))
-}
-
 tasks.named("build") {
     dependsOn("ktlintFormat")
 }
@@ -96,12 +92,4 @@ ktlint {
     outputToConsole.set(true)
     coloredOutput.set(true)
     ignoreFailures.set(true)
-}
-
-tasks.register<Exec>("runServerAndTest") {
-    group = "verification"
-    description = "Runs the Ktor server, executes tests, then shuts the server down."
-
-    // Specify the command to run the script
-    commandLine("bash", "runServerAndTest.sh")
 }

@@ -21,6 +21,7 @@ fun Application.module() {
 
     configureSecurity()
     configureSerialization()
+    configureCORS()
     configureRouting()
     configureCallLogging()
     configureExceptionHandling()

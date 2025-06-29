@@ -23,32 +23,32 @@ class DatabaseUtils(
             block: (Handle) -> T,
         ): T {
             logger.debug("Starting transaction")
-            var result: T? = null
 
-            withContext(Dispatchers.IO) {
-                jdbi.inTransaction<T, Exception> { handle ->
+            val result =
+                withContext(Dispatchers.IO) {
+                    jdbi.inTransaction<T, Exception> { handle ->
 
-                    try {
-                        logger.debug("Starting block")
-                        result = block(handle)
-                        logger.debug("Block completed")
+                        try {
+                            logger.debug("Starting block")
+                            val blockResult = block(handle)
+                            logger.debug("Block completed")
 
-                        result
-                    } catch (e: Exception) {
-                        logger.error("Transaction failed: ${e.message}", e)
+                            blockResult
+                        } catch (e: Exception) {
+                            logger.error("Transaction failed: ${e.message}", e)
 
-                        if (e is KnownError) {
-                            throw e
+                            if (e is KnownError) {
+                                throw e
+                            }
+
+                            throw DbException("Transaction failed: ${e.message}", e)
                         }
-
-                        throw DbException("Transaction failed: ${e.message}", e)
                     }
                 }
-            }
 
             logger.debug("Transaction completed")
 
-            return result ?: throw DbException("Transaction failed: No result returned")
+            return result
         }
 
         suspend fun <T> query(
@@ -56,31 +56,31 @@ class DatabaseUtils(
             block: (Handle) -> T,
         ): T {
             logger.debug("Starting handle")
-            var result: T? = null
 
-            withContext(Dispatchers.IO) {
-                jdbi.withHandle<T, Exception> { handle ->
-                    try {
-                        logger.debug("Starting block")
-                        result = block(handle)
-                        logger.debug("Block completed")
+            val result =
+                withContext(Dispatchers.IO) {
+                    jdbi.withHandle<T, Exception> { handle ->
+                        try {
+                            logger.debug("Starting block")
+                            val blockResult = block(handle)
+                            logger.debug("Block completed")
 
-                        result
-                    } catch (e: Exception) {
-                        logger.error("Query failed: ${e.message}", e)
+                            blockResult
+                        } catch (e: Exception) {
+                            logger.error("Query failed: ${e.message}", e)
 
-                        if (e is KnownError) {
-                            throw e
+                            if (e is KnownError) {
+                                throw e
+                            }
+
+                            throw DbException("Query failed: ${e.message}", e)
                         }
-
-                        throw DbException("Query failed: ${e.message}", e)
                     }
                 }
-            }
 
             logger.debug("Handle completed")
 
-            return result ?: throw DbException("Handle failed: No result returned")
+            return result
         }
 
         fun insert(

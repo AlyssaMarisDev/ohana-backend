@@ -15,6 +15,6 @@ class JwtCreator {
                 .withIssuer("https://ohana.com")
                 .withClaim("userId", userId)
                 .withExpiresAt(Date.from(Instant.now().plus(30, ChronoUnit.DAYS))) // 30 days expiry
-                .sign(Algorithm.HMAC256("secret"))
+                .sign(Algorithm.HMAC256("a-string-secret-at-least-256-bits-long"))
     }
 }

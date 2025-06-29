@@ -58,16 +58,18 @@ class MemberRegistrationTests {
     @Test
     fun whenGivenInvalidRegistrationRequest_thenReturnsBadRequestStatus() =
         runBlocking {
-            val request = object {
-                val email = "invalid-email"
-                val password = "short"
-            }
+            val request =
+                object {
+                    val email = "invalid-email"
+                    val password = "short"
+                }
             val requestJson = objectMapper.writeValueAsString(request)
 
-            val createResponse = client.post("http://localhost:4240/api/v1/register") {
-                contentType(ContentType.Application.Json)
-                setBody(requestJson)
-            }
+            val createResponse =
+                client.post("http://localhost:4240/api/v1/register") {
+                    contentType(ContentType.Application.Json)
+                    setBody(requestJson)
+                }
 
             assertEquals(HttpStatusCode.BadRequest, createResponse.status)
         }
