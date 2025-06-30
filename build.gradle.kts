@@ -65,6 +65,23 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 }
 
+// Configure the JAR task to create an executable JAR
+tasks.jar {
+    manifest {
+        attributes(
+            "Main-Class" to "com.ohana.ApplicationKt",
+        )
+    }
+
+    // Include all dependencies in the JAR (fat JAR)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(
+        configurations.runtimeClasspath.map { config ->
+            config.map { if (it.isDirectory) it else zipTree(it) }
+        },
+    )
+}
+
 tasks.test {
     useJUnitPlatform()
 
@@ -76,10 +93,6 @@ tasks.test {
         showStackTraces = true
         showCauses = true
     }
-}
-
-tasks.build {
-    dependsOn("assemble")
 }
 
 tasks.named("build") {

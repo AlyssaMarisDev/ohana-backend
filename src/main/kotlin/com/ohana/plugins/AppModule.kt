@@ -14,8 +14,16 @@ import org.koin.dsl.module
 // Define a Koin module to provide dependencies
 val appModule =
     module {
-        // Provide a single instance of JDBI
-        single { Jdbi.create("jdbc:mysql://localhost:3306/ohana", "root", "root") }
+        // Provide a single instance of JDBI with environment-based configuration
+        single {
+            val dbHost = System.getenv("DB_HOST") ?: "localhost"
+            val dbPort = System.getenv("DB_PORT") ?: "3306"
+            val dbName = System.getenv("DB_NAME") ?: "ohana"
+            val dbUser = System.getenv("DB_USER") ?: "root"
+            val dbPassword = System.getenv("DB_PASSWORD") ?: "root"
+
+            Jdbi.create("jdbc:mysql://$dbHost:$dbPort/$dbName", dbUser, dbPassword)
+        }
 
         // Provide a single instance of services
         single { GetSingleMemberByIdHandler(get()) }

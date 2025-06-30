@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "ohana-464419",
+  "private_key_id": "c985579a569c017330c3753ae7b863ff1defcb77",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDHUG5firLXAXoL\nVJcZyMJDsaRMtUmrq8xOxpfioeLVHrCL0v2yRPm/szNIFPCNlQ28OzbP432aI8Bv\ns6TcWLffbY/OXzcXaK15lcKsxfl8IYPUae9GqlH6bC+VYYW7r3tzhatRmH3KSVMy\n9Rt6BUhNsnF8iskdIcZg/c5bnFxLjRqniZKooMKA/Pa+wWzQWsiGoL0Rmz+MqtII\nqZ1UrNJOzS7VtosdzcjjhIOtCAmbIbvQlFskl1pMWkrUBBnosoGkJJbrfiRREB1x\nZuxXVnMQIriO9CmYwdyYtvID7OdlYtqfPKqElBoN7iN/5LByzBdbkteRuR7dHqcR\nLssiQ+UjAgMBAAECggEAXvjYXvY8GW8+tD9ucH7U8mSnIVYQ8JhAFhlTLk5tQ5gI\nD9hNwrBTQSEmgmZX6V7o2JRunciMhPIcNB2ppMUxeGlAaNm96o2ae6D8zk7XfmqJ\n4qFHvqhRv73lPozlqHUJohZDd/HtnoIp/tIEcbQqq7snkGyhQBxj5ruJpOVwpR6S\n+cDQpg7yCBBd5mF29MQzxTEtAuRfSE6G53ht6Kk/0VrXNka2q5JuwqUB2YT0S8kT\nXviWhQgvoKmSKGtJeh2NUcch5E6lgpVUnGQfBfImCVcLJiBYHWkAfNHM2BXC5cTu\nPUsF8ZioWnEq9X5gyEVYOJuRoFMy5P+Qejik+P2+QQKBgQD6R1ND1FWugunq1GHR\nNbsdGuZUdJwzLEvEZ2pqS979zAUPMna6XY7E/0URZYPwgSQR/iZDgRR1yuPsoG/o\nEXsLhYuFZSb3GqkOVkYSvKgQwtJ4zxLGjUcrtV+lbhjaochRnQTZOEjkQK816ity\n9QN7fXLenyZ67Sl7tt/QpGz/mwKBgQDL3tpf9JiHp54QjKED3IIFpoPLHfwtfWjM\ndSX4wXUgVdYOHjucRDiidd/8zQ0VljmcxVBfE8QLBz18MGLk5rwbITeugBKxpUdb\nTF/hGLAOdZrYQFPG0FCjIjcu3HBfkL7/sbSgbymEil9QbZvwaRuZXAtcgI0rsNj0\n+HNiGRU9GQKBgB5dLuXoyehdK6H42FE4cpYKYG1YpGa09hBC968ju08RRH/egHcF\nyL9vtOJybXptQIIKUnwYGfJchiB8Knd+P25balzps7uA+Yeqwd+eEcnOyRgtDzsV\ngs/ztkHsxIkp3ZLBOQhdgsJmcptY6KKOxThjNN97cYCyazj+K9M1T6AHAoGAI87d\nvlLg45rOSYvZ0CrP75wis+9tVrQbTyYYaEvafbZ15X7r63OUGvznPajqbms3bVC+\n4CRBn8pCw2hgRmI8ketQs2atYeRs1x1gDdJfQfroGqmZzWbTcwPUe3eeiTqMQa79\n0dwUh8IiIadO53ger94Z5MJziUQDp2toIMfVEikCgYA9IeAYxeFgKopIfom0xpju\n+XhqWmJgwuI2NjdBPIxmGUIoMYSEkHku0eigyQRi3moOh3r5Hw78RZJR3NH1Qnq+\nUuQgH7pPKVDweuYMKXDDVOd8jvii1e+uzc76CC1BJmF3ajK4VdFZyEdZC42lu8NE\n7MBR/3wF6iQggi/GQBz/tg==\n-----END PRIVATE KEY-----\n",
+  "client_email": "kotlin-deployer@ohana-464419.iam.gserviceaccount.com",
+  "client_id": "116755118376251943443",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/kotlin-deployer%40ohana-464419.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
