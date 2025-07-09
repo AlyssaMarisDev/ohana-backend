@@ -7,6 +7,8 @@ import com.ohana.utils.DatabaseUtils.Companion.transaction
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
 import org.slf4j.LoggerFactory
+import java.util.UUID
+import java.time.Instant
 
 class HouseholdCreationHandler(
     private val jdbi: Jdbi,
@@ -36,6 +38,12 @@ class HouseholdCreationHandler(
                 throw Exception("Failed to create household")
             }
 
+            insertHouseholdMember(handle, userId, request)
+
+            if (insertedRows == 0) {
+                throw Exception("Failed to add household member")
+            }
+
             getHouseholdById(handle, request.id)
         }
 
@@ -57,6 +65,31 @@ class HouseholdCreationHandler(
                 "name" to request.name,
                 "description" to request.description,
                 "createdBy" to userId,
+            ),
+        )
+    }
+
+    private fun insertHouseholdMember(
+        handle: Handle,
+        userId: String,
+        request: Request,
+    ): Int {
+        val insertQuery = """
+            INSERT INTO household_members (id, householdId, memberId, role, isActive, invitedBy, joinedAt)
+            VALUES (:id, :householdId, :memberId, :role, :isActive, :invitedBy, :joinedAt)
+        """
+
+        return insert(
+            handle,
+            insertQuery,
+            mapOf(
+                "id" to UUID.randomUUID().toString(),
+                "householdId" to request.id,
+                "memberId" to userId,
+                "role" to "admin",
+                "isActive" to true,
+                "invitedBy" to userId,
+                "joinedAt" to Instant.now(),
             ),
         )
     }
