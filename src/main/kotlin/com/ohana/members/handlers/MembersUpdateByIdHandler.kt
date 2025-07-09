@@ -18,7 +18,7 @@ class MembersUpdateByIdHandler(
     )
 
     data class Response(
-        val id: Int,
+        val id: String,
         val name: String,
         val age: Int?,
         val gender: String?,
@@ -26,7 +26,7 @@ class MembersUpdateByIdHandler(
     )
 
     suspend fun handle(
-        id: Int,
+        id: String,
         request: Request,
     ): Response =
         transaction(jdbi) { handle ->
@@ -46,7 +46,7 @@ class MembersUpdateByIdHandler(
 
     private fun updateMember(
         handle: Handle,
-        id: Int,
+        id: String,
         request: Request,
     ): Int {
         val updateQuery = """
@@ -71,7 +71,7 @@ class MembersUpdateByIdHandler(
 
     private fun fetchMemberById(
         handle: Handle,
-        id: Int,
+        id: String,
     ): Response {
         val selectQuery = """
             SELECT id, name, age, gender, email

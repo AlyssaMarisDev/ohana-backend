@@ -9,8 +9,9 @@ import com.ohana.members.handlers.MembersGetAllHandler
 import com.ohana.members.handlers.MembersGetByIdHandler
 import com.ohana.members.handlers.MembersUpdateByIdHandler
 import com.ohana.tasks.controllers.TasksController
-import com.ohana.tasks.handlers.TaskCreationHandler
-import com.ohana.tasks.handlers.TaskGetByIdHandler
+import com.ohana.tasks.handlers.TasksCreationHandler
+import com.ohana.tasks.handlers.TasksGetAllHandler
+import com.ohana.tasks.handlers.TasksGetByIdHandler
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.KotlinPlugin
 import org.koin.dsl.module
@@ -41,12 +42,13 @@ val appModule =
         single { MembersUpdateByIdHandler(get()) }
 
         // Tasks handlers
-        single { TaskCreationHandler(get()) }
-        single { TaskGetByIdHandler(get()) }
+        single { TasksCreationHandler(get()) }
+        single { TasksGetAllHandler(get()) }
+        single { TasksGetByIdHandler(get()) }
 
         // Controllers
         single { AuthController(get(), get()) }
         single { HealthController() }
         single { MembersController(get(), get(), get()) }
-        single { TasksController(get(), get()) }
+        single { TasksController(get(), get(), get()) }
     }

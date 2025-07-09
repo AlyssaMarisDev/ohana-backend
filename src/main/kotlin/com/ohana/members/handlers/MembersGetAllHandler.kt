@@ -9,7 +9,7 @@ class MembersGetAllHandler(
     private val jdbi: Jdbi,
 ) {
     data class Response(
-        val id: Int,
+        val id: String,
         val name: String,
         val age: Int?,
         val gender: String?,

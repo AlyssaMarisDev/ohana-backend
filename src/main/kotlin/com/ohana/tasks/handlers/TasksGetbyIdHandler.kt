@@ -7,7 +7,7 @@ import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
 import java.time.Instant
 
-class TaskGetByIdHandler(
+class TasksGetByIdHandler(
     private val jdbi: Jdbi,
 ) {
     data class Response(

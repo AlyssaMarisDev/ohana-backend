@@ -10,21 +10,21 @@ class MembersGetByIdHandler(
     private val jdbi: Jdbi,
 ) {
     data class Response(
-        val id: Int,
+        val id: String,
         val name: String,
         val age: Int?,
         val gender: String?,
         val email: String,
     )
 
-    suspend fun handle(id: Int): Response =
+    suspend fun handle(id: String): Response =
         query(jdbi) { handle ->
             fetchSingleMemberById(handle, id) ?: throw NotFoundException("Member not found")
         }
 
     fun fetchSingleMemberById(
         handle: Handle,
-        id: Int,
+        id: String,
     ): Response? =
         get(
             handle,

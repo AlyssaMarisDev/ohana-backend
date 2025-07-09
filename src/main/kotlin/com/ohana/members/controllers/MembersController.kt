@@ -19,7 +19,7 @@ class MembersController(
         authenticate("auth-jwt") {
             route("/members") {
                 get("/{id}") {
-                    val id = call.parameters["id"]?.toIntOrNull() ?: throw ValidationException("Member ID must be an integer")
+                    val id = call.parameters["id"] ?: throw ValidationException("Member ID is required")
                     val response = membersGetByIdHandler.handle(id)
                     call.respond(HttpStatusCode.OK, response)
                 }
@@ -30,7 +30,7 @@ class MembersController(
                 }
 
                 put("/{id}") {
-                    val id = call.parameters["id"]?.toIntOrNull() ?: throw ValidationException("Member ID must be an integer")
+                    val id = call.parameters["id"] ?: throw ValidationException("Member ID is required")
                     val request = call.receive<MembersUpdateByIdHandler.Request>()
                     val response = membersUpdateByIdHandler.handle(id, request)
                     call.respond(HttpStatusCode.OK, response)

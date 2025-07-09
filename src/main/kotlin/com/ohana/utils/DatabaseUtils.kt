@@ -43,7 +43,7 @@ class DatabaseUtils(
                             }
 
                             if (e.cause is SQLIntegrityConstraintViolationException) {
-                                throw ConflictException("Transaction failed: ${e.message}", e)
+                                throw ConflictException("Duplicate entry", e)
                             }
 
                             throw DbException("Transaction failed: ${e.message}", e)
@@ -76,10 +76,6 @@ class DatabaseUtils(
 
                             if (e is KnownError) {
                                 throw e
-                            }
-
-                            if (e is SQLIntegrityConstraintViolationException) {
-                                throw ConflictException("Query failed: ${e.message}", e)
                             }
 
                             throw DbException("Query failed: ${e.message}", e)
@@ -196,6 +192,8 @@ class DatabaseUtils(
                         else -> rs.getObject(columnIndex)
                     }
                 }
+
+            logger.debug("Mapping row to object: $args")
 
             // Create an instance using the constructor
             return constructor.callBy(args)
