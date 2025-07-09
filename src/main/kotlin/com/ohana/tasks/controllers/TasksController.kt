@@ -4,6 +4,7 @@ import com.ohana.exceptions.ValidationException
 import com.ohana.tasks.handlers.TasksCreationHandler
 import com.ohana.tasks.handlers.TasksGetAllHandler
 import com.ohana.tasks.handlers.TasksGetByIdHandler
+import com.ohana.utils.getUserId
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.JWTPrincipal
@@ -23,13 +24,7 @@ class TasksController(
                     val request = call.receive<TasksCreationHandler.Request>()
                     println("Received request: $request")
 
-                    val userId =
-                        call
-                            .principal<JWTPrincipal>()
-                            ?.payload
-                            ?.getClaim("userId")
-                            ?.asString()
-                            ?: throw ValidationException("User ID is required")
+                    val userId = getUserId(call.principal<JWTPrincipal>())
 
                     val response = tasksCreationHandler.handle(userId, request)
 

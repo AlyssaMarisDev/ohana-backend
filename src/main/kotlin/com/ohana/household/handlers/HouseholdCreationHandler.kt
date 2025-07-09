@@ -7,8 +7,8 @@ import com.ohana.utils.DatabaseUtils.Companion.transaction
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
 import org.slf4j.LoggerFactory
-import java.util.UUID
 import java.time.Instant
+import java.util.UUID
 
 class HouseholdCreationHandler(
     private val jdbi: Jdbi,
