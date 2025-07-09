@@ -26,7 +26,7 @@ class HouseholdController(
 
                     val response = householdCreationHandler.handle(userId, request)
 
-                    call.respond(HttpStatusCode.OK, response)
+                    call.respond(HttpStatusCode.Created, response)
                 }
 
                 get("/{id}") {
