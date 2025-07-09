@@ -21,7 +21,7 @@ class HouseholdGetByIdHandler(
             getHouseholdById(handle, id) ?: throw NotFoundException("Household not found")
         }
 
-    fun getHouseholdById(
+    private fun getHouseholdById(
         handle: Handle,
         id: String,
     ): Response? =
