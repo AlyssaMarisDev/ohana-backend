@@ -1,11 +1,11 @@
 package com.ohana.members.handlers
 
-import com.ohana.utils.DatabaseUtils.Companion.fetch
+import com.ohana.utils.DatabaseUtils.Companion.get
 import com.ohana.utils.DatabaseUtils.Companion.query
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
 
-class GetAllMembersHandler(
+class MembersGetAllHandler(
     private val jdbi: Jdbi,
 ) {
     data class Response(
@@ -26,7 +26,7 @@ class GetAllMembersHandler(
     }
 
     fun fetchAllMembers(handle: Handle): List<Response> =
-        fetch(
+        get(
             handle,
             "SELECT id, name, age, gender, email FROM members",
             mapOf(),

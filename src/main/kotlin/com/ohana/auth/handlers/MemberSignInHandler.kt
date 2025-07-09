@@ -3,14 +3,13 @@ package com.ohana.auth.handlers
 import com.ohana.auth.utils.Hasher
 import com.ohana.auth.utils.JwtCreator
 import com.ohana.exceptions.AuthorizationException
-import com.ohana.utils.DatabaseUtils.Companion.fetch
+import com.ohana.utils.DatabaseUtils.Companion.get
 import com.ohana.utils.DatabaseUtils.Companion.query
 import org.jdbi.v3.core.Jdbi
-import org.koin.core.component.KoinComponent
 
 class MemberSignInHandler(
     private val jdbi: Jdbi,
-) : KoinComponent {
+) {
     data class Request(
         val email: String,
         val password: String,
@@ -32,7 +31,7 @@ class MemberSignInHandler(
 
     private suspend fun findMemberByEmail(email: String): Member? =
         query(jdbi) { handle ->
-            fetch(
+            get(
                 handle,
                 "SELECT id, password, salt FROM members WHERE email = :email",
                 mapOf("email" to email),
@@ -41,7 +40,7 @@ class MemberSignInHandler(
         }
 
     private data class Member(
-        val id: Int,
+        val id: String,
         val password: String,
         val salt: ByteArray,
     )

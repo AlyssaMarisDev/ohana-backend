@@ -10,7 +10,7 @@ class JwtCreator {
     companion object {
         private val JWT_SECRET = System.getenv("JWT_SECRET") ?: "a-string-secret-at-least-256-bits-long"
 
-        fun generateToken(userId: Int): String =
+        fun generateToken(userId: String): String =
             JWT
                 .create()
                 .withAudience("Ohana")

@@ -1,5 +1,6 @@
 package com.ohana.utils
 
+import com.ohana.exceptions.ConflictException
 import com.ohana.exceptions.DbException
 import com.ohana.exceptions.KnownError
 import kotlinx.coroutines.Dispatchers
@@ -8,6 +9,7 @@ import org.jdbi.v3.core.*
 import org.jdbi.v3.core.Jdbi
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet
+import java.sql.SQLIntegrityConstraintViolationException
 import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
@@ -27,7 +29,6 @@ class DatabaseUtils(
             val result =
                 withContext(Dispatchers.IO) {
                     jdbi.inTransaction<T, Exception> { handle ->
-
                         try {
                             logger.debug("Starting block")
                             val blockResult = block(handle)
@@ -39,6 +40,10 @@ class DatabaseUtils(
 
                             if (e is KnownError) {
                                 throw e
+                            }
+
+                            if (e.cause is SQLIntegrityConstraintViolationException) {
+                                throw ConflictException("Transaction failed: ${e.message}", e)
                             }
 
                             throw DbException("Transaction failed: ${e.message}", e)
@@ -73,6 +78,10 @@ class DatabaseUtils(
                                 throw e
                             }
 
+                            if (e is SQLIntegrityConstraintViolationException) {
+                                throw ConflictException("Query failed: ${e.message}", e)
+                            }
+
                             throw DbException("Query failed: ${e.message}", e)
                         }
                     }
@@ -97,12 +106,7 @@ class DatabaseUtils(
 
             logger.debug("Inserting")
 
-            val inserted =
-                insert
-                    .executeAndReturnGeneratedKeys("id")
-                    .mapTo(Int::class.java)
-                    .findOne()
-                    .orElseThrow { throw DbException("Failed to insert") }
+            val inserted = insert.execute()
 
             logger.debug("Insert completed")
 
@@ -130,30 +134,34 @@ class DatabaseUtils(
             return updated
         }
 
-        fun <T : Any> fetch(
+        fun <T : Any> get(
             handle: Handle,
             query: String,
             params: Map<String, Any>,
             clazz: KClass<T>,
         ): List<T> {
-            logger.debug("Starting fetch")
-            var fetch = handle.createQuery(query)
+            logger.debug("Starting get")
+            var get = handle.createQuery(query)
 
             params.forEach { (key, value) ->
-                fetch = fetch.bind(key, value)
+                get = get.bind(key, value)
             }
 
-            logger.debug("Fetching")
+            logger.debug("Getting")
 
-            val fetched =
-                fetch
-                    .map { rs, _ ->
-                        mapRowToObject(rs, clazz)
-                    }.toList()
+            val results =
+                get
+                    .registerRowMapper(
+                        clazz.java,
+                        org.jdbi.v3.core.mapper.RowMapper { rs, _ ->
+                            mapRowToObject(rs, clazz)
+                        },
+                    ).mapTo(clazz.java)
+                    .toList()
 
-            logger.debug("Fetch completed")
+            logger.debug("Get completed")
 
-            return fetched
+            return results
         }
 
         private fun <T : Any> mapRowToObject(
@@ -178,7 +186,15 @@ class DatabaseUtils(
                     val columnIndex =
                         columnIndexMap[columnName]
                             ?: throw IllegalArgumentException("Column $columnName not found in result set")
-                    rs.getObject(columnIndex)
+
+                    // Handle type conversions
+                    when (parameter.type.classifier) {
+                        java.time.Instant::class -> {
+                            val timestamp = rs.getTimestamp(columnIndex)
+                            timestamp?.toInstant()
+                        }
+                        else -> rs.getObject(columnIndex)
+                    }
                 }
 
             // Create an instance using the constructor

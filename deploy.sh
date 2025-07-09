@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# GCP Deployment Script for Ohana Members API
+# GCP Deployment Script for Ohana Backend API
 set -e
 
 # Configuration
 PROJECT_ID="ohana-464419"
 REGION="us-west1"
-SERVICE_NAME="ohana-members"
+SERVICE_NAME="ohana-backend"
 IMAGE_NAME="us-west1-docker.pkg.dev/$PROJECT_ID/ohana-repo/$SERVICE_NAME"
 
 # Colors for output

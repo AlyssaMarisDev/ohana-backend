@@ -3,16 +3,16 @@ package com.ohana.auth.handlers
 import com.ohana.auth.utils.Hasher
 import com.ohana.auth.utils.JwtCreator
 import com.ohana.exceptions.ConflictException
-import com.ohana.utils.DatabaseUtils.Companion.fetch
+import com.ohana.utils.DatabaseUtils.Companion.get
 import com.ohana.utils.DatabaseUtils.Companion.insert
 import com.ohana.utils.DatabaseUtils.Companion.transaction
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
-import org.koin.core.component.KoinComponent
+import java.util.UUID
 
-class RegisterNewMemberHandler(
+class MemberRegistrationHandler(
     private val jdbi: Jdbi,
-) : KoinComponent {
+) {
     data class Request(
         val name: String,
         val email: String,
@@ -40,13 +40,14 @@ class RegisterNewMemberHandler(
     }
 
     data class Response(
-        val id: Int,
+        val id: String,
         val token: String,
     )
 
     suspend fun handle(request: Request): Response {
         val salt = Hasher.generateSalt()
         val hashedPassword = Hasher.hashPassword(request.password, salt)
+        val id = UUID.randomUUID().toString()
 
         return transaction(jdbi) { handle ->
             // Check if the member already exists
@@ -57,14 +58,15 @@ class RegisterNewMemberHandler(
             }
 
             // Insert the new member
-            val memberId = insertMember(handle, request.name, request.email, hashedPassword, salt)
+            insertMember(handle, id, request.name, request.email, hashedPassword, salt)
 
-            Response(memberId, JwtCreator.generateToken(memberId))
+            Response(id, JwtCreator.generateToken(id))
         }
     }
 
     private fun insertMember(
         handle: Handle,
+        id: String,
         name: String,
         email: String,
         password: String,
@@ -72,8 +74,12 @@ class RegisterNewMemberHandler(
     ): Int =
         insert(
             handle,
-            "INSERT INTO members (name, email, password, salt) VALUES (:name, :email, :password, :salt)",
+            """
+            INSERT INTO members (id, name, email, password, salt)
+            VALUES (:id, :name, :email, :password, :salt)
+            """,
             mapOf(
+                "id" to id,
                 "name" to name,
                 "email" to email,
                 "password" to password,
@@ -85,7 +91,7 @@ class RegisterNewMemberHandler(
         handle: Handle,
         email: String,
     ): Member? =
-        fetch(
+        get(
             handle,
             "SELECT id FROM members WHERE email = :email",
             mapOf("email" to email),
@@ -93,6 +99,6 @@ class RegisterNewMemberHandler(
         ).firstOrNull()
 
     private data class Member(
-        val id: Int,
+        val id: String,
     )
 }

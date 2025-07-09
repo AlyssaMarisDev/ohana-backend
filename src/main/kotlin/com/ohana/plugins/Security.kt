@@ -8,11 +8,13 @@ import io.ktor.server.auth.jwt.*
 
 fun Application.configureSecurity() {
     install(Authentication) {
+        val jwtSecret = System.getenv("JWT_SECRET") ?: "a-string-secret-at-least-256-bits-long"
+
         jwt("auth-jwt") {
             realm = "Ohana"
             verifier(
                 JWT
-                    .require(Algorithm.HMAC256("secret"))
+                    .require(Algorithm.HMAC256(jwtSecret))
                     .withAudience("Ohana")
                     .withIssuer("https://ohana.com")
                     .build(),

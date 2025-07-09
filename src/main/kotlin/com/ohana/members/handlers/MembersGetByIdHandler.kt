@@ -1,12 +1,12 @@
 package com.ohana.members.handlers
 
 import com.ohana.exceptions.NotFoundException
-import com.ohana.utils.DatabaseUtils.Companion.fetch
+import com.ohana.utils.DatabaseUtils.Companion.get
 import com.ohana.utils.DatabaseUtils.Companion.query
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
 
-class GetSingleMemberByIdHandler(
+class MembersGetByIdHandler(
     private val jdbi: Jdbi,
 ) {
     data class Response(
@@ -26,7 +26,7 @@ class GetSingleMemberByIdHandler(
         handle: Handle,
         id: Int,
     ): Response? =
-        fetch(
+        get(
             handle,
             "SELECT id, name, age, gender, email FROM members WHERE id = :id",
             mapOf("id" to id),

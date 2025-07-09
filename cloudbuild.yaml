@@ -7,11 +7,11 @@ steps:
 
   # Build the Docker image
   - name: "gcr.io/cloud-builders/docker"
-    args: ["build", "-t", "gcr.io/$PROJECT_ID/ohana-members:$COMMIT_SHA", "."]
+    args: ["build", "-t", "gcr.io/$PROJECT_ID/ohana-backend:$COMMIT_SHA", "."]
 
   # Push the Docker image to Container Registry
   - name: "gcr.io/cloud-builders/docker"
-    args: ["push", "gcr.io/$PROJECT_ID/ohana-members:$COMMIT_SHA"]
+    args: ["push", "gcr.io/$PROJECT_ID/ohana-backend:$COMMIT_SHA"]
 
   # Deploy to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
@@ -19,9 +19,9 @@ steps:
     args:
       - "run"
       - "deploy"
-      - "ohana-members"
+      - "ohana-backend"
       - "--image"
-      - "gcr.io/$PROJECT_ID/ohana-members:$COMMIT_SHA"
+      - "gcr.io/$PROJECT_ID/ohana-backend:$COMMIT_SHA"
       - "--region"
       - "us-central1"
       - "--platform"
@@ -41,7 +41,7 @@ steps:
       - "DB_PASSWORD=${_DB_PASSWORD}"
 
 images:
-  - "gcr.io/$PROJECT_ID/ohana-members:$COMMIT_SHA"
+  - "gcr.io/$PROJECT_ID/ohana-backend:$COMMIT_SHA"
 
 substitutions:
   _DB_HOST: "your-cloud-sql-instance-ip"

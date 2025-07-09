@@ -1,6 +1,6 @@
 # GCP Deployment Guide
 
-This guide will help you deploy the Ohana Members API to Google Cloud Platform.
+This guide will help you deploy the Ohana Backend API to Google Cloud Platform.
 
 ## Prerequisites
 
@@ -74,12 +74,12 @@ If you prefer manual deployment:
 ./gradlew build
 
 # Build and push Docker image
-docker build -t gcr.io/ohana-464419/ohana-members .
-docker push gcr.io/ohana-464419/ohana-members
+docker build -t gcr.io/ohana-464419/ohana-backend .
+docker push gcr.io/ohana-464419/ohana-backend
 
 # Deploy to Cloud Run
-gcloud run deploy ohana-members \
-    --image gcr.io/ohana-464419/ohana-members \
+gcloud run deploy ohana-backend \
+    --image gcr.io/ohana-464419/ohana-backend \
     --region us-central1 \
     --platform managed \
     --allow-unauthenticated \
@@ -129,13 +129,13 @@ flyway -url="jdbc:mysql://your-cloud-sql-ip:3306/ohana" \
 
 ```bash
 # View service logs
-gcloud logs read --service=ohana-members --limit=50
+gcloud logs read --service=ohana-backend --limit=50
 
 # Check service status
-gcloud run services describe ohana-members --region=us-central1
+gcloud run services describe ohana-backend --region=us-central1
 
 # Update environment variables
-gcloud run services update ohana-members \
+gcloud run services update ohana-backend \
     --region=us-central1 \
     --set-env-vars "NEW_VAR=value"
 ```

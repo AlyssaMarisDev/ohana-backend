@@ -2,13 +2,13 @@ package com.ohana.members.handlers
 
 import com.ohana.exceptions.DbException
 import com.ohana.exceptions.NotFoundException
-import com.ohana.utils.DatabaseUtils.Companion.fetch
+import com.ohana.utils.DatabaseUtils.Companion.get
 import com.ohana.utils.DatabaseUtils.Companion.transaction
 import com.ohana.utils.DatabaseUtils.Companion.update
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
 
-class UpdateMemberByIdHandler(
+class MembersUpdateByIdHandler(
     private val jdbi: Jdbi,
 ) {
     data class Request(
@@ -79,7 +79,7 @@ class UpdateMemberByIdHandler(
             WHERE id = :id
         """
 
-        return fetch(
+        return get(
             handle,
             selectQuery,
             mapOf("id" to id),

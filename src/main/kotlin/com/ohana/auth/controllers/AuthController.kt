@@ -1,8 +1,8 @@
 package com.ohana.auth.controllers
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.ohana.auth.handlers.MemberRegistrationHandler
 import com.ohana.auth.handlers.MemberSignInHandler
-import com.ohana.auth.handlers.RegisterNewMemberHandler
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -11,7 +11,7 @@ import io.ktor.server.routing.*
 import org.slf4j.LoggerFactory
 
 class AuthController(
-    private val registerNewMemberHandler: RegisterNewMemberHandler,
+    private val memberRegistrationHandler: MemberRegistrationHandler,
     private val memberSignInHandler: MemberSignInHandler,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -19,7 +19,7 @@ class AuthController(
 
     fun Route.registerAuthRoutes() {
         post("/register") {
-            val member = call.receive<RegisterNewMemberHandler.Request>()
+            val member = call.receive<MemberRegistrationHandler.Request>()
             val errors = member.validate()
 
             if (errors.isNotEmpty()) {
@@ -27,7 +27,7 @@ class AuthController(
                 return@post
             }
 
-            val token = registerNewMemberHandler.handle(member)
+            val token = memberRegistrationHandler.handle(member)
             call.respond(HttpStatusCode.Created, token)
         }
 
