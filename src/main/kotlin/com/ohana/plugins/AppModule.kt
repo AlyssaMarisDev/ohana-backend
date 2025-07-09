@@ -15,6 +15,7 @@ import com.ohana.members.handlers.MembersGetAllHandler
 import com.ohana.members.handlers.MembersGetByIdHandler
 import com.ohana.members.handlers.MembersUpdateByIdHandler
 import com.ohana.tasks.controllers.TasksController
+import com.ohana.tasks.handlers.TaskUpdateByIdHandler
 import com.ohana.tasks.handlers.TasksCreationHandler
 import com.ohana.tasks.handlers.TasksGetAllHandler
 import com.ohana.tasks.handlers.TasksGetByIdHandler
@@ -51,6 +52,7 @@ val appModule =
         single { TasksCreationHandler(get()) }
         single { TasksGetAllHandler(get()) }
         single { TasksGetByIdHandler(get()) }
+        single { TaskUpdateByIdHandler(get()) }
 
         // Household handlers
         single { HouseholdAcceptInviteHandler(get()) }
@@ -63,5 +65,5 @@ val appModule =
         single { HealthController() }
         single { HouseholdController(get(), get(), get(), get(), get()) }
         single { MembersController(get(), get(), get()) }
-        single { TasksController(get(), get(), get()) }
+        single { TasksController(get(), get(), get(), get()) }
     }

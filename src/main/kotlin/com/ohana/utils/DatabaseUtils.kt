@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory
 import java.sql.ResultSet
 import java.sql.SQLIntegrityConstraintViolationException
 import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
 
@@ -189,7 +190,26 @@ class DatabaseUtils(
                             val timestamp = rs.getTimestamp(columnIndex)
                             timestamp?.toInstant()
                         }
-                        else -> rs.getObject(columnIndex)
+                        else -> {
+                            val classifier = parameter.type.classifier
+                            if (classifier is KClass<*> && classifier.isSubclassOf(Enum::class)) {
+                                val stringValue = rs.getString(columnIndex)
+                                if (stringValue != null) {
+                                    try {
+                                        classifier.java
+                                            .getMethod("valueOf", String::class.java)
+                                            .invoke(null, stringValue) as Enum<*>
+                                    } catch (e: Exception) {
+                                        logger.warn("Failed to convert enum value: $stringValue for ${classifier.simpleName}")
+                                        null
+                                    }
+                                } else {
+                                    null
+                                }
+                            } else {
+                                rs.getObject(columnIndex)
+                            }
+                        }
                     }
                 }
 

@@ -22,8 +22,6 @@ class HouseholdController(
             route("/households") {
                 post("") {
                     val request = call.receive<HouseholdCreationHandler.Request>()
-                    println("Received request: $request")
-
                     val userId = getUserId(call.principal<JWTPrincipal>())
 
                     val response = householdCreationHandler.handle(userId, request)

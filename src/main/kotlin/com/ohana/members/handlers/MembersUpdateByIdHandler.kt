@@ -30,17 +30,12 @@ class MembersUpdateByIdHandler(
         request: Request,
     ): Response =
         transaction(jdbi) { handle ->
-            // Fetch to check if the member exists
-            fetchMemberById(handle, id)
-
-            // Perform the update
             val updatedRows = updateMember(handle, id, request)
 
             if (updatedRows == 0) {
                 throw DbException("Failed to update member")
             }
 
-            // Return the updated member
             fetchMemberById(handle, id)
         }
 

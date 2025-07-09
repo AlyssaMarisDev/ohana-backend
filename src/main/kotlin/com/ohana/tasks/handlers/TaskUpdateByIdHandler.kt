@@ -1,76 +1,81 @@
 package com.ohana.tasks.handlers
 
+import com.ohana.exceptions.DbException
 import com.ohana.exceptions.NotFoundException
 import com.ohana.shared.TaskStatus
 import com.ohana.utils.DatabaseUtils.Companion.get
-import com.ohana.utils.DatabaseUtils.Companion.insert
 import com.ohana.utils.DatabaseUtils.Companion.transaction
+import com.ohana.utils.DatabaseUtils.Companion.update
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
-import org.slf4j.LoggerFactory
 import java.time.Instant
 
-class TasksCreationHandler(
+class TaskUpdateByIdHandler(
     private val jdbi: Jdbi,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     data class Request(
-        val id: String,
         val title: String,
-        val description: String,
+        val description: String?,
         val dueDate: Instant,
-        val status: TaskStatus,
+        val status: TaskStatus?,
     )
 
     data class Response(
         val id: String,
         val title: String,
-        val description: String,
+        val description: String?,
         val dueDate: Instant,
-        val status: TaskStatus,
+        val status: TaskStatus?,
         val createdBy: String,
     )
 
     suspend fun handle(
-        userId: String,
+        id: String,
         request: Request,
     ): Response =
         transaction(jdbi) { handle ->
-            val insertedRows = insertTask(handle, userId, request)
-
-            if (insertedRows == 0) {
-                throw Exception("Failed to create task")
+            val task = fetchTaskById(handle, id)
+            if (task == null) {
+                throw NotFoundException("Task not found")
             }
 
-            getTaskById(handle, request.id)
+            val updatedRows = updateTask(handle, id, request)
+
+            if (updatedRows == 0) {
+                throw DbException("Failed to update task")
+            }
+
+            fetchTaskById(handle, id)
         }
 
-    private fun insertTask(
+    private fun updateTask(
         handle: Handle,
-        userId: String,
+        id: String,
         request: Request,
     ): Int {
-        val insertQuery = """
-            INSERT INTO tasks (id, title, description, dueDate, status, createdBy)
-            VALUES (:id, :title, :description, :dueDate, :status, :createdBy)
+        val updateQuery = """
+            UPDATE tasks
+            SET title = :title,
+                description = :description,
+                dueDate = :dueDate,
+                status = :status
+            WHERE id = :id
         """
 
-        return insert(
+        return update(
             handle,
-            insertQuery,
+            updateQuery,
             mapOf(
-                "id" to request.id,
+                "id" to id,
                 "title" to request.title,
                 "description" to request.description,
                 "dueDate" to request.dueDate,
-                "status" to request.status.name,
-                "createdBy" to userId,
+                "status" to request.status?.name,
             ),
         )
     }
 
-    private fun getTaskById(
+    private fun fetchTaskById(
         handle: Handle,
         id: String,
     ): Response {

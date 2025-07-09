@@ -1,6 +1,7 @@
 package com.ohana.tasks.handlers
 
 import com.ohana.exceptions.NotFoundException
+import com.ohana.shared.TaskStatus
 import com.ohana.utils.DatabaseUtils.Companion.get
 import com.ohana.utils.DatabaseUtils.Companion.query
 import org.jdbi.v3.core.Handle
@@ -15,7 +16,7 @@ class TasksGetByIdHandler(
         val title: String,
         val description: String,
         val dueDate: Instant,
-        val status: String,
+        val status: TaskStatus,
         val createdBy: String,
     )
 
