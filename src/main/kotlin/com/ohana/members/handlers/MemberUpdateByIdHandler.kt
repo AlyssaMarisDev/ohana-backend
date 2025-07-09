@@ -8,7 +8,7 @@ import com.ohana.utils.DatabaseUtils.Companion.update
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
 
-class MembersUpdateByIdHandler(
+class MemberUpdateByIdHandler(
     private val jdbi: Jdbi,
 ) {
     data class Request(

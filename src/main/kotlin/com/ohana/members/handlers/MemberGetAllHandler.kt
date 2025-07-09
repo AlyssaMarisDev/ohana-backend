@@ -5,7 +5,7 @@ import com.ohana.utils.DatabaseUtils.Companion.query
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
 
-class MembersGetAllHandler(
+class MemberGetAllHandler(
     private val jdbi: Jdbi,
 ) {
     data class Response(

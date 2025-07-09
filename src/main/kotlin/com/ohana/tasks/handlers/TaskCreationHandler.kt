@@ -10,7 +10,7 @@ import org.jdbi.v3.core.Jdbi
 import org.slf4j.LoggerFactory
 import java.time.Instant
 
-class TasksCreationHandler(
+class TaskCreationHandler(
     private val jdbi: Jdbi,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)

@@ -10,15 +10,15 @@ import com.ohana.household.handlers.HouseholdCreationHandler
 import com.ohana.household.handlers.HouseholdGetAllHandler
 import com.ohana.household.handlers.HouseholdGetByIdHandler
 import com.ohana.household.handlers.HouseholdInviteMemberHandler
-import com.ohana.members.controllers.MembersController
-import com.ohana.members.handlers.MembersGetAllHandler
-import com.ohana.members.handlers.MembersGetByIdHandler
-import com.ohana.members.handlers.MembersUpdateByIdHandler
-import com.ohana.tasks.controllers.TasksController
+import com.ohana.members.controllers.MemberController
+import com.ohana.members.handlers.MemberGetAllHandler
+import com.ohana.members.handlers.MemberGetByIdHandler
+import com.ohana.members.handlers.MemberUpdateByIdHandler
+import com.ohana.tasks.controllers.TaskController
+import com.ohana.tasks.handlers.TaskCreationHandler
+import com.ohana.tasks.handlers.TaskGetAllHandler
+import com.ohana.tasks.handlers.TaskGetByIdHandler
 import com.ohana.tasks.handlers.TaskUpdateByIdHandler
-import com.ohana.tasks.handlers.TasksCreationHandler
-import com.ohana.tasks.handlers.TasksGetAllHandler
-import com.ohana.tasks.handlers.TasksGetByIdHandler
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.KotlinPlugin
 import org.koin.dsl.module
@@ -44,14 +44,14 @@ val appModule =
         single { MemberSignInHandler(get()) }
 
         // Members handlers
-        single { MembersGetAllHandler(get()) }
-        single { MembersGetByIdHandler(get()) }
-        single { MembersUpdateByIdHandler(get()) }
+        single { MemberGetAllHandler(get()) }
+        single { MemberGetByIdHandler(get()) }
+        single { MemberUpdateByIdHandler(get()) }
 
         // Tasks handlers
-        single { TasksCreationHandler(get()) }
-        single { TasksGetAllHandler(get()) }
-        single { TasksGetByIdHandler(get()) }
+        single { TaskCreationHandler(get()) }
+        single { TaskGetAllHandler(get()) }
+        single { TaskGetByIdHandler(get()) }
         single { TaskUpdateByIdHandler(get()) }
 
         // Household handlers
@@ -64,6 +64,6 @@ val appModule =
         single { AuthController(get(), get()) }
         single { HealthController() }
         single { HouseholdController(get(), get(), get(), get(), get()) }
-        single { MembersController(get(), get(), get()) }
-        single { TasksController(get(), get(), get(), get()) }
+        single { MemberController(get(), get(), get()) }
+        single { TaskController(get(), get(), get(), get()) }
     }
