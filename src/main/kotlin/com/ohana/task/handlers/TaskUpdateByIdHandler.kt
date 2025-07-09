@@ -36,7 +36,7 @@ class TaskUpdateByIdHandler(
         transaction(jdbi) { handle ->
             validateTaskExists(handle, id)
             updateTask(handle, id, request)
-            fetchTaskById(handle, id)
+            getTaskById(handle, id)
         }
 
     private fun updateTask(
@@ -69,7 +69,7 @@ class TaskUpdateByIdHandler(
         if (updatedRows == 0) throw DbException("Failed to update task")
     }
 
-    private fun fetchTaskById(
+    private fun getTaskById(
         handle: Handle,
         id: String,
     ): Response {
@@ -91,13 +91,13 @@ class TaskUpdateByIdHandler(
         handle: Handle,
         id: String,
     ) {
-        val taskId = fetchIfTaskExists(handle, id)
+        val taskId = getIfTaskExists(handle, id)
         if (taskId == null) {
             throw NotFoundException("Task not found")
         }
     }
 
-    private fun fetchIfTaskExists(
+    private fun getIfTaskExists(
         handle: Handle,
         id: String,
     ): String? {

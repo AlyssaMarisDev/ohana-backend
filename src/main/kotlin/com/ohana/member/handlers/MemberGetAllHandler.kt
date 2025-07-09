@@ -19,13 +19,13 @@ class MemberGetAllHandler(
     suspend fun handle(): List<Response> {
         val response =
             query(jdbi) { handle ->
-                fetchAllMembers(handle)
+                getAllMembers(handle)
             }
 
         return response
     }
 
-    fun fetchAllMembers(handle: Handle): List<Response> =
+    fun getAllMembers(handle: Handle): List<Response> =
         get(
             handle,
             "SELECT id, name, age, gender, email FROM members",

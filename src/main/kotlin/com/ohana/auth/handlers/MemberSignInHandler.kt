@@ -20,7 +20,7 @@ class MemberSignInHandler(
     )
 
     suspend fun handle(request: Request): Response {
-        val member = findMemberByEmail(request.email)
+        val member = getMemberByEmail(request.email)
 
         if (member == null || member.password != Hasher.hashPassword(request.password, member.salt)) {
             throw AuthorizationException("Invalid email or password")
@@ -29,7 +29,7 @@ class MemberSignInHandler(
         return Response(JwtCreator.generateToken(member.id))
     }
 
-    private suspend fun findMemberByEmail(email: String): Member? =
+    private suspend fun getMemberByEmail(email: String): Member? =
         query(jdbi) { handle ->
             get(
                 handle,

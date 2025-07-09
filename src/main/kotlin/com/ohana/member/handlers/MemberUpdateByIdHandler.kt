@@ -31,7 +31,7 @@ class MemberUpdateByIdHandler(
     ): Response =
         transaction(jdbi) { handle ->
             updateMember(handle, id, request)
-            fetchMemberById(handle, id)
+            getMemberById(handle, id)
         }
 
     private fun updateMember(
@@ -62,7 +62,7 @@ class MemberUpdateByIdHandler(
         if (updatedRows == 0) throw DbException("Failed to update member")
     }
 
-    private fun fetchMemberById(
+    private fun getMemberById(
         handle: Handle,
         id: String,
     ): Response {

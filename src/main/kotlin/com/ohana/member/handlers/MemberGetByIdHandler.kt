@@ -19,10 +19,10 @@ class MemberGetByIdHandler(
 
     suspend fun handle(id: String): Response =
         query(jdbi) { handle ->
-            fetchSingleMemberById(handle, id) ?: throw NotFoundException("Member not found")
+            getMemberById(handle, id) ?: throw NotFoundException("Member not found")
         }
 
-    fun fetchSingleMemberById(
+    fun getMemberById(
         handle: Handle,
         id: String,
     ): Response? =

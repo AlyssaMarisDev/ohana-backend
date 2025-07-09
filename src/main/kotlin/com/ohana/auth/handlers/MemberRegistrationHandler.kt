@@ -50,17 +50,20 @@ class MemberRegistrationHandler(
         val id = UUID.randomUUID().toString()
 
         return transaction(jdbi) { handle ->
-            // Check if the member already exists
-            val existingMember = findMemberByEmail(handle, request.email)
-
-            if (existingMember != null) {
-                throw ConflictException("Member with email ${request.email} already exists")
-            }
-
-            // Insert the new member
+            validateMember(handle, request.email)
             insertMember(handle, id, request.name, request.email, hashedPassword, salt)
-
             Response(id, JwtCreator.generateToken(id))
+        }
+    }
+
+    private fun validateMember(
+        handle: Handle,
+        email: String,
+    ) {
+        val existingMember = getMemberByEmail(handle, email)
+
+        if (existingMember != null) {
+            throw ConflictException("Member with email $email already exists")
         }
     }
 
@@ -87,7 +90,7 @@ class MemberRegistrationHandler(
             ),
         )
 
-    private fun findMemberByEmail(
+    private fun getMemberByEmail(
         handle: Handle,
         email: String,
     ): Member? =
