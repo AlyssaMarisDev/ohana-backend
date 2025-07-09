@@ -1,6 +1,7 @@
 package com.ohana.household.handlers
 
 import com.ohana.exceptions.NotFoundException
+import com.ohana.shared.HouseholdMemberRole
 import com.ohana.utils.DatabaseUtils.Companion.get
 import com.ohana.utils.DatabaseUtils.Companion.insert
 import com.ohana.utils.DatabaseUtils.Companion.transaction
@@ -86,7 +87,7 @@ class HouseholdCreationHandler(
                 "id" to UUID.randomUUID().toString(),
                 "householdId" to request.id,
                 "memberId" to userId,
-                "role" to "admin",
+                "role" to HouseholdMemberRole.admin.name,
                 "isActive" to true,
                 "invitedBy" to userId,
                 "joinedAt" to Instant.now(),
