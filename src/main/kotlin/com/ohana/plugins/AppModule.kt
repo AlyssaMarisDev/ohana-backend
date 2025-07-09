@@ -4,6 +4,10 @@ import com.ohana.auth.controllers.AuthController
 import com.ohana.auth.handlers.MemberRegistrationHandler
 import com.ohana.auth.handlers.MemberSignInHandler
 import com.ohana.health.controllers.HealthController
+import com.ohana.household.controllers.HouseholdController
+import com.ohana.household.handlers.HouseholdCreationHandler
+import com.ohana.household.handlers.HouseholdGetAllHandler
+import com.ohana.household.handlers.HouseholdGetByIdHandler
 import com.ohana.members.controllers.MembersController
 import com.ohana.members.handlers.MembersGetAllHandler
 import com.ohana.members.handlers.MembersGetByIdHandler
@@ -46,9 +50,15 @@ val appModule =
         single { TasksGetAllHandler(get()) }
         single { TasksGetByIdHandler(get()) }
 
+        // Household handlers
+        single { HouseholdCreationHandler(get()) }
+        single { HouseholdGetAllHandler(get()) }
+        single { HouseholdGetByIdHandler(get()) }
+
         // Controllers
         single { AuthController(get(), get()) }
         single { HealthController() }
+        single { HouseholdController(get(), get(), get()) }
         single { MembersController(get(), get(), get()) }
         single { TasksController(get(), get(), get()) }
     }
