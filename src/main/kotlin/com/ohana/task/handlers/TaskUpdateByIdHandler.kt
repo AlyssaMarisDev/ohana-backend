@@ -34,17 +34,8 @@ class TaskUpdateByIdHandler(
         request: Request,
     ): Response =
         transaction(jdbi) { handle ->
-            val task = fetchTaskById(handle, id)
-            if (task == null) {
-                throw NotFoundException("Task not found")
-            }
-
-            val updatedRows = updateTask(handle, id, request)
-
-            if (updatedRows == 0) {
-                throw DbException("Failed to update task")
-            }
-
+            validateTaskExists(handle, id)
+            updateTask(handle, id, request)
             fetchTaskById(handle, id)
         }
 
@@ -52,7 +43,7 @@ class TaskUpdateByIdHandler(
         handle: Handle,
         id: String,
         request: Request,
-    ): Int {
+    ) {
         val updateQuery = """
             UPDATE tasks
             SET title = :title,
@@ -62,17 +53,20 @@ class TaskUpdateByIdHandler(
             WHERE id = :id
         """
 
-        return update(
-            handle,
-            updateQuery,
-            mapOf(
-                "id" to id,
-                "title" to request.title,
-                "description" to request.description,
-                "dueDate" to request.dueDate,
-                "status" to request.status?.name,
-            ),
-        )
+        val updatedRows =
+            update(
+                handle,
+                updateQuery,
+                mapOf(
+                    "id" to id,
+                    "title" to request.title,
+                    "description" to request.description,
+                    "dueDate" to request.dueDate,
+                    "status" to request.status?.name,
+                ),
+            )
+
+        if (updatedRows == 0) throw DbException("Failed to update task")
     }
 
     private fun fetchTaskById(
@@ -91,5 +85,33 @@ class TaskUpdateByIdHandler(
             mapOf("id" to id),
             Response::class,
         ).firstOrNull() ?: throw NotFoundException("Task not found")
+    }
+
+    private fun validateTaskExists(
+        handle: Handle,
+        id: String,
+    ) {
+        val taskId = fetchIfTaskExists(handle, id)
+        if (taskId == null) {
+            throw NotFoundException("Task not found")
+        }
+    }
+
+    private fun fetchIfTaskExists(
+        handle: Handle,
+        id: String,
+    ): String? {
+        val selectQuery = """
+            SELECT id
+            FROM tasks
+            WHERE id = :id
+        """
+
+        return get(
+            handle,
+            selectQuery,
+            mapOf("id" to id),
+            String::class,
+        ).firstOrNull()
     }
 }

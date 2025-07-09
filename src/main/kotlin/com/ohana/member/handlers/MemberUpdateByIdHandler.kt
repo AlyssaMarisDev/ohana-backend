@@ -30,12 +30,7 @@ class MemberUpdateByIdHandler(
         request: Request,
     ): Response =
         transaction(jdbi) { handle ->
-            val updatedRows = updateMember(handle, id, request)
-
-            if (updatedRows == 0) {
-                throw DbException("Failed to update member")
-            }
-
+            updateMember(handle, id, request)
             fetchMemberById(handle, id)
         }
 
@@ -43,7 +38,7 @@ class MemberUpdateByIdHandler(
         handle: Handle,
         id: String,
         request: Request,
-    ): Int {
+    ) {
         val updateQuery = """
             UPDATE members
             SET name = :name,
@@ -52,16 +47,19 @@ class MemberUpdateByIdHandler(
             WHERE id = :id
         """
 
-        return update(
-            handle,
-            updateQuery,
-            mapOf(
-                "id" to id,
-                "name" to request.name,
-                "age" to request.age,
-                "gender" to request.gender,
-            ),
-        )
+        val updatedRows =
+            update(
+                handle,
+                updateQuery,
+                mapOf(
+                    "id" to id,
+                    "name" to request.name,
+                    "age" to request.age,
+                    "gender" to request.gender,
+                ),
+            )
+
+        if (updatedRows == 0) throw DbException("Failed to update member")
     }
 
     private fun fetchMemberById(

@@ -24,20 +24,18 @@ class HouseholdInviteMemberHandler(
         householdId: String,
         request: Request,
     ) = transaction(jdbi) { handle ->
-        val actorHouseholdMember = getHouseholdMember(handle, userId, householdId)
-        validateAuthorization(actorHouseholdMember)
-
-        val memberHouseholdMember = getHouseholdMember(handle, request.memberId, householdId)
-        validateMember(memberHouseholdMember)
-
-        val insertedRows = addHouseholdMember(handle, userId, householdId, request)
-
-        if (insertedRows == 0) {
-            throw DbException("Failed to add member to household")
-        }
+        validateAuthorization(handle, userId, householdId)
+        validateMember(handle, request.memberId, householdId)
+        insertHouseholdMember(handle, userId, householdId, request)
     }
 
-    private fun validateAuthorization(actorHouseholdMember: HouseholdMember?) {
+    private fun validateAuthorization(
+        handle: Handle,
+        userId: String,
+        householdId: String,
+    ) {
+        val actorHouseholdMember = getHouseholdMember(handle, userId, householdId)
+
         if (actorHouseholdMember == null) {
             throw AuthorizationException("User is not a member of the household")
         }
@@ -47,34 +45,43 @@ class HouseholdInviteMemberHandler(
         }
     }
 
-    private fun validateMember(memberHouseholdMember: HouseholdMember?) {
+    private fun validateMember(
+        handle: Handle,
+        memberId: String,
+        householdId: String,
+    ) {
+        val memberHouseholdMember = getHouseholdMember(handle, memberId, householdId)
+
         if (memberHouseholdMember != null) {
             throw ConflictException("User is already a member of the household")
         }
     }
 
-    private fun addHouseholdMember(
+    private fun insertHouseholdMember(
         handle: Handle,
         userId: String,
         householdId: String,
         request: Request,
-    ): Int {
+    ) {
         val insertQuery = """
             INSERT INTO household_members (id, householdId, memberId, role, invitedBy)
             VALUES (:id, :householdId, :memberId, :role, :invitedBy)
         """
 
-        return insert(
-            handle,
-            insertQuery,
-            mapOf(
-                "id" to UUID.randomUUID().toString(),
-                "householdId" to householdId,
-                "memberId" to request.memberId,
-                "role" to request.role.name,
-                "invitedBy" to userId,
-            ),
-        )
+        val insertedRows =
+            insert(
+                handle,
+                insertQuery,
+                mapOf(
+                    "id" to UUID.randomUUID().toString(),
+                    "householdId" to householdId,
+                    "memberId" to request.memberId,
+                    "role" to request.role.name,
+                    "invitedBy" to userId,
+                ),
+            )
+
+        if (insertedRows == 0) throw DbException("Failed to invite member")
     }
 
     private fun getHouseholdMember(

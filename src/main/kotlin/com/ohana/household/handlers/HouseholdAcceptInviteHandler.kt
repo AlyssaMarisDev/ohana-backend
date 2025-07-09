@@ -1,6 +1,6 @@
 package com.ohana.household.handlers
 
-import com.ohana.exceptions.ConflictException
+import com.ohana.exceptions.AuthorizationException
 import com.ohana.exceptions.DbException
 import com.ohana.utils.DatabaseUtils.Companion.get
 import com.ohana.utils.DatabaseUtils.Companion.transaction
@@ -15,16 +15,19 @@ class HouseholdAcceptInviteHandler(
         userId: String,
         householdId: String,
     ) = transaction(jdbi) { handle ->
+        validateHouseholdMember(handle, userId, householdId)
+        updateHouseholdMember(handle, userId, householdId)
+    }
+
+    private fun validateHouseholdMember(
+        handle: Handle,
+        userId: String,
+        householdId: String,
+    ) {
         val householdMember = getHouseholdMember(handle, userId, householdId)
 
         if (householdMember == null) {
-            throw ConflictException("User has not been invited to the household")
-        }
-
-        val updatedRows = addHouseholdMember(handle, userId, householdId)
-
-        if (updatedRows == 0) {
-            throw DbException("Failed to add member to household")
+            throw AuthorizationException("User has not been invited to the household")
         }
     }
 
@@ -50,11 +53,11 @@ class HouseholdAcceptInviteHandler(
         ).firstOrNull()
     }
 
-    private fun addHouseholdMember(
+    private fun updateHouseholdMember(
         handle: Handle,
         userId: String,
         householdId: String,
-    ): Int {
+    ) {
         val updateQuery = """
             UPDATE household_members
             SET isActive = true,
@@ -63,14 +66,17 @@ class HouseholdAcceptInviteHandler(
               AND memberId = :userId
         """
 
-        return update(
-            handle,
-            updateQuery,
-            mapOf(
-                "householdId" to householdId,
-                "userId" to userId,
-            ),
-        )
+        val updatedRows =
+            update(
+                handle,
+                updateQuery,
+                mapOf(
+                    "householdId" to householdId,
+                    "userId" to userId,
+                ),
+            )
+
+        if (updatedRows == 0) throw DbException("Failed to update household member")
     }
 
     data class HouseholdMember(

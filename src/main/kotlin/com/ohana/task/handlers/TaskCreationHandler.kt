@@ -1,5 +1,6 @@
 package com.ohana.tasks.handlers
 
+import com.ohana.exceptions.DbException
 import com.ohana.exceptions.NotFoundException
 import com.ohana.shared.TaskStatus
 import com.ohana.utils.DatabaseUtils.Companion.get
@@ -37,12 +38,7 @@ class TaskCreationHandler(
         request: Request,
     ): Response =
         transaction(jdbi) { handle ->
-            val insertedRows = insertTask(handle, userId, request)
-
-            if (insertedRows == 0) {
-                throw Exception("Failed to create task")
-            }
-
+            insertTask(handle, userId, request)
             getTaskById(handle, request.id)
         }
 
@@ -50,24 +46,27 @@ class TaskCreationHandler(
         handle: Handle,
         userId: String,
         request: Request,
-    ): Int {
+    ) {
         val insertQuery = """
             INSERT INTO tasks (id, title, description, dueDate, status, createdBy)
             VALUES (:id, :title, :description, :dueDate, :status, :createdBy)
         """
 
-        return insert(
-            handle,
-            insertQuery,
-            mapOf(
-                "id" to request.id,
-                "title" to request.title,
-                "description" to request.description,
-                "dueDate" to request.dueDate,
-                "status" to request.status.name,
-                "createdBy" to userId,
-            ),
-        )
+        val insertedRows =
+            insert(
+                handle,
+                insertQuery,
+                mapOf(
+                    "id" to request.id,
+                    "title" to request.title,
+                    "description" to request.description,
+                    "dueDate" to request.dueDate,
+                    "status" to request.status.name,
+                    "createdBy" to userId,
+                ),
+            )
+
+        if (insertedRows == 0) throw DbException("Failed to create task")
     }
 
     private fun getTaskById(
