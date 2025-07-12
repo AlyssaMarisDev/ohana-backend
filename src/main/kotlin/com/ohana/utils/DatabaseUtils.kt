@@ -1,15 +1,9 @@
 package com.ohana.utils
 
-import com.ohana.exceptions.ConflictException
-import com.ohana.exceptions.DbException
-import com.ohana.exceptions.KnownError
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.jdbi.v3.core.*
 import org.jdbi.v3.core.Jdbi
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet
-import java.sql.SQLIntegrityConstraintViolationException
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
@@ -20,74 +14,6 @@ class DatabaseUtils(
 ) {
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
-
-        suspend fun <T> transaction(
-            jdbi: Jdbi,
-            block: (Handle) -> T,
-        ): T {
-            logger.debug("Starting transaction")
-
-            val result =
-                withContext(Dispatchers.IO) {
-                    jdbi.inTransaction<T, Exception> { handle ->
-                        try {
-                            logger.debug("Starting block")
-                            val blockResult = block(handle)
-                            logger.debug("Block completed")
-
-                            blockResult
-                        } catch (e: Exception) {
-                            logger.error("Transaction failed: ${e.message}", e)
-
-                            if (e is KnownError) {
-                                throw e
-                            }
-
-                            if (e.cause is SQLIntegrityConstraintViolationException) {
-                                throw ConflictException("Duplicate entry", e)
-                            }
-
-                            throw DbException("Transaction failed: ${e.message}", e)
-                        }
-                    }
-                }
-
-            logger.debug("Transaction completed")
-
-            return result
-        }
-
-        suspend fun <T> query(
-            jdbi: Jdbi,
-            block: (Handle) -> T,
-        ): T {
-            logger.debug("Starting handle")
-
-            val result =
-                withContext(Dispatchers.IO) {
-                    jdbi.withHandle<T, Exception> { handle ->
-                        try {
-                            logger.debug("Starting block")
-                            val blockResult = block(handle)
-                            logger.debug("Block completed")
-
-                            blockResult
-                        } catch (e: Exception) {
-                            logger.error("Query failed: ${e.message}", e)
-
-                            if (e is KnownError) {
-                                throw e
-                            }
-
-                            throw DbException("Query failed: ${e.message}", e)
-                        }
-                    }
-                }
-
-            logger.debug("Handle completed")
-
-            return result
-        }
 
         fun insert(
             handle: Handle,
