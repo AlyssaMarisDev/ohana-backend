@@ -12,7 +12,8 @@ The application follows a strict layered architecture:
 
 - **Controllers** - Handle HTTP requests/responses and route definitions
 - **Handlers** - Contain business logic and orchestrate operations
-- **Database Utils** - Provide database access abstractions
+- **Repositories** - Provide data access abstractions through the Unit of Work pattern
+- **Unit of Work** - Manages transactions and provides repository access
 - **Exceptions** - Custom exception hierarchy for error handling
 
 ### 2. Dependency Injection Pattern
@@ -20,6 +21,7 @@ The application follows a strict layered architecture:
 - Uses **Koin** for dependency injection
 - All dependencies are defined in `AppModule.kt`
 - Controllers and Handlers are injected as singletons
+- Unit of Work is injected as a single instance
 - Database connection (JDBI) is injected as a single instance
 
 ### 3. Request-Response Pattern
@@ -50,7 +52,7 @@ com.ohana/
 ├── auth/                            # Authentication domain
 │   ├── controllers/                 # HTTP controllers
 │   ├── handlers/                    # Business logic
-│   ├── services/                    # CRUD services
+│   ├── entities/                    # Domain entities (AuthMember)
 │   ├── repositories/                # Database repositories
 │   └── utils/                       # Auth utilities (JWT, hashing)
 ├── exceptions/                      # Custom exception hierarchy
@@ -58,19 +60,19 @@ com.ohana/
 ├── household/                       # Household domain
 │   ├── controllers/
 │   ├── handlers/
-│   ├── services/
-│   └── repositories/
+│   ├── repositories/
+│   └── entities/
 ├── member/                          # Member domain
 │   ├── controllers/
 │   ├── handlers/
-│   ├── services/
+│   ├── entities/
 │   └── repositories/
 ├── plugins/                         # Ktor application configuration
-├── shared/                          # Shared enums and constants
+├── shared/                          # Shared enums, constants, and Unit of Work
 ├── task/                            # Task domain
 │   ├── controllers/
 │   ├── handlers/
-│   ├── services/
+│   ├── entities/
 │   └── repositories/
 └── utils/                           # Shared utilities
 ```
@@ -79,10 +81,108 @@ com.ohana/
 
 - **Controllers**: `{Domain}Controller.kt` (e.g., `AuthController.kt`)
 - **Handlers**: `{Domain}{Action}Handler.kt` (e.g., `MemberRegistrationHandler.kt`)
-- **Services**: `{Resource}Service.kt` (e.g., `MemberService.kt`)
-- **Repositories**: `{Entity}Repository.kt` (e.g., `MemberRepository.kt`)
+- **Repositories**: `Jdbi{Entity}Repository.kt` (e.g., `JdbiMemberRepository.kt`)
+- **Entities**: `{Entity}.kt` (e.g., `Member.kt`, `Task.kt`)
 - **Request/Response**: Nested data classes within handlers
 - **Database tables**: Plural, snake_case (e.g., `household_members`)
+
+## Unit of Work Pattern
+
+### Overview
+
+The Unit of Work pattern provides a centralized way to manage database transactions and repository access. All database operations go through the Unit of Work, ensuring consistent transaction management.
+
+### Structure
+
+```kotlin
+// Unit of Work interface
+interface UnitOfWork {
+    suspend fun <T> execute(block: (UnitOfWorkContext) -> T): T
+}
+
+// Unit of Work context interface
+interface UnitOfWorkContext {
+    val tasks: TaskRepository
+    val members: MemberRepository
+    val households: HouseholdRepository
+    val authMembers: AuthMemberRepository
+}
+
+// Repository interfaces
+interface TaskRepository {
+    fun create(task: Task): Task
+    fun findById(id: String): Task?
+    fun findAll(): List<Task>
+    fun update(task: Task): Task
+}
+
+interface MemberRepository {
+    fun findById(id: String): Member?
+    fun findAll(): List<Member>
+    fun findByEmail(email: String): Member?
+    fun create(member: Member): Member
+    fun update(member: Member): Member
+}
+
+interface HouseholdRepository {
+    fun findById(id: String): Household?
+    fun findAll(): List<Household>
+    fun create(household: Household): Household
+    fun findMemberById(householdId: String, memberId: String): HouseholdMember?
+    fun createMember(member: HouseholdMember): HouseholdMember
+    fun updateMember(member: HouseholdMember): HouseholdMember
+}
+
+interface AuthMemberRepository {
+    fun findByEmail(email: String): AuthMember?
+    fun create(member: AuthMember): AuthMember
+}
+```
+
+### Usage in Handlers
+
+```kotlin
+class TaskCreationHandler(
+    private val unitOfWork: UnitOfWork,
+) {
+    suspend fun handle(userId: String, request: Request): Response =
+        unitOfWork.execute { context ->
+            // Validate that the user exists
+            context.members.findById(userId)
+                ?: throw IllegalArgumentException("User not found")
+
+            // Create the task
+            val task = context.tasks.create(
+                Task(
+                    id = request.id,
+                    title = request.title,
+                    description = request.description,
+                    dueDate = request.dueDate,
+                    status = request.status,
+                    createdBy = userId,
+                )
+            )
+
+            // Convert to response
+            Response(
+                id = task.id,
+                title = task.title,
+                description = task.description,
+                dueDate = task.dueDate,
+                status = task.status,
+                createdBy = task.createdBy,
+            )
+        }
+}
+```
+
+### Benefits
+
+- **Automatic transaction management**: All operations within `unitOfWork.execute` are wrapped in a transaction
+- **Consistent error handling**: Database errors are automatically converted to appropriate exceptions
+- **Repository abstraction**: Handlers don't need to know about database implementation details
+- **Testability**: Easy to mock the Unit of Work for testing
+- **Type safety**: Strongly typed repository interfaces
 
 ## Controller Pattern
 
@@ -127,8 +227,7 @@ Handlers contain business logic and follow this pattern:
 
 ```kotlin
 class {Action}Handler(
-    private val {Resource1}Service,
-    private val {Resource2}Service,
+    private val unitOfWork: UnitOfWork,
 ) {
     data class Request(
         // Input validation
@@ -142,27 +241,94 @@ class {Action}Handler(
     )
 
     suspend fun handle(request: Request, *other params if applicable*): Response {
-        // Call services to create/read/update/delete data
-        // Does business logic using those resources
+        return unitOfWork.execute { context ->
+            // Business logic using repositories
+            // All database operations go through context.{repository}
+        }
     }
 }
 ```
 
 ### Database Operations
 
-Always use `{Resource}Service.startTransaction` to start a transaction
-
-- `startTransaction` returns an id for the transaction
-- `useTransaction` can accept an id to continue the transaction using another Service
-- `commitTransaction` on any Service will commit that transaction for all Services using it
-
-Example:
+Always use the Unit of Work pattern for database operations:
 
 ```kotlin
-val transactionId = memberService.startTransaction()
-// Udate a member
+suspend fun handle(request: Request): Response =
+    unitOfWork.execute { context ->
+        // Get data
+        val member = context.members.findById(id)
+            ?: throw NotFoundException("Member not found")
 
+        // Create data
+        val task = context.tasks.create(newTask)
+
+        // Update data
+        val updatedMember = context.members.update(member.copy(name = "New Name"))
+
+        // Return response
+        Response(...)
+    }
 ```
+
+## Repository Pattern
+
+### Implementation
+
+Each repository implements a specific interface and provides data access methods:
+
+```kotlin
+class JdbiTaskRepository(
+    private val handle: Handle,
+) : TaskRepository {
+    override fun create(task: Task): Task {
+        val insertQuery = """
+            INSERT INTO tasks (id, title, description, due_date, status, created_by)
+            VALUES (:id, :title, :description, :due_date, :status, :created_by)
+        """
+
+        val insertedRows = DatabaseUtils.insert(
+            handle,
+            insertQuery,
+            mapOf(
+                "id" to task.id,
+                "title" to task.title,
+                "description" to task.description,
+                "due_date" to task.dueDate,
+                "status" to task.status.name,
+                "created_by" to task.createdBy,
+            ),
+        )
+
+        if (insertedRows == 0) throw DbException("Failed to create task")
+
+        return findById(task.id) ?: throw NotFoundException("Task not found after creation")
+    }
+
+    override fun findById(id: String): Task? {
+        val selectQuery = """
+            SELECT id, title, description, due_date as dueDate, status, created_by as createdBy
+            FROM tasks
+            WHERE id = :id
+        """
+
+        return DatabaseUtils
+            .get(
+                handle,
+                selectQuery,
+                mapOf("id" to id),
+                Task::class,
+            ).firstOrNull()
+    }
+}
+```
+
+### Key Principles
+
+- **Single responsibility**: Each repository handles one entity type
+- **Interface segregation**: Repositories implement specific interfaces
+- **Dependency inversion**: Handlers depend on repository interfaces, not implementations
+- **Error handling**: Repositories throw appropriate exceptions for database errors
 
 ## Exception Handling Pattern
 
@@ -205,7 +371,8 @@ get(handle, query, params, Response::class)
 ### Transaction Management
 
 ```kotlin
-transaction(jdbi) { handle ->
+// All transactions are managed by the Unit of Work
+unitOfWork.execute { context ->
     // Multiple database operations
     // Automatic rollback on exception
 }
@@ -249,7 +416,7 @@ data class Request(
 
 ```kotlin
 // Check if user is member of household
-val member = getHouseholdMember(handle, userId, householdId)
+val member = context.households.findMemberById(householdId, userId)
 if (member == null) {
     throw AuthorizationException("User is not a member of the household")
 }
@@ -311,7 +478,7 @@ if (member.role != HouseholdMemberRole.admin.name) {
 
 - Inject test doubles via Koin test modules
 - Use `runTest` for coroutine testing
-- Mock external dependencies
+- Mock Unit of Work for handler testing
 
 ## Logging Pattern
 
@@ -371,10 +538,10 @@ logger.error("Error occurred", exception)
 
 ### Database Error Handling
 
-- Always use `DatabaseUtils` methods
+- Always use `DatabaseUtils` methods in repositories
 - Handle `SQLIntegrityConstraintViolationException` as `ConflictException`
 - Wrap unknown database errors in `DbException`
-- Use transactions for multi-step operations
+- Use Unit of Work for multi-step operations
 
 ## Code Quality Standards
 
@@ -397,29 +564,94 @@ logger.error("Error occurred", exception)
 ### Steps to Follow
 
 1. **Add shared enums/constants** in `shared/` package
-2. **Create handler** with Request/Response data classes
-3. **Create controller** with route registration
-4. **Add to Koin module** in `AppModule.kt`
-5. **Add to routing** in `Routing.kt`
-6. **Add tests** for new functionality
+2. **Create entity** in appropriate domain package
+3. **Create repository interface** in `shared/UnitOfWork.kt`
+4. **Create repository implementation** in domain package
+5. **Update Unit of Work** to include new repository
+6. **Create handler** with Request/Response data classes
+7. **Create controller** with route registration
+8. **Add to Koin module** in `AppModule.kt`
+9. **Add to routing** in `Routing.kt`
+10. **Add tests** for new functionality
 
 ### Example: Adding a New Resource
 
 ```kotlin
-// 1. Create handler
-class NewResourceHandler(private val jdbi: Jdbi) {
-    data class Request(val name: String)
-    data class Response(val id: String, val name: String)
+// 1. Create entity
+data class NewResource(
+    val id: String,
+    val name: String,
+    val description: String,
+)
+
+// 2. Add repository interface to UnitOfWork.kt
+interface NewResourceRepository {
+    fun findById(id: String): NewResource?
+    fun create(resource: NewResource): NewResource
+    fun update(resource: NewResource): NewResource
+}
+
+// 3. Create repository implementation
+class JdbiNewResourceRepository(
+    private val handle: Handle,
+) : NewResourceRepository {
+    override fun findById(id: String): NewResource? {
+        // Implementation
+    }
+
+    override fun create(resource: NewResource): NewResource {
+        // Implementation
+    }
+
+    override fun update(resource: NewResource): NewResource {
+        // Implementation
+    }
+}
+
+// 4. Update UnitOfWorkContext
+interface UnitOfWorkContext {
+    // ... existing repositories
+    val newResources: NewResourceRepository
+}
+
+// 5. Update JdbiUnitOfWorkContext
+class JdbiUnitOfWorkContext(
+    private val handle: Handle,
+) : UnitOfWorkContext {
+    // ... existing repositories
+    override val newResources: NewResourceRepository = JdbiNewResourceRepository(handle)
+}
+
+// 6. Create handler
+class NewResourceHandler(
+    private val unitOfWork: UnitOfWork,
+) {
+    data class Request(val name: String, val description: String)
+    data class Response(val id: String, val name: String, val description: String)
 
     suspend fun handle(request: Request): Response {
-        return transaction(jdbi) { handle ->
-            // Implementation
+        return unitOfWork.execute { context ->
+            val resource = context.newResources.create(
+                NewResource(
+                    id = UUID.randomUUID().toString(),
+                    name = request.name,
+                    description = request.description,
+                )
+            )
+
+            Response(
+                id = resource.id,
+                name = resource.name,
+                description = resource.description,
+            )
         }
     }
 }
 
-// 2. Create controller
-class NewResourceController(private val handler: NewResourceHandler) {
+// 7. Create controller
+class NewResourceController(
+    private val handler: NewResourceHandler,
+) {
     fun Route.registerNewResourceRoutes() {
         authenticate("auth-jwt") {
             route("/new-resources") {
@@ -433,11 +665,11 @@ class NewResourceController(private val handler: NewResourceHandler) {
     }
 }
 
-// 3. Add to AppModule.kt
+// 8. Add to AppModule.kt
 single { NewResourceHandler(get()) }
 single { NewResourceController(get()) }
 
-// 4. Add to Routing.kt
+// 9. Add to Routing.kt
 val newResourceController: NewResourceController by inject()
 newResourceController.apply {
     registerNewResourceRoutes()
