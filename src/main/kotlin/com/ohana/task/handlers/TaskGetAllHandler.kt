@@ -27,7 +27,7 @@ class TaskGetAllHandler(
     fun getTasks(handle: Handle): List<Response> =
         get(
             handle,
-            "SELECT id, title, description, dueDate, status, createdBy FROM tasks",
+            "SELECT id, title, description, due_date as dueDate, status, created_by as createdBy FROM tasks",
             mapOf(),
             Response::class,
         )

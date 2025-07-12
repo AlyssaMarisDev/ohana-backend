@@ -48,7 +48,7 @@ class TaskUpdateByIdHandler(
             UPDATE tasks
             SET title = :title,
                 description = :description,
-                dueDate = :dueDate,
+                due_date = :due_date,
                 status = :status
             WHERE id = :id
         """
@@ -61,7 +61,7 @@ class TaskUpdateByIdHandler(
                     "id" to id,
                     "title" to request.title,
                     "description" to request.description,
-                    "dueDate" to request.dueDate,
+                    "due_date" to request.dueDate,
                     "status" to request.status?.name,
                 ),
             )
@@ -74,7 +74,7 @@ class TaskUpdateByIdHandler(
         id: String,
     ): Response {
         val selectQuery = """
-            SELECT id, title, description, dueDate, status, createdBy
+            SELECT id, title, description, due_date as dueDate, status, created_by as createdBy
             FROM tasks
             WHERE id = :id
         """

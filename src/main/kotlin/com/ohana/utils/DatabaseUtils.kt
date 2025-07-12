@@ -174,7 +174,7 @@ class DatabaseUtils(
             val columnCount = metaData.columnCount
 
             // Cache column indices in a map
-            val columnIndexMap = (1..columnCount).associateBy { metaData.getColumnName(it).lowercase() }
+            val columnIndexMap = (1..columnCount).associateBy { metaData.getColumnLabel(it).lowercase() }
 
             // Create a map of parameter names to values
             val args =

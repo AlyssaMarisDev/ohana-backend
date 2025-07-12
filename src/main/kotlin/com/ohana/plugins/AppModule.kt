@@ -14,6 +14,8 @@ import com.ohana.members.controllers.MemberController
 import com.ohana.members.handlers.MemberGetAllHandler
 import com.ohana.members.handlers.MemberGetByIdHandler
 import com.ohana.members.handlers.MemberUpdateByIdHandler
+import com.ohana.shared.JdbiUnitOfWork
+import com.ohana.shared.UnitOfWork
 import com.ohana.tasks.controllers.TaskController
 import com.ohana.tasks.handlers.TaskCreationHandler
 import com.ohana.tasks.handlers.TaskGetAllHandler
@@ -38,6 +40,9 @@ val appModule =
                 .create("jdbc:mysql://$dbHost:$dbPort/$dbName", dbUser, dbPassword)
                 .installPlugin(KotlinPlugin())
         }
+
+        // Unit of Work
+        single<UnitOfWork> { JdbiUnitOfWork(get()) }
 
         // Auth handlers
         single { MemberRegistrationHandler(get()) }

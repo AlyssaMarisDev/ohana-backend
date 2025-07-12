@@ -31,7 +31,7 @@ class TaskGetByIdHandler(
     ): Response? =
         get(
             handle,
-            "SELECT id, title, description, dueDate, status, createdBy FROM tasks WHERE id = :id",
+            "SELECT id, title, description, due_date as dueDate, status, created_by as createdBy FROM tasks WHERE id = :id",
             mapOf("id" to id),
             Response::class,
         ).firstOrNull()

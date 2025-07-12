@@ -48,7 +48,6 @@ dependencies {
     implementation("org.jdbi:jdbi3-sqlobject:3.27.0")
     implementation("org.jdbi:jdbi3-kotlin-sqlobject:3.27.0")
     implementation("com.mysql:mysql-connector-j:9.0.0")
-    implementation("org.flywaydb:flyway-core:9.0.0")
 
     // Jackson JSON library
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
