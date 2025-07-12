@@ -28,7 +28,8 @@ class TestUtils {
             dueDate: Instant = Instant.now(),
             status: TaskStatus = TaskStatus.pending,
             createdBy: String = "user-1",
-        ): Task = Task(id, title, description, dueDate, status, createdBy)
+            householdId: String = "household-1",
+        ): Task = Task(id, title, description, dueDate, status, createdBy, householdId)
 
         fun getMember(
             id: String = "user-1",

@@ -12,8 +12,8 @@ class JdbiTaskRepository(
 ) : TaskRepository {
     override fun create(task: Task): Task {
         val insertQuery = """
-            INSERT INTO tasks (id, title, description, due_date, status, created_by)
-            VALUES (:id, :title, :description, :due_date, :status, :created_by)
+            INSERT INTO tasks (id, title, description, due_date, status, created_by, household_id)
+            VALUES (:id, :title, :description, :due_date, :status, :created_by, :household_id)
         """
 
         val insertedRows =
@@ -27,6 +27,7 @@ class JdbiTaskRepository(
                     "due_date" to task.dueDate,
                     "status" to task.status.name,
                     "created_by" to task.createdBy,
+                    "household_id" to task.householdId,
                 ),
             )
 
@@ -37,7 +38,7 @@ class JdbiTaskRepository(
 
     override fun findById(id: String): Task? {
         val selectQuery = """
-            SELECT id, title, description, due_date as dueDate, status, created_by as createdBy
+            SELECT id, title, description, due_date as dueDate, status, created_by as createdBy, household_id as householdId
             FROM tasks
             WHERE id = :id
         """
@@ -53,7 +54,7 @@ class JdbiTaskRepository(
 
     override fun findAll(): List<Task> {
         val selectQuery = """
-            SELECT id, title, description, due_date as dueDate, status, created_by as createdBy
+            SELECT id, title, description, due_date as dueDate, status, created_by as createdBy, household_id as householdId
             FROM tasks
         """
 
@@ -62,6 +63,22 @@ class JdbiTaskRepository(
                 handle,
                 selectQuery,
                 mapOf(),
+                Task::class,
+            )
+    }
+
+    override fun findByHouseholdId(householdId: String): List<Task> {
+        val selectQuery = """
+            SELECT id, title, description, due_date as dueDate, status, created_by as createdBy, household_id as householdId
+            FROM tasks
+            WHERE household_id = :household_id
+        """
+
+        return DatabaseUtils
+            .get(
+                handle,
+                selectQuery,
+                mapOf("household_id" to householdId),
                 Task::class,
             )
     }

@@ -69,14 +69,17 @@ CREATE TABLE `tasks` (
   `due_date` timestamp NULL DEFAULT NULL COMMENT 'Due date for the task',
   `status` varchar(50) NOT NULL DEFAULT 'pending' COMMENT 'Status of the task (pending, in_progress, completed)',
   `created_by` char(36) NOT NULL COMMENT 'ID of the member who created the task',
+  `household_id` char(36) NOT NULL COMMENT 'ID of the household this task belongs to',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Record creation timestamp',
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Record update timestamp',
   PRIMARY KEY (`id`),
   KEY `idx_created_by` (`created_by`),
+  KEY `idx_household_id` (`household_id`),
   KEY `idx_status` (`status`),
   KEY `idx_due_date` (`due_date`),
   KEY `idx_title` (`title`),
-  CONSTRAINT `fk_tasks_created_by` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_tasks_created_by` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_tasks_household_id` FOREIGN KEY (`household_id`) REFERENCES `households` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores task information';
 
 -- Insert sample data (optional)
@@ -96,8 +99,8 @@ INSERT INTO `household_members` (`id`, `household_id`, `member_id`, `role`, `is_
 ('550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440000', 'admin', 1, '550e8400-e29b-41d4-a716-446655440000', NOW());
 
 -- Sample task
-INSERT INTO `tasks` (`id`, `title`, `description`, `due_date`, `status`, `created_by`) VALUES
-('550e8400-e29b-41d4-a716-446655440003', 'Buy groceries', 'Purchase items for the week', DATE_ADD(NOW(), INTERVAL 2 DAY), 'pending', '550e8400-e29b-41d4-a716-446655440000');
+INSERT INTO `tasks` (`id`, `title`, `description`, `due_date`, `status`, `created_by`, `household_id`) VALUES
+('550e8400-e29b-41d4-a716-446655440003', 'Buy groceries', 'Purchase items for the week', DATE_ADD(NOW(), INTERVAL 2 DAY), 'pending', '550e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440001');
 */
 
 -- Show table information

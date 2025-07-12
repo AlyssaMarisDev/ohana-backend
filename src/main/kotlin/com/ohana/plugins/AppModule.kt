@@ -8,6 +8,7 @@ import com.ohana.household.controllers.HouseholdController
 import com.ohana.household.handlers.*
 import com.ohana.member.controllers.MemberController
 import com.ohana.member.handlers.*
+import com.ohana.shared.HouseholdMemberValidator
 import com.ohana.shared.JdbiUnitOfWork
 import com.ohana.shared.UnitOfWork
 import com.ohana.task.controllers.TaskController
@@ -35,6 +36,9 @@ val appModule =
         // Unit of Work - provides services through context
         single<UnitOfWork> { JdbiUnitOfWork(get()) }
 
+        // Shared
+        single { HouseholdMemberValidator() }
+
         // Auth handlers
         single { MemberRegistrationHandler(get()) }
         single { MemberSignInHandler(get()) }
@@ -45,10 +49,10 @@ val appModule =
         single { MemberUpdateByIdHandler(get()) }
 
         // Tasks handlers - now only need UnitOfWork
-        single { TaskCreationHandler(get()) }
-        single { TaskGetAllHandler(get()) }
-        single { TaskGetByIdHandler(get()) }
-        single { TaskUpdateByIdHandler(get()) }
+        single { TaskCreationHandler(get(), get()) }
+        single { TaskGetAllHandler(get(), get()) }
+        single { TaskGetByIdHandler(get(), get()) }
+        single { TaskUpdateByIdHandler(get(), get()) }
 
         // Household handlers
         single { HouseholdAcceptInviteHandler(get()) }

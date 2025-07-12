@@ -1,6 +1,8 @@
 package com.ohana.task.handlers
 
 import com.ohana.TestUtils
+import com.ohana.exceptions.AuthorizationException
+import com.ohana.shared.HouseholdMemberValidator
 import com.ohana.shared.MemberRepository
 import com.ohana.shared.TaskRepository
 import com.ohana.shared.TaskStatus
@@ -20,24 +22,25 @@ class TaskCreationHandlerTest {
     private lateinit var taskRepository: TaskRepository
     private lateinit var memberRepository: MemberRepository
     private lateinit var handler: TaskCreationHandler
-
+    private lateinit var householdMemberValidator: HouseholdMemberValidator
     private val userId = "user-1"
 
     @BeforeEach
     fun setUp() {
         taskRepository = mock()
         memberRepository = mock()
+        householdMemberValidator = mock()
         context =
             mock {
                 on { tasks } doReturn taskRepository
                 on { members } doReturn memberRepository
             }
         unitOfWork = mock()
-        handler = TaskCreationHandler(unitOfWork)
+        handler = TaskCreationHandler(unitOfWork, householdMemberValidator)
     }
 
     @Test
-    fun `handle should create task when user exists`() =
+    fun `handle should create task when validation passes`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
             val request =
@@ -47,17 +50,16 @@ class TaskCreationHandlerTest {
                     description = "Test Description",
                     dueDate = Instant.now(),
                     status = TaskStatus.pending,
+                    householdId = "household-1",
                 )
 
             val task = TestUtils.getTask()
-            val member = TestUtils.getMember()
 
-            whenever(memberRepository.findById(userId)).thenReturn(member)
             whenever(taskRepository.create(any())).thenReturn(task)
 
             val response = handler.handle(userId, request)
 
-            verify(memberRepository).findById(userId)
+            verify(householdMemberValidator).validate(context, "household-1", userId)
             verify(taskRepository).create(task)
 
             assertEquals(task.id, response.id)
@@ -66,10 +68,11 @@ class TaskCreationHandlerTest {
             assertEquals(task.dueDate, response.dueDate)
             assertEquals(task.status, response.status)
             assertEquals(task.createdBy, response.createdBy)
+            assertEquals(task.householdId, response.householdId)
         }
 
     @Test
-    fun `handle should throw when user does not exist`() =
+    fun `handle should throw when validation fails`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
@@ -80,15 +83,18 @@ class TaskCreationHandlerTest {
                     description = "Test Description",
                     dueDate = Instant.now(),
                     status = TaskStatus.pending,
+                    householdId = "household-1",
                 )
 
-            whenever(memberRepository.findById(userId)).thenReturn(null)
+            whenever(
+                householdMemberValidator.validate(context, "household-1", userId),
+            ).thenThrow(AuthorizationException("User is not a member of the household"))
 
             val ex =
-                assertThrows<IllegalArgumentException> {
+                assertThrows<AuthorizationException> {
                     handler.handle(userId, request)
                 }
-            assertEquals("User not found", ex.message)
+            assertEquals("User is not a member of the household", ex.message)
         }
 
     @Test
@@ -103,11 +109,9 @@ class TaskCreationHandlerTest {
                     description = "Test Description",
                     dueDate = Instant.now(),
                     status = TaskStatus.pending,
+                    householdId = "household-1",
                 )
 
-            val member = TestUtils.getMember()
-
-            whenever(memberRepository.findById(userId)).thenReturn(member)
             whenever(taskRepository.create(any())).thenThrow(RuntimeException("DB error"))
 
             val ex =

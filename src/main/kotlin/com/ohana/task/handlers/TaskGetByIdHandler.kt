@@ -1,10 +1,12 @@
 package com.ohana.task.handlers
 
 import com.ohana.exceptions.NotFoundException
+import com.ohana.shared.HouseholdMemberValidator
 import com.ohana.shared.UnitOfWork
 
 class TaskGetByIdHandler(
     private val unitOfWork: UnitOfWork,
+    private val householdMemberValidator: HouseholdMemberValidator,
 ) {
     data class Response(
         val id: String,
@@ -13,11 +15,23 @@ class TaskGetByIdHandler(
         val dueDate: java.time.Instant,
         val status: com.ohana.shared.TaskStatus,
         val createdBy: String,
+        val householdId: String,
     )
 
-    suspend fun handle(id: String): Response =
+    suspend fun handle(
+        id: String,
+        householdId: String,
+        userId: String,
+    ): Response =
         unitOfWork.execute { context ->
+            householdMemberValidator.validate(context, householdId, userId)
+
             val task = context.tasks.findById(id) ?: throw NotFoundException("Task not found")
+
+            // Validate that the task belongs to the specified household
+            if (task.householdId != householdId) {
+                throw NotFoundException("Task not found in this household")
+            }
 
             Response(
                 id = task.id,
@@ -26,6 +40,7 @@ class TaskGetByIdHandler(
                 dueDate = task.dueDate,
                 status = task.status,
                 createdBy = task.createdBy,
+                householdId = task.householdId,
             )
         }
 }

@@ -1,5 +1,6 @@
 package com.ohana.task.handlers
 
+import com.ohana.shared.HouseholdMemberValidator
 import com.ohana.shared.TaskStatus
 import com.ohana.shared.UnitOfWork
 import com.ohana.task.entities.Task
@@ -8,6 +9,7 @@ import java.time.Instant
 
 class TaskCreationHandler(
     private val unitOfWork: UnitOfWork,
+    private val householdMemberValidator: HouseholdMemberValidator,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -17,6 +19,7 @@ class TaskCreationHandler(
         val description: String,
         val dueDate: Instant,
         val status: TaskStatus,
+        val householdId: String,
     )
 
     data class Response(
@@ -26,6 +29,7 @@ class TaskCreationHandler(
         val dueDate: Instant,
         val status: TaskStatus,
         val createdBy: String,
+        val householdId: String,
     )
 
     suspend fun handle(
@@ -33,11 +37,8 @@ class TaskCreationHandler(
         request: Request,
     ): Response =
         unitOfWork.execute { context ->
-            // Validate that the user exists
-            context.members.findById(userId)
-                ?: throw IllegalArgumentException("User not found")
+            householdMemberValidator.validate(context, request.householdId, userId)
 
-            // Create the task
             val task =
                 context.tasks.create(
                     Task(
@@ -47,10 +48,10 @@ class TaskCreationHandler(
                         dueDate = request.dueDate,
                         status = request.status,
                         createdBy = userId,
+                        householdId = request.householdId,
                     ),
                 )
 
-            // Convert to response
             Response(
                 id = task.id,
                 title = task.title,
@@ -58,6 +59,7 @@ class TaskCreationHandler(
                 dueDate = task.dueDate,
                 status = task.status,
                 createdBy = task.createdBy,
+                householdId = task.householdId,
             )
         }
 }

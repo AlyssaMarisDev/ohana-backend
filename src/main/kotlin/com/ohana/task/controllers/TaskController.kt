@@ -18,8 +18,9 @@ class TaskController(
 ) {
     fun Route.registerTaskRoutes() {
         authenticate("auth-jwt") {
-            route("/tasks") {
+            route("/households/{householdId}/tasks") {
                 post("") {
+                    val householdId = call.parameters["householdId"] ?: throw ValidationException("Household ID is required")
                     val request = call.receive<TaskCreationHandler.Request>()
                     val userId = getUserId(call.principal<JWTPrincipal>())
 
@@ -29,24 +30,31 @@ class TaskController(
                 }
 
                 get("/{id}") {
+                    val householdId = call.parameters["householdId"] ?: throw ValidationException("Household ID is required")
                     val id = call.parameters["id"] ?: throw ValidationException("Task ID is required")
+                    val userId = getUserId(call.principal<JWTPrincipal>())
 
-                    val response = taskGetByIdHandler.handle(id)
+                    val response = taskGetByIdHandler.handle(id, householdId, userId)
 
                     call.respond(HttpStatusCode.OK, response)
                 }
 
                 get("") {
-                    val response = taskGetAllHandler.handle()
+                    val householdId = call.parameters["householdId"] ?: throw ValidationException("Household ID is required")
+                    val userId = getUserId(call.principal<JWTPrincipal>())
+
+                    val response = taskGetAllHandler.handle(householdId, userId)
 
                     call.respond(HttpStatusCode.OK, response)
                 }
 
                 put("/{id}") {
+                    val householdId = call.parameters["householdId"] ?: throw ValidationException("Household ID is required")
                     val id = call.parameters["id"] ?: throw ValidationException("Task ID is required")
                     val request = call.receive<TaskUpdateByIdHandler.Request>()
+                    val userId = getUserId(call.principal<JWTPrincipal>())
 
-                    val response = taskUpdateByIdHandler.handle(id, request)
+                    val response = taskUpdateByIdHandler.handle(id, householdId, userId, request)
 
                     call.respond(HttpStatusCode.OK, response)
                 }
