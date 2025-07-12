@@ -44,7 +44,7 @@ class HouseholdCreationHandler(
                     id = UUID.randomUUID().toString(),
                     householdId = request.id,
                     memberId = userId,
-                    role = HouseholdMemberRole.admin.name,
+                    role = HouseholdMemberRole.admin,
                     isActive = true,
                     invitedBy = userId,
                     joinedAt = Instant.now(),

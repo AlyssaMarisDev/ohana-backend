@@ -25,7 +25,7 @@ class HouseholdInviteMemberHandler(
         if (actorHouseholdMember == null) {
             throw AuthorizationException("User is not a member of the household")
         }
-        if (actorHouseholdMember.role != HouseholdMemberRole.admin.name) {
+        if (actorHouseholdMember.role != HouseholdMemberRole.admin) {
             throw AuthorizationException("User is not an admin of the household")
         }
 
@@ -41,7 +41,7 @@ class HouseholdInviteMemberHandler(
                 id = UUID.randomUUID().toString(),
                 householdId = householdId,
                 memberId = request.memberId,
-                role = request.role.name,
+                role = request.role,
                 isActive = false,
                 invitedBy = userId,
             ),

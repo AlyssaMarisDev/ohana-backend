@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.*
 import java.time.Instant
+import java.util.UUID
 
 class TaskCreationHandlerTest {
     private lateinit var unitOfWork: UnitOfWork
@@ -45,21 +46,30 @@ class TaskCreationHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
             val request =
                 TaskCreationHandler.Request(
-                    id = "task-1",
+                    id = UUID.randomUUID().toString(),
                     title = "Test Task",
                     description = "Test Description",
-                    dueDate = Instant.now(),
+                    dueDate = Instant.now().plusSeconds(1000),
                     status = TaskStatus.pending,
-                    householdId = "household-1",
+                    householdId = UUID.randomUUID().toString(),
                 )
 
-            val task = TestUtils.getTask()
+            val task =
+                TestUtils.getTask(
+                    id = request.id,
+                    title = request.title,
+                    description = request.description,
+                    dueDate = request.dueDate,
+                    status = request.status,
+                    createdBy = userId,
+                    householdId = request.householdId,
+                )
 
             whenever(taskRepository.create(any())).thenReturn(task)
 
             val response = handler.handle(userId, request)
 
-            verify(householdMemberValidator).validate(context, "household-1", userId)
+            verify(householdMemberValidator).validate(context, request.householdId, userId)
             verify(taskRepository).create(task)
 
             assertEquals(task.id, response.id)
@@ -78,16 +88,16 @@ class TaskCreationHandlerTest {
 
             val request =
                 TaskCreationHandler.Request(
-                    id = "task-1",
+                    id = UUID.randomUUID().toString(),
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now(),
                     status = TaskStatus.pending,
-                    householdId = "household-1",
+                    householdId = UUID.randomUUID().toString(),
                 )
 
             whenever(
-                householdMemberValidator.validate(context, "household-1", userId),
+                householdMemberValidator.validate(context, request.householdId, userId),
             ).thenThrow(AuthorizationException("User is not a member of the household"))
 
             val ex =
@@ -104,12 +114,12 @@ class TaskCreationHandlerTest {
 
             val request =
                 TaskCreationHandler.Request(
-                    id = "task-1",
+                    id = UUID.randomUUID().toString(),
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now(),
                     status = TaskStatus.pending,
-                    householdId = "household-1",
+                    householdId = UUID.randomUUID().toString(),
                 )
 
             whenever(taskRepository.create(any())).thenThrow(RuntimeException("DB error"))
