@@ -559,104 +559,82 @@ logger.error("Error occurred", exception)
 - Clear separation between layers
 - Consistent error handling
 
-## Adding New Features
+## Quick Reference for AI Assistants
 
-### Steps to Follow
+When implementing new features or making changes to this project, follow these key architectural patterns:
 
-1. **Add shared enums/constants** in `shared/` package
-2. **Create entity** in appropriate domain package
-3. **Create repository interface** in `shared/UnitOfWork.kt`
-4. **Create repository implementation** in domain package
-5. **Update Unit of Work** to include new repository
-6. **Create handler** with Request/Response data classes
-7. **Create controller** with route registration
-8. **Add to Koin module** in `AppModule.kt`
-9. **Add to routing** in `Routing.kt`
-10. **Add tests** for new functionality
+### 1. **Layered Architecture** (Controllers → Handlers → Unit of Work -> Repositories)
 
-### Example: Adding a New Resource
+- Controllers handle HTTP requests/responses
+- Handlers contain business logic
+- Unit of Work manages transactions
+- Repositories provide data access
+
+### 2. **Handler Pattern** (Always follow this structure)
 
 ```kotlin
-// 1. Create entity
-data class NewResource(
-    val id: String,
-    val name: String,
-    val description: String,
-)
-
-// 2. Add repository interface to UnitOfWork.kt
-interface NewResourceRepository {
-    fun findById(id: String): NewResource?
-    fun create(resource: NewResource): NewResource
-    fun update(resource: NewResource): NewResource
-}
-
-// 3. Create repository implementation
-class JdbiNewResourceRepository(
-    private val handle: Handle,
-) : NewResourceRepository {
-    override fun findById(id: String): NewResource? {
-        // Implementation
-    }
-
-    override fun create(resource: NewResource): NewResource {
-        // Implementation
-    }
-
-    override fun update(resource: NewResource): NewResource {
-        // Implementation
-    }
-}
-
-// 4. Update UnitOfWorkContext
-interface UnitOfWorkContext {
-    // ... existing repositories
-    val newResources: NewResourceRepository
-}
-
-// 5. Update JdbiUnitOfWorkContext
-class JdbiUnitOfWorkContext(
-    private val handle: Handle,
-) : UnitOfWorkContext {
-    // ... existing repositories
-    override val newResources: NewResourceRepository = JdbiNewResourceRepository(handle)
-}
-
-// 6. Create handler
-class NewResourceHandler(
+class NewFeatureHandler(
     private val unitOfWork: UnitOfWork,
 ) {
-    data class Request(val name: String, val description: String)
-    data class Response(val id: String, val name: String, val description: String)
-
-    suspend fun handle(request: Request): Response {
-        return unitOfWork.execute { context ->
-            val resource = context.newResources.create(
-                NewResource(
-                    id = UUID.randomUUID().toString(),
-                    name = request.name,
-                    description = request.description,
-                )
-            )
-
-            Response(
-                id = resource.id,
-                name = resource.name,
-                description = resource.description,
-            )
+    data class Request(
+        // Input parameters
+        fun validate(): List<String> {
+            // Return validation errors
         }
+    )
+
+    data class Response(
+        // Output data
+    )
+
+    suspend fun handle(request: Request): Response =
+        unitOfWork.execute { context ->
+            // Business logic using context.{repository}
+            // All database operations go through repositories
+        }
+}
+```
+
+### 3. **Unit of Work Pattern** (For all database operations)
+
+```kotlin
+suspend fun handle(request: Request): Response =
+    unitOfWork.execute { context ->
+        // Get data
+        val entity = context.repository.findById(id)
+            ?: throw NotFoundException("Entity not found")
+
+        // Create/Update data
+        val result = context.repository.create(newEntity)
+
+        // Return response
+        Response(...)
     }
+```
+
+### 4. **Repository Pattern** (Implement interfaces, not concrete classes)
+
+```kotlin
+interface NewRepository {
+    fun findById(id: String): Entity?
+    fun create(entity: Entity): Entity
+    fun update(entity: Entity): Entity
 }
 
-// 7. Create controller
-class NewResourceController(
-    private val handler: NewResourceHandler,
-) {
-    fun Route.registerNewResourceRoutes() {
-        authenticate("auth-jwt") {
-            route("/new-resources") {
+class JdbiNewRepository(private val handle: Handle) : NewRepository {
+    // Implementation using DatabaseUtils
+}
+```
+
+### 5. **Controller Pattern** (Route registration and HTTP handling)
+
+```kotlin
+class NewController(private val handler: NewHandler) {
+    fun Route.registerNewRoutes() {
+        authenticate("auth-jwt") {  // If authentication required
+            route("/resource") {
                 post("") {
-                    val request = call.receive<NewResourceHandler.Request>()
+                    val request = call.receive<NewHandler.Request>()
                     val response = handler.handle(request)
                     call.respond(HttpStatusCode.Created, response)
                 }
@@ -664,16 +642,57 @@ class NewResourceController(
         }
     }
 }
+```
 
-// 8. Add to AppModule.kt
-single { NewResourceHandler(get()) }
-single { NewResourceController(get()) }
+### 6. **Exception Handling** (Use custom exceptions)
 
-// 9. Add to Routing.kt
-val newResourceController: NewResourceController by inject()
-newResourceController.apply {
-    registerNewResourceRoutes()
+- `ValidationException` - Input validation errors (400)
+- `NotFoundException` - Resource not found (404)
+- `ConflictException` - Duplicate/conflict errors (409)
+- `DbException` - Database errors (500)
+
+### 7. **Adding New Features Checklist**
+
+1. Create entity in appropriate domain package
+2. Add repository interface to `shared/UnitOfWork.kt`
+3. Create repository implementation
+4. Update UnitOfWorkContext to include new repository
+5. Create handler with Request/Response data classes
+6. Create controller with route registration
+7. Add to Koin module in `AppModule.kt`
+8. Add to routing in `Routing.kt`
+
+### 8. **Key Dependencies** (Always inject via Koin)
+
+- Controllers and Handlers as singletons
+- Unit of Work as single instance
+- Database connection (JDBI) as single instance
+
+### 9. **Database Operations** (Always use DatabaseUtils)
+
+```kotlin
+// Parameterized queries with named parameters
+val query = "SELECT * FROM table WHERE id = :id"
+val params = mapOf("id" to id)
+DatabaseUtils.get(handle, query, params, Entity::class)
+```
+
+### 10. **Validation Pattern** (In Request data classes)
+
+```kotlin
+data class Request(val email: String) {
+    fun validate(): List<String> {
+        val errors = mutableListOf<String>()
+        if (email.isEmpty()) errors.add("Email is required")
+        return errors
+    }
 }
 ```
 
-This architecture ensures maintainability, testability, and consistency across the application. Always follow these patterns when making changes to maintain code quality and consistency.
+### Common Anti-Patterns to Avoid:
+
+- ❌ Don't access database directly from handlers (use Unit of Work)
+- ❌ Don't create services (use handlers instead)
+- ❌ Don't use concrete repository classes (use interfaces)
+- ❌ Don't handle HTTP in handlers (use controllers)
+- ❌ Don't skip validation in Request classes
