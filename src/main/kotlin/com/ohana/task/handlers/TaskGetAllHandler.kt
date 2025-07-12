@@ -1,34 +1,30 @@
 package com.ohana.tasks.handlers
 
-import com.ohana.shared.TaskStatus
-import com.ohana.utils.DatabaseUtils.Companion.get
-import com.ohana.utils.DatabaseUtils.Companion.query
-import org.jdbi.v3.core.Handle
-import org.jdbi.v3.core.Jdbi
-import java.time.Instant
+import com.ohana.shared.UnitOfWork
 
 class TaskGetAllHandler(
-    private val jdbi: Jdbi,
+    private val unitOfWork: UnitOfWork,
 ) {
     data class Response(
         val id: String,
         val title: String,
         val description: String,
-        val dueDate: Instant,
-        val status: TaskStatus,
+        val dueDate: java.time.Instant,
+        val status: com.ohana.shared.TaskStatus,
         val createdBy: String,
     )
 
     suspend fun handle(): List<Response> =
-        query(jdbi) { handle ->
-            getTasks(handle)
+        unitOfWork.execute { context ->
+            context.tasks.findAll().map { task ->
+                Response(
+                    id = task.id,
+                    title = task.title,
+                    description = task.description,
+                    dueDate = task.dueDate,
+                    status = task.status,
+                    createdBy = task.createdBy,
+                )
+            }
         }
-
-    fun getTasks(handle: Handle): List<Response> =
-        get(
-            handle,
-            "SELECT id, title, description, due_date as dueDate, status, created_by as createdBy FROM tasks",
-            mapOf(),
-            Response::class,
-        )
 }

@@ -1,13 +1,10 @@
 package com.ohana.household.handlers
 
 import com.ohana.exceptions.NotFoundException
-import com.ohana.utils.DatabaseUtils.Companion.get
-import com.ohana.utils.DatabaseUtils.Companion.query
-import org.jdbi.v3.core.Handle
-import org.jdbi.v3.core.Jdbi
+import com.ohana.shared.UnitOfWork
 
 class HouseholdGetByIdHandler(
-    private val jdbi: Jdbi,
+    private val unitOfWork: UnitOfWork,
 ) {
     data class Response(
         val id: String,
@@ -17,18 +14,14 @@ class HouseholdGetByIdHandler(
     )
 
     suspend fun handle(id: String): Response =
-        query(jdbi) { handle ->
-            getHouseholdById(handle, id) ?: throw NotFoundException("Household not found")
-        }
+        unitOfWork.execute { context ->
+            val household = context.households.findById(id) ?: throw NotFoundException("Household not found")
 
-    private fun getHouseholdById(
-        handle: Handle,
-        id: String,
-    ): Response? =
-        get(
-            handle,
-            "SELECT id, name, description, createdBy FROM households WHERE id = :id",
-            mapOf("id" to id),
-            Response::class,
-        ).firstOrNull()
+            Response(
+                id = household.id,
+                name = household.name,
+                description = household.description,
+                createdBy = household.createdBy,
+            )
+        }
 }

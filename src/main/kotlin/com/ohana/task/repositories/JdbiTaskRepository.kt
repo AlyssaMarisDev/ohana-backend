@@ -50,4 +50,44 @@ class JdbiTaskRepository(
                 Task::class,
             ).firstOrNull()
     }
+
+    override fun findAll(): List<Task> {
+        val selectQuery = """
+            SELECT id, title, description, due_date as dueDate, status, created_by as createdBy
+            FROM tasks
+        """
+
+        return DatabaseUtils
+            .get(
+                handle,
+                selectQuery,
+                mapOf(),
+                Task::class,
+            )
+    }
+
+    override fun update(task: Task): Task {
+        val updateQuery = """
+            UPDATE tasks
+            SET title = :title, description = :description, due_date = :due_date, status = :status
+            WHERE id = :id
+        """
+
+        val updatedRows =
+            DatabaseUtils.update(
+                handle,
+                updateQuery,
+                mapOf(
+                    "id" to task.id,
+                    "title" to task.title,
+                    "description" to task.description,
+                    "due_date" to task.dueDate,
+                    "status" to task.status.name,
+                ),
+            )
+
+        if (updatedRows == 0) throw DbException("Failed to update task")
+
+        return findById(task.id) ?: throw NotFoundException("Task not found after update")
+    }
 }

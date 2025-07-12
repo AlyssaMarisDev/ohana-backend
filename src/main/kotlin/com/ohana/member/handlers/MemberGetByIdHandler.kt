@@ -1,13 +1,10 @@
 package com.ohana.members.handlers
 
 import com.ohana.exceptions.NotFoundException
-import com.ohana.utils.DatabaseUtils.Companion.get
-import com.ohana.utils.DatabaseUtils.Companion.query
-import org.jdbi.v3.core.Handle
-import org.jdbi.v3.core.Jdbi
+import com.ohana.shared.UnitOfWork
 
 class MemberGetByIdHandler(
-    private val jdbi: Jdbi,
+    private val unitOfWork: UnitOfWork,
 ) {
     data class Response(
         val id: String,
@@ -18,18 +15,15 @@ class MemberGetByIdHandler(
     )
 
     suspend fun handle(id: String): Response =
-        query(jdbi) { handle ->
-            getMemberById(handle, id) ?: throw NotFoundException("Member not found")
-        }
+        unitOfWork.execute { context ->
+            val member = context.members.findById(id) ?: throw NotFoundException("Member not found")
 
-    fun getMemberById(
-        handle: Handle,
-        id: String,
-    ): Response? =
-        get(
-            handle,
-            "SELECT id, name, age, gender, email FROM members WHERE id = :id",
-            mapOf("id" to id),
-            Response::class,
-        ).firstOrNull()
+            Response(
+                id = member.id,
+                name = member.name,
+                age = member.age,
+                gender = member.gender,
+                email = member.email,
+            )
+        }
 }

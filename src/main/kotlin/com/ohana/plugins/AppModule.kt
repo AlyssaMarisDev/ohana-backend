@@ -41,19 +41,19 @@ val appModule =
                 .installPlugin(KotlinPlugin())
         }
 
-        // Unit of Work
+        // Unit of Work - provides services through context
         single<UnitOfWork> { JdbiUnitOfWork(get()) }
 
         // Auth handlers
         single { MemberRegistrationHandler(get()) }
         single { MemberSignInHandler(get()) }
 
-        // Members handlers
+        // Members handlers - now only need UnitOfWork
         single { MemberGetAllHandler(get()) }
         single { MemberGetByIdHandler(get()) }
         single { MemberUpdateByIdHandler(get()) }
 
-        // Tasks handlers
+        // Tasks handlers - now only need UnitOfWork
         single { TaskCreationHandler(get()) }
         single { TaskGetAllHandler(get()) }
         single { TaskGetByIdHandler(get()) }
@@ -65,6 +65,7 @@ val appModule =
         single { HouseholdGetAllHandler(get()) }
         single { HouseholdGetByIdHandler(get()) }
         single { HouseholdInviteMemberHandler(get()) }
+
         // Controllers
         single { AuthController(get(), get()) }
         single { HealthController() }

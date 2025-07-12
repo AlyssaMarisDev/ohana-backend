@@ -1,17 +1,14 @@
 package com.ohana.auth.handlers
 
+import com.ohana.auth.entities.AuthMember
 import com.ohana.auth.utils.Hasher
 import com.ohana.auth.utils.JwtCreator
 import com.ohana.exceptions.ConflictException
-import com.ohana.utils.DatabaseUtils.Companion.get
-import com.ohana.utils.DatabaseUtils.Companion.insert
-import com.ohana.utils.DatabaseUtils.Companion.transaction
-import org.jdbi.v3.core.Handle
-import org.jdbi.v3.core.Jdbi
+import com.ohana.shared.UnitOfWork
 import java.util.UUID
 
 class MemberRegistrationHandler(
-    private val jdbi: Jdbi,
+    private val unitOfWork: UnitOfWork,
 ) {
     data class Request(
         val name: String,
@@ -49,59 +46,26 @@ class MemberRegistrationHandler(
         val hashedPassword = Hasher.hashPassword(request.password, salt)
         val id = UUID.randomUUID().toString()
 
-        return transaction(jdbi) { handle ->
-            validateMember(handle, request.email)
-            insertMember(handle, id, request.name, request.email, hashedPassword, salt)
-            Response(id, JwtCreator.generateToken(id))
+        return unitOfWork.execute { context ->
+            // Validate that member doesn't already exist
+            val existingMember = context.authMembers.findByEmail(request.email)
+            if (existingMember != null) {
+                throw ConflictException("Member with email ${request.email} already exists")
+            }
+
+            // Create the member
+            val member =
+                context.authMembers.create(
+                    AuthMember(
+                        id = id,
+                        name = request.name,
+                        email = request.email,
+                        password = hashedPassword,
+                        salt = salt,
+                    ),
+                )
+
+            Response(member.id, JwtCreator.generateToken(member.id))
         }
     }
-
-    private fun validateMember(
-        handle: Handle,
-        email: String,
-    ) {
-        val existingMember = getMemberByEmail(handle, email)
-
-        if (existingMember != null) {
-            throw ConflictException("Member with email $email already exists")
-        }
-    }
-
-    private fun insertMember(
-        handle: Handle,
-        id: String,
-        name: String,
-        email: String,
-        password: String,
-        salt: ByteArray,
-    ): Int =
-        insert(
-            handle,
-            """
-            INSERT INTO members (id, name, email, password, salt)
-            VALUES (:id, :name, :email, :password, :salt)
-            """,
-            mapOf(
-                "id" to id,
-                "name" to name,
-                "email" to email,
-                "password" to password,
-                "salt" to salt,
-            ),
-        )
-
-    private fun getMemberByEmail(
-        handle: Handle,
-        email: String,
-    ): Member? =
-        get(
-            handle,
-            "SELECT id FROM members WHERE email = :email",
-            mapOf("email" to email),
-            Member::class,
-        ).firstOrNull()
-
-    private data class Member(
-        val id: String,
-    )
 }

@@ -1,12 +1,9 @@
 package com.ohana.members.handlers
 
-import com.ohana.utils.DatabaseUtils.Companion.get
-import com.ohana.utils.DatabaseUtils.Companion.query
-import org.jdbi.v3.core.Handle
-import org.jdbi.v3.core.Jdbi
+import com.ohana.shared.UnitOfWork
 
 class MemberGetAllHandler(
-    private val jdbi: Jdbi,
+    private val unitOfWork: UnitOfWork,
 ) {
     data class Response(
         val id: String,
@@ -16,20 +13,16 @@ class MemberGetAllHandler(
         val email: String,
     )
 
-    suspend fun handle(): List<Response> {
-        val response =
-            query(jdbi) { handle ->
-                getAllMembers(handle)
+    suspend fun handle(): List<Response> =
+        unitOfWork.execute { context ->
+            context.members.findAll().map { member ->
+                Response(
+                    id = member.id,
+                    name = member.name,
+                    age = member.age,
+                    gender = member.gender,
+                    email = member.email,
+                )
             }
-
-        return response
-    }
-
-    fun getAllMembers(handle: Handle): List<Response> =
-        get(
-            handle,
-            "SELECT id, name, age, gender, email FROM members",
-            mapOf(),
-            Response::class,
-        )
+        }
 }

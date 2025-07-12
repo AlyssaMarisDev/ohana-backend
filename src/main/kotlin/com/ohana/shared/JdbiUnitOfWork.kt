@@ -1,5 +1,7 @@
 package com.ohana.shared
 
+import com.ohana.auth.repositories.JdbiAuthMemberRepository
+import com.ohana.household.repositories.JdbiHouseholdRepository
 import com.ohana.member.repositories.JdbiMemberRepository
 import com.ohana.task.repositories.JdbiTaskRepository
 import kotlinx.coroutines.Dispatchers
@@ -26,4 +28,6 @@ class JdbiUnitOfWorkContext(
 ) : UnitOfWorkContext {
     override val tasks: TaskRepository = JdbiTaskRepository(handle)
     override val members: MemberRepository = JdbiMemberRepository(handle)
+    override val households: HouseholdRepository = JdbiHouseholdRepository(handle)
+    override val authMembers: AuthMemberRepository = JdbiAuthMemberRepository(handle)
 }

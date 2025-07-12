@@ -34,9 +34,8 @@ class TaskCreationHandler(
     ): Response =
         unitOfWork.execute { context ->
             // Validate that the user exists
-            val member =
-                context.members.findById(userId)
-                    ?: throw IllegalArgumentException("User not found")
+            context.members.findById(userId)
+                ?: throw IllegalArgumentException("User not found")
 
             // Create the task
             val task =

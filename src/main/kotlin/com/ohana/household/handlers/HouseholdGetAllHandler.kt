@@ -1,12 +1,9 @@
 package com.ohana.household.handlers
 
-import com.ohana.utils.DatabaseUtils.Companion.get
-import com.ohana.utils.DatabaseUtils.Companion.query
-import org.jdbi.v3.core.Handle
-import org.jdbi.v3.core.Jdbi
+import com.ohana.shared.UnitOfWork
 
 class HouseholdGetAllHandler(
-    private val jdbi: Jdbi,
+    private val unitOfWork: UnitOfWork,
 ) {
     data class Response(
         val id: String,
@@ -16,15 +13,14 @@ class HouseholdGetAllHandler(
     )
 
     suspend fun handle(): List<Response> =
-        query(jdbi) { handle ->
-            getHouseholds(handle)
+        unitOfWork.execute { context ->
+            context.households.findAll().map { household ->
+                Response(
+                    id = household.id,
+                    name = household.name,
+                    description = household.description,
+                    createdBy = household.createdBy,
+                )
+            }
         }
-
-    fun getHouseholds(handle: Handle): List<Response> =
-        get(
-            handle,
-            "SELECT id, name, description, createdBy FROM households",
-            mapOf(),
-            Response::class,
-        )
 }
