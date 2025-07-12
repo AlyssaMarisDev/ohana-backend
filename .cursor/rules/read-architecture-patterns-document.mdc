@@ -1,7 +1,6 @@
 ---
-description: Apply defined architecture patterns
-globs:
-alwaysApply: true
+description: Apply defined architecture patterns for codebase
+alwaysApply: false
 ---
 
 - Read and apply the patterns shown in this file when implementing changes and giving suggestions

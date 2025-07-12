@@ -1,0 +1,8 @@
+---
+description: Apply defined architecture patterns for tests
+alwaysApply: false
+---
+
+- Read and apply the patterns shown in this file when writing unit tests
+
+@testpatterns.md
