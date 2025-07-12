@@ -1,9 +1,7 @@
-package com.ohana.members.controllers
+package com.ohana.member.controllers
 
 import com.ohana.exceptions.ValidationException
-import com.ohana.members.handlers.MemberGetAllHandler
-import com.ohana.members.handlers.MemberGetByIdHandler
-import com.ohana.members.handlers.MemberUpdateByIdHandler
+import com.ohana.member.handlers.*
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*

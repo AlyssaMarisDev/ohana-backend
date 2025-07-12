@@ -1,4 +1,4 @@
-package com.ohana.tasks.handlers
+package com.ohana.task.handlers
 
 import com.ohana.shared.TaskStatus
 import com.ohana.shared.UnitOfWork

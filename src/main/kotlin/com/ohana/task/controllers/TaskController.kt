@@ -1,10 +1,7 @@
-package com.ohana.tasks.controllers
+package com.ohana.task.controllers
 
 import com.ohana.exceptions.ValidationException
-import com.ohana.tasks.handlers.TaskCreationHandler
-import com.ohana.tasks.handlers.TaskGetAllHandler
-import com.ohana.tasks.handlers.TaskGetByIdHandler
-import com.ohana.tasks.handlers.TaskUpdateByIdHandler
+import com.ohana.task.handlers.*
 import com.ohana.utils.getUserId
 import io.ktor.http.*
 import io.ktor.server.auth.*

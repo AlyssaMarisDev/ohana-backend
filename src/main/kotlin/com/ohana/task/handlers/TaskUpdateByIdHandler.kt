@@ -1,4 +1,4 @@
-package com.ohana.tasks.handlers
+package com.ohana.task.handlers
 
 import com.ohana.exceptions.NotFoundException
 import com.ohana.shared.UnitOfWork

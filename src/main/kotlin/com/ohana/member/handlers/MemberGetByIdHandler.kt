@@ -1,4 +1,4 @@
-package com.ohana.members.handlers
+package com.ohana.member.handlers
 
 import com.ohana.exceptions.NotFoundException
 import com.ohana.shared.UnitOfWork

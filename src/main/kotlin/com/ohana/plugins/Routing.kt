@@ -3,8 +3,8 @@ package com.ohana.plugins
 import com.ohana.auth.controllers.AuthController
 import com.ohana.health.controllers.HealthController
 import com.ohana.household.controllers.HouseholdController
-import com.ohana.members.controllers.MemberController
-import com.ohana.tasks.controllers.TaskController
+import com.ohana.member.controllers.MemberController
+import com.ohana.task.controllers.TaskController
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
