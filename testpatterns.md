@@ -181,16 +181,16 @@ Add to the `TestUtils.kt` file for reusable test data:
 ```kotlin
 object TestUtils {
     fun getTask(
-        id: String = "task-1",
+        id: String = UUID.randomUUID().toString(),
         title: String = "Test Task",
         description: String = "Test Description",
         dueDate: Instant = Instant.now(),
         status: TaskStatus = TaskStatus.pending,
-        createdBy: String = "user-1",
+        createdBy: String = UUID.randomUUID().toString(),
     ): Task = Task(id, title, description, dueDate, status, createdBy)
 
     fun getMember(
-        id: String = "user-1",
+        id: String = UUID.randomUUID().toString(),
         name: String = "Test User",
         email: String = "test@example.com",
         age: Int? = null,
@@ -216,14 +216,12 @@ fun `handle should create task when user exists`() = runTest {
     TestUtils.mockUnitOfWork(unitOfWork, context)
 
     val request = TaskCreationHandler.Request(
-        id = "task-1",
+        id = UUID.randomUUID().toString(),
         title = "Test Task",
         description = "Test Description",
         dueDate = Instant.now(),
         status = TaskStatus.pending,
     )
-
-    val task = TestUtils.getTask()
     val member = TestUtils.getMember()
 
     // Test implementation

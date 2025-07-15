@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.*
 import java.time.Instant
+import java.util.UUID
 
 class TaskGetAllHandlerTest {
     private lateinit var unitOfWork: UnitOfWork
@@ -24,8 +25,8 @@ class TaskGetAllHandlerTest {
     private lateinit var householdMemberValidator: HouseholdMemberValidator
     private lateinit var handler: TaskGetAllHandler
 
-    private val userId = "user-1"
-    private val householdId = "household-1"
+    private val userId = UUID.randomUUID().toString()
+    private val householdId = UUID.randomUUID().toString()
 
     @BeforeEach
     fun setUp() {
@@ -47,7 +48,6 @@ class TaskGetAllHandlerTest {
             val tasks =
                 listOf(
                     TestUtils.getTask(
-                        id = "task-1",
                         title = "Task 1",
                         description = "Description 1",
                         dueDate = Instant.now().plusSeconds(3600),
@@ -56,16 +56,14 @@ class TaskGetAllHandlerTest {
                         householdId = householdId,
                     ),
                     TestUtils.getTask(
-                        id = "task-2",
                         title = "Task 2",
                         description = "Description 2",
                         dueDate = Instant.now().plusSeconds(7200),
                         status = TaskStatus.in_progress,
-                        createdBy = "user-2",
+                        createdBy = UUID.randomUUID().toString(),
                         householdId = householdId,
                     ),
                     TestUtils.getTask(
-                        id = "task-3",
                         title = "Task 3",
                         description = "Description 3",
                         dueDate = Instant.now().plusSeconds(10800),
@@ -84,31 +82,31 @@ class TaskGetAllHandlerTest {
             assertEquals(3, response.size)
 
             // Verify first task
-            assertEquals("task-1", response[0].id)
-            assertEquals("Task 1", response[0].title)
-            assertEquals("Description 1", response[0].description)
+            assertEquals(tasks[0].id, response[0].id)
+            assertEquals(tasks[0].title, response[0].title)
+            assertEquals(tasks[0].description, response[0].description)
             assertEquals(tasks[0].dueDate, response[0].dueDate)
-            assertEquals(TaskStatus.pending, response[0].status)
-            assertEquals(userId, response[0].createdBy)
-            assertEquals(householdId, response[0].householdId)
+            assertEquals(tasks[0].status, response[0].status)
+            assertEquals(tasks[0].createdBy, response[0].createdBy)
+            assertEquals(tasks[0].householdId, response[0].householdId)
 
             // Verify second task
-            assertEquals("task-2", response[1].id)
-            assertEquals("Task 2", response[1].title)
-            assertEquals("Description 2", response[1].description)
+            assertEquals(tasks[1].id, response[1].id)
+            assertEquals(tasks[1].title, response[1].title)
+            assertEquals(tasks[1].description, response[1].description)
             assertEquals(tasks[1].dueDate, response[1].dueDate)
-            assertEquals(TaskStatus.in_progress, response[1].status)
-            assertEquals("user-2", response[1].createdBy)
-            assertEquals(householdId, response[1].householdId)
+            assertEquals(tasks[1].status, response[1].status)
+            assertEquals(tasks[1].createdBy, response[1].createdBy)
+            assertEquals(tasks[1].householdId, response[1].householdId)
 
             // Verify third task
-            assertEquals("task-3", response[2].id)
-            assertEquals("Task 3", response[2].title)
-            assertEquals("Description 3", response[2].description)
+            assertEquals(tasks[2].id, response[2].id)
+            assertEquals(tasks[2].title, response[2].title)
+            assertEquals(tasks[2].description, response[2].description)
             assertEquals(tasks[2].dueDate, response[2].dueDate)
-            assertEquals(TaskStatus.completed, response[2].status)
-            assertEquals(userId, response[2].createdBy)
-            assertEquals(householdId, response[2].householdId)
+            assertEquals(tasks[2].status, response[2].status)
+            assertEquals(tasks[2].createdBy, response[2].createdBy)
+            assertEquals(tasks[2].householdId, response[2].householdId)
         }
 
     @Test
@@ -198,21 +196,18 @@ class TaskGetAllHandlerTest {
             val tasks =
                 listOf(
                     TestUtils.getTask(
-                        id = "task-1",
                         title = "Pending Task",
                         status = TaskStatus.pending,
                         createdBy = userId,
                         householdId = householdId,
                     ),
                     TestUtils.getTask(
-                        id = "task-2",
                         title = "In Progress Task",
                         status = TaskStatus.in_progress,
                         createdBy = userId,
                         householdId = householdId,
                     ),
                     TestUtils.getTask(
-                        id = "task-3",
                         title = "Completed Task",
                         status = TaskStatus.completed,
                         createdBy = userId,
@@ -238,21 +233,18 @@ class TaskGetAllHandlerTest {
             val tasks =
                 listOf(
                     TestUtils.getTask(
-                        id = "task-1",
                         title = "My Task",
                         createdBy = userId,
                         householdId = householdId,
                     ),
                     TestUtils.getTask(
-                        id = "task-2",
                         title = "Other User Task",
-                        createdBy = "user-2",
+                        createdBy = UUID.randomUUID().toString(),
                         householdId = householdId,
                     ),
                     TestUtils.getTask(
-                        id = "task-3",
                         title = "Another User Task",
-                        createdBy = "user-3",
+                        createdBy = UUID.randomUUID().toString(),
                         householdId = householdId,
                     ),
                 )
@@ -262,8 +254,8 @@ class TaskGetAllHandlerTest {
             val response = handler.handle(householdId, userId)
 
             assertEquals(3, response.size)
-            assertEquals(userId, response[0].createdBy)
-            assertEquals("user-2", response[1].createdBy)
-            assertEquals("user-3", response[2].createdBy)
+            assertEquals(tasks[0].createdBy, response[0].createdBy)
+            assertEquals(tasks[1].createdBy, response[1].createdBy)
+            assertEquals(tasks[2].createdBy, response[2].createdBy)
         }
 }
