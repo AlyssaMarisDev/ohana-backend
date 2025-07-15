@@ -3,6 +3,7 @@ package com.ohana.auth.controllers
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ohana.auth.handlers.MemberRegistrationHandler
 import com.ohana.auth.handlers.MemberSignInHandler
+import com.ohana.plugins.validateAndReceive
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -19,20 +20,16 @@ class AuthController(
 
     fun Route.registerAuthRoutes() {
         post("/register") {
-            val member = call.receive<MemberRegistrationHandler.Request>()
-            val errors = member.validate()
-
-            if (errors.isNotEmpty()) {
-                call.respond(HttpStatusCode.BadRequest, errors)
-                return@post
-            }
+            // Use annotation-based validation
+            val member = call.validateAndReceive<MemberRegistrationHandler.Request>()
 
             val token = memberRegistrationHandler.handle(member)
             call.respond(HttpStatusCode.Created, token)
         }
 
         post("/login") {
-            val member = call.receive<MemberSignInHandler.Request>()
+            // Use annotation-based validation
+            val member = call.validateAndReceive<MemberSignInHandler.Request>()
             val token = memberSignInHandler.handle(member)
             call.respond(HttpStatusCode.OK, token)
         }

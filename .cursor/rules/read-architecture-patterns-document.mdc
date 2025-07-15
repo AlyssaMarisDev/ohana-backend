@@ -10,3 +10,4 @@ alwaysApply: true
 @data-access-patterns.md
 @domain-architecture.md
 @entities.md
+@validation-patterns.md

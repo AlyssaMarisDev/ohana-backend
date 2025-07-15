@@ -2,7 +2,6 @@ package com.ohana.household.handlers
 
 import com.ohana.TestUtils
 import com.ohana.exceptions.AuthorizationException
-import com.ohana.shared.HouseholdMember
 import com.ohana.shared.HouseholdMemberRole
 import com.ohana.shared.HouseholdRepository
 import com.ohana.shared.UnitOfWork
@@ -180,10 +179,7 @@ class HouseholdAcceptInviteHandlerTest {
                 )
 
             whenever(householdRepository.findMemberById(householdId, userId)).thenReturn(invitedMember)
-            whenever(householdRepository.updateMember(any())).thenAnswer { invocation ->
-                val member = invocation.getArgument<HouseholdMember>(0)
-                member
-            }
+            whenever(householdRepository.updateMember(any())).thenReturn(invitedMember.copy(isActive = true, joinedAt = any()))
 
             handler.handle(userId, householdId)
 

@@ -1,28 +1,20 @@
 package com.ohana.member.handlers
 
 import com.ohana.exceptions.NotFoundException
-import com.ohana.exceptions.ValidationError
 import com.ohana.shared.UnitOfWork
-import com.ohana.shared.Validatable
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 
 class MemberUpdateByIdHandler(
     private val unitOfWork: UnitOfWork,
 ) {
     data class Request(
+        @field:NotBlank(message = "Name is required")
+        @field:Size(min = 1, max = 255, message = "Name must be between 1 and 255 characters long")
         val name: String,
         val age: Int?,
         val gender: String?,
-    ) : Validatable {
-        override fun validate(): List<ValidationError> {
-            val errors = mutableListOf<ValidationError>()
-
-            if (name.isEmpty()) errors.add(ValidationError("name", "Name is required"))
-            if (name.length < 1) errors.add(ValidationError("name", "Name must be at least 1 character long"))
-            if (name.length > 255) errors.add(ValidationError("name", "Name must be at most 255 characters long"))
-
-            return errors
-        }
-    }
+    )
 
     data class Response(
         val id: String,

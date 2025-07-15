@@ -5,36 +5,38 @@ import com.ohana.auth.utils.Hasher
 import com.ohana.auth.utils.JwtCreator
 import com.ohana.exceptions.ConflictException
 import com.ohana.shared.UnitOfWork
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
 import java.util.UUID
 
 class MemberRegistrationHandler(
     private val unitOfWork: UnitOfWork,
 ) {
     data class Request(
+        @field:NotBlank(message = "Name is required")
+        @field:Size(min = 3, message = "Name must be at least 3 characters long")
         val name: String,
+        @field:NotBlank(message = "Email is required")
+        @field:Email(message = "Invalid email format")
         val email: String,
+        @field:NotBlank(message = "Password is required")
+        @field:Size(min = 8, message = "Password must be at least 8 characters long")
+        @field:Pattern(
+            regexp = ".*[A-Z].*",
+            message = "Password must contain at least one uppercase letter",
+        )
+        @field:Pattern(
+            regexp = ".*[0-9].*",
+            message = "Password must contain at least one number",
+        )
+        @field:Pattern(
+            regexp = ".*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\|,.<>\\/?].*",
+            message = "Password must contain at least one special character",
+        )
         val password: String,
-    ) {
-        fun validate(): List<String> {
-            val errors = mutableListOf<String>()
-
-            if (name.isEmpty()) errors.add("Name is required")
-            if (name.length < 3) errors.add("Name must be at least 3 characters long")
-            if (email.isEmpty()) errors.add("Email is required")
-            if (!email.matches(Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\$"))) {
-                errors.add("Invalid email format")
-            }
-            if (password.isEmpty()) errors.add("Password is required")
-            if (password.length < 8) errors.add("Password must be at least 8 characters long")
-            if (!password.matches(Regex(".*[A-Z].*"))) errors.add("Password must contain at least one uppercase letter")
-            if (!password.matches(Regex(".*[0-9].*"))) errors.add("Password must contain at least one number")
-            if (!password.matches(Regex(".*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\|,.<>\\/?].*"))) {
-                errors.add("Password must contain at least one special character")
-            }
-
-            return errors
-        }
-    }
+    )
 
     data class Response(
         val id: String,

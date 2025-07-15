@@ -10,7 +10,6 @@ import com.ohana.member.controllers.MemberController
 import com.ohana.member.handlers.*
 import com.ohana.shared.HouseholdMemberValidator
 import com.ohana.shared.JdbiUnitOfWork
-import com.ohana.shared.ObjectValidator
 import com.ohana.shared.UnitOfWork
 import com.ohana.task.controllers.TaskController
 import com.ohana.task.handlers.*
@@ -39,7 +38,6 @@ val appModule =
 
         // Shared
         single { HouseholdMemberValidator() }
-        single { ObjectValidator() }
 
         // Auth handlers
         single { MemberRegistrationHandler(get()) }
@@ -66,7 +64,7 @@ val appModule =
         // Controllers
         single { AuthController(get(), get()) }
         single { HealthController() }
-        single { HouseholdController(get(), get(), get(), get(), get(), get()) }
-        single { MemberController(get(), get(), get(), get()) }
-        single { TaskController(get(), get(), get(), get(), get()) }
+        single { HouseholdController(get(), get(), get(), get(), get()) }
+        single { MemberController(get(), get(), get()) }
+        single { TaskController(get(), get(), get(), get()) }
     }

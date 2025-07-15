@@ -32,7 +32,13 @@ fun Application.configureExceptionHandling() {
 
         exception<ValidationException> { call, cause ->
             logger.info("Validation error: ${cause.message}")
-            call.respond(HttpStatusCode.BadRequest, "Validation error: ${cause.message}")
+            call.respond(
+                HttpStatusCode.BadRequest,
+                mapOf(
+                    "error" to "Validation failed",
+                    "details" to cause.errors.map { "${it.field}: ${it.message}" },
+                ),
+            )
         }
 
         exception<AuthenticationException> { call, cause ->

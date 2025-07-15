@@ -1,12 +1,12 @@
 package com.ohana.household.handlers
 
-import com.ohana.exceptions.ValidationError
-import com.ohana.shared.Guid
 import com.ohana.shared.Household
 import com.ohana.shared.HouseholdMember
 import com.ohana.shared.HouseholdMemberRole
 import com.ohana.shared.UnitOfWork
-import com.ohana.shared.Validatable
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
 import java.time.Instant
 import java.util.UUID
 
@@ -14,28 +14,16 @@ class HouseholdCreationHandler(
     private val unitOfWork: UnitOfWork,
 ) {
     data class Request(
+        @field:NotBlank(message = "Household ID is required")
+        @field:Pattern(regexp = "^[0-9a-fA-F-]{36}$", message = "Household ID must be a valid GUID")
         val id: String,
+        @field:NotBlank(message = "Household name is required")
+        @field:Size(min = 1, max = 255, message = "Household name must be between 1 and 255 characters long")
         val name: String,
+        @field:NotBlank(message = "Household description is required")
+        @field:Size(max = 1000, message = "Household description must be at most 1000 characters long")
         val description: String,
-    ) : Validatable {
-        override fun validate(): List<ValidationError> {
-            val errors = mutableListOf<ValidationError>()
-
-            if (id.isEmpty()) errors.add(ValidationError("id", "Household ID is required"))
-            if (!Guid.isValid(id)) errors.add(ValidationError("id", "Household ID must be a valid GUID"))
-            if (name.isEmpty()) errors.add(ValidationError("name", "Household name is required"))
-            if (name.length < 1) errors.add(ValidationError("name", "Household name must be at least 1 character long"))
-            if (name.length > 255) errors.add(ValidationError("name", "Household name must be at most 255 characters long"))
-            if (description.isEmpty()) errors.add(ValidationError("description", "Household description is required"))
-            if (description.length >
-                1000
-            ) {
-                errors.add(ValidationError("description", "Household description must be at most 1000 characters long"))
-            }
-
-            return errors
-        }
-    }
+    )
 
     data class Response(
         val id: String,

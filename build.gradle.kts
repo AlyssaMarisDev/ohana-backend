@@ -55,6 +55,11 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
 
+    // Bean Validation (JSR-303)
+    implementation("jakarta.validation:jakarta.validation-api:3.0.2")
+    implementation("org.hibernate.validator:hibernate-validator:8.0.1.Final")
+    implementation("org.glassfish:jakarta.el:4.0.2")
+
     // Testing
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.2")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.2")

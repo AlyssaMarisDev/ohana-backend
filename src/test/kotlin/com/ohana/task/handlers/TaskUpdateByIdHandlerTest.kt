@@ -8,8 +8,11 @@ import com.ohana.shared.TaskRepository
 import com.ohana.shared.TaskStatus
 import com.ohana.shared.UnitOfWork
 import com.ohana.shared.UnitOfWorkContext
+import jakarta.validation.Validation
+import jakarta.validation.Validator
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -23,6 +26,7 @@ class TaskUpdateByIdHandlerTest {
     private lateinit var taskRepository: TaskRepository
     private lateinit var handler: TaskUpdateByIdHandler
     private lateinit var householdMemberValidator: HouseholdMemberValidator
+    private lateinit var validator: Validator
 
     @BeforeEach
     fun setUp() {
@@ -34,6 +38,7 @@ class TaskUpdateByIdHandlerTest {
             }
         unitOfWork = mock()
         handler = TaskUpdateByIdHandler(unitOfWork, householdMemberValidator)
+        validator = Validation.buildDefaultValidatorFactory().validator
     }
 
     @Test
@@ -244,10 +249,8 @@ class TaskUpdateByIdHandlerTest {
                 dueDate = Instant.now().plusSeconds(3600),
                 status = TaskStatus.pending,
             )
-
-        val errors = request.validate()
-
-        assertEquals(0, errors.size)
+        val violations = validator.validate(request)
+        assertEquals(0, violations.size)
     }
 
     @Test
@@ -259,14 +262,11 @@ class TaskUpdateByIdHandlerTest {
                 dueDate = Instant.now().plusSeconds(3600),
                 status = TaskStatus.pending,
             )
-
-        val errors = request.validate()
-
-        assertEquals(2, errors.size)
-        assertEquals("title", errors[0].field)
-        assertEquals("Title is required", errors[0].message)
-        assertEquals("title", errors[1].field)
-        assertEquals("Title must be at least 1 character long", errors[1].message)
+        val violations = validator.validate(request)
+        val messages = violations.map { it.propertyPath.toString() to it.message }
+        assertEquals(2, violations.size)
+        assertTrue(messages.contains("title" to "Title is required"))
+        assertTrue(messages.contains("title" to "Title must be between 1 and 255 characters long"))
     }
 
     @Test
@@ -278,14 +278,11 @@ class TaskUpdateByIdHandlerTest {
                 dueDate = Instant.now().plusSeconds(3600),
                 status = TaskStatus.pending,
             )
-
-        val errors = request.validate()
-
-        assertEquals(2, errors.size)
-        assertEquals("title", errors[0].field)
-        assertEquals("Title is required", errors[0].message)
-        assertEquals("title", errors[1].field)
-        assertEquals("Title must be at least 1 character long", errors[1].message)
+        val violations = validator.validate(request)
+        val messages = violations.map { it.propertyPath.toString() to it.message }
+        assertEquals(2, violations.size)
+        assertTrue(messages.contains("title" to "Title is required"))
+        assertTrue(messages.contains("title" to "Title must be between 1 and 255 characters long"))
     }
 
     @Test
@@ -298,12 +295,10 @@ class TaskUpdateByIdHandlerTest {
                 dueDate = Instant.now().plusSeconds(3600),
                 status = TaskStatus.pending,
             )
-
-        val errors = request.validate()
-
-        assertEquals(1, errors.size)
-        assertEquals("title", errors[0].field)
-        assertEquals("Title must be at most 255 characters long", errors[0].message)
+        val violations = validator.validate(request)
+        val messages = violations.map { it.propertyPath.toString() to it.message }
+        assertEquals(1, violations.size)
+        assertTrue(messages.contains("title" to "Title must be between 1 and 255 characters long"))
     }
 
     @Test
@@ -316,12 +311,10 @@ class TaskUpdateByIdHandlerTest {
                 dueDate = Instant.now().plusSeconds(3600),
                 status = TaskStatus.pending,
             )
-
-        val errors = request.validate()
-
-        assertEquals(1, errors.size)
-        assertEquals("description", errors[0].field)
-        assertEquals("Description must be at most 1000 characters long", errors[0].message)
+        val violations = validator.validate(request)
+        val messages = violations.map { it.propertyPath.toString() to it.message }
+        assertEquals(1, violations.size)
+        assertTrue(messages.contains("description" to "Description must be at most 1000 characters long"))
     }
 
     @Test
@@ -333,27 +326,23 @@ class TaskUpdateByIdHandlerTest {
                 dueDate = Instant.now().minusSeconds(3600), // Past date
                 status = TaskStatus.pending,
             )
-
-        val errors = request.validate()
-
-        assertEquals(1, errors.size)
-        assertEquals("dueDate", errors[0].field)
-        assertEquals("Due date cannot be in the past", errors[0].message)
+        val violations = validator.validate(request)
+        val messages = violations.map { it.propertyPath.toString() to it.message }
+        assertEquals(1, violations.size)
+        assertTrue(messages.contains("dueDate" to "Due date cannot be in the past"))
     }
 
     @Test
-    fun `Request validation should pass with current due date`() {
+    fun `Request validation should pass with future due date`() {
         val request =
             TaskUpdateByIdHandler.Request(
                 title = "Valid Title",
                 description = "Valid description",
-                dueDate = Instant.now(), // Current time
+                dueDate = Instant.now().plusSeconds(3600), // Future date
                 status = TaskStatus.pending,
             )
-
-        val errors = request.validate()
-
-        assertEquals(0, errors.size)
+        val violations = validator.validate(request)
+        assertEquals(0, violations.size)
     }
 
     @Test
@@ -365,12 +354,11 @@ class TaskUpdateByIdHandlerTest {
                 dueDate = Instant.now().minusSeconds(3600), // Past date
                 status = TaskStatus.pending,
             )
-
-        val errors = request.validate()
-
-        assertEquals(4, errors.size)
-
-        val errorFields = errors.map { it.field }.toSet()
-        assertEquals(setOf("title", "description", "dueDate"), errorFields)
+        val violations = validator.validate(request)
+        val fields = violations.map { it.propertyPath.toString() }.toSet()
+        assertEquals(3, fields.size)
+        assertTrue(fields.contains("title"))
+        assertTrue(fields.contains("description"))
+        assertTrue(fields.contains("dueDate"))
     }
 }

@@ -1,10 +1,12 @@
 package com.ohana.task.handlers
 
 import com.ohana.exceptions.NotFoundException
-import com.ohana.exceptions.ValidationError
 import com.ohana.shared.HouseholdMemberValidator
+import com.ohana.shared.TaskStatus
 import com.ohana.shared.UnitOfWork
-import com.ohana.shared.Validatable
+import com.ohana.shared.validators.FutureDate
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 import java.time.Instant
 
 class TaskUpdateByIdHandler(
@@ -12,27 +14,15 @@ class TaskUpdateByIdHandler(
     private val householdMemberValidator: HouseholdMemberValidator,
 ) {
     data class Request(
+        @field:NotBlank(message = "Title is required")
+        @field:Size(min = 1, max = 255, message = "Title must be between 1 and 255 characters long")
         val title: String,
+        @field:Size(max = 1000, message = "Description must be at most 1000 characters long")
         val description: String,
+        @field:FutureDate(message = "Due date cannot be in the past")
         val dueDate: Instant,
         val status: com.ohana.shared.TaskStatus,
-    ) : Validatable {
-        override fun validate(): List<ValidationError> {
-            val errors = mutableListOf<ValidationError>()
-
-            if (title.isEmpty()) errors.add(ValidationError("title", "Title is required"))
-            if (title.length < 1) errors.add(ValidationError("title", "Title must be at least 1 character long"))
-            if (title.length > 255) errors.add(ValidationError("title", "Title must be at most 255 characters long"))
-            if (description.length >
-                1000
-            ) {
-                errors.add(ValidationError("description", "Description must be at most 1000 characters long"))
-            }
-            if (dueDate.isBefore(Instant.now())) errors.add(ValidationError("dueDate", "Due date cannot be in the past"))
-
-            return errors
-        }
-    }
+    )
 
     data class Response(
         val id: String,
