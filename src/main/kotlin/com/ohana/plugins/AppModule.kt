@@ -3,6 +3,7 @@ package com.ohana.plugins
 import com.ohana.auth.controllers.AuthController
 import com.ohana.auth.handlers.MemberRegistrationHandler
 import com.ohana.auth.handlers.MemberSignInHandler
+import com.ohana.config.AppConfig
 import com.ohana.health.controllers.HealthController
 import com.ohana.household.controllers.HouseholdController
 import com.ohana.household.handlers.*
@@ -20,17 +21,18 @@ import org.koin.dsl.module
 // Define a Koin module to provide dependencies
 val appModule =
     module {
+        // Provide configuration
+        single { AppConfig.fromEnvironment() }
+
         // Provide a single instance of JDBI with environment-based configuration
         single {
-            val dbHost = System.getenv("DB_HOST") ?: "localhost"
-            val dbPort = System.getenv("DB_PORT") ?: "3306"
-            val dbName = System.getenv("DB_NAME") ?: "ohana"
-            val dbUser = System.getenv("DB_USER") ?: "root"
-            val dbPassword = System.getenv("DB_PASSWORD") ?: "root"
-
+            val config = AppConfig.fromEnvironment()
             Jdbi
-                .create("jdbc:mysql://$dbHost:$dbPort/$dbName", dbUser, dbPassword)
-                .installPlugin(KotlinPlugin())
+                .create(
+                    "jdbc:mysql://${config.database.host}:${config.database.port}/${config.database.name}",
+                    config.database.user,
+                    config.database.password,
+                ).installPlugin(KotlinPlugin())
         }
 
         // Unit of Work - provides services through context

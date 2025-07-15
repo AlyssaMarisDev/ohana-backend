@@ -1,5 +1,6 @@
 package com.ohana
 
+import com.ohana.config.AppConfig
 import com.ohana.plugins.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -7,22 +8,27 @@ import io.ktor.server.netty.*
 import org.koin.ktor.plugin.Koin
 
 fun main() {
-    // Read the port from the environment variable, default to 4242 if not set
-    val port = System.getenv("PORT")?.toIntOrNull() ?: 4242
+    val config = AppConfig.fromEnvironment()
 
-    embeddedServer(Netty, port = port, host = "0.0.0.0", module = Application::module)
-        .start(wait = true)
+    embeddedServer(
+        Netty,
+        port = config.server.port,
+        host = config.server.host,
+        module = Application::module,
+    ).start(wait = true)
 }
 
 fun Application.module() {
+    val config = AppConfig.fromEnvironment()
+
     install(Koin) {
         modules(appModule)
     }
 
-    configureSecurity()
+    configureSecurity(config.jwt)
     configureSerialization()
     configureCORS()
-    configureRateLimit()
+    configureRateLimit(config.rateLimit)
     configureValidation()
     configureRouting()
     configureCallLogging()
