@@ -37,6 +37,10 @@ ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
 # Database connection pool
 DB_POOL_SIZE=10
 DB_CONNECTION_TIMEOUT=30000
+
+# Rate limiting configuration
+RATE_LIMIT=100
+RATE_LIMIT_REFILL_PERIOD_SECONDS=60
 ```
 
 ### Environment Variable Loading
@@ -130,6 +134,8 @@ data class AppConfig(
     val jwtSecret: String,
     val logLevel: String,
     val allowedOrigins: List<String>,
+    val rateLimit: Int,
+    val rateLimitRefillPeriodSeconds: Int,
 ) {
     companion object {
         fun fromEnvironment(): AppConfig {
@@ -139,56 +145,12 @@ data class AppConfig(
                     ?: throw IllegalStateException("JWT_SECRET is required"),
                 logLevel = System.getenv("LOG_LEVEL") ?: "INFO",
                 allowedOrigins = System.getenv("ALLOWED_ORIGINS")?.split(",") ?: listOf("*"),
+                rateLimit = System.getenv("RATE_LIMIT")?.toIntOrNull() ?: 100,
+                rateLimitRefillPeriodSeconds = System.getenv("RATE_LIMIT_REFILL_PERIOD_SECONDS")?.toIntOrNull() ?: 60,
             )
         }
     }
 }
-```
-
-## Environment-Specific Configuration
-
-### Development Environment
-
-```bash
-# .env.development
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=ohana_dev
-DB_USER=root
-DB_PASSWORD=root
-JWT_SECRET=dev-secret-key
-PORT=4242
-LOG_LEVEL=DEBUG
-```
-
-### Production Environment
-
-```bash
-# .env.production
-DB_HOST=production-db.example.com
-DB_PORT=3306
-DB_NAME=ohana_prod
-DB_USER=ohana_user
-DB_PASSWORD=secure-production-password
-JWT_SECRET=super-secure-jwt-secret-key
-PORT=8080
-LOG_LEVEL=INFO
-ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
-```
-
-### Staging Environment
-
-```bash
-# .env.staging
-DB_HOST=staging-db.example.com
-DB_PORT=3306
-DB_NAME=ohana_staging
-DB_USER=ohana_staging_user
-DB_PASSWORD=staging-password
-JWT_SECRET=staging-jwt-secret
-PORT=8080
-LOG_LEVEL=INFO
-ALLOWED_ORIGINS=https://staging.yourdomain.com
 ```
 
 ## Configuration Loading
@@ -326,6 +288,36 @@ fun Application.configureDatabaseMigrations() {
 }
 ```
 
+## Rate Limiting Configuration
+
+### Global Rate Limiting
+
+The application uses Ktor's RateLimit plugin to implement global rate limiting. This helps protect the API from abuse and ensures fair usage across all clients.
+
+#### Configuration Parameters
+
+- **RATE_LIMIT**: Maximum number of requests allowed in the time window (default: 100)
+- **RATE_LIMIT_REFILL_PERIOD_SECONDS**: Time window in seconds for rate limiting (default: 60)
+
+#### Rate Limiting Behavior
+
+- **Token Bucket Algorithm**: Uses a token bucket algorithm for rate limiting
+- **Global Scope**: All requests are rate limited globally (not per user/IP)
+- **HTTP 429**: Returns HTTP 429 (Too Many Requests) when rate limit is exceeded
+- **Automatic Refill**: Tokens are automatically refilled based on the configured period
+
+#### Example Configuration
+
+```bash
+# Development - More lenient rate limiting
+RATE_LIMIT=200
+RATE_LIMIT_REFILL_PERIOD_SECONDS=60
+
+# Production - Stricter rate limiting
+RATE_LIMIT=100
+RATE_LIMIT_REFILL_PERIOD_SECONDS=60
+```
+
 ## Security Configuration
 
 ### Environment Variable Security
@@ -440,6 +432,8 @@ services:
       - DB_PASSWORD=ohana_password
       - JWT_SECRET=your-jwt-secret
       - PORT=8080
+      - RATE_LIMIT=100
+      - RATE_LIMIT_REFILL_PERIOD_SECONDS=60
     depends_on:
       - db
 
