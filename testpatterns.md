@@ -167,6 +167,11 @@ fun `handle should propagate exception from repository`() = runTest {
 }
 ```
 
+### Important Notes
+
+- **Always set up mocks in @BeforeEach**: This ensures mocks aren't shared between test cases
+- **Always mock dependencies passed into the class**: This ensures we aren't duplicating testing effort since dependencies should have their own tests
+
 ## Test Data Management
 
 ### TestUtils Pattern
@@ -427,7 +432,7 @@ fun `handle should handle empty result set`() = runTest {
 
 ### 2. Mock Management
 
-- Mock only what you need
+- Always mock dependencies passed into the class
 - Use `verify()` to ensure expected interactions
 - Use `verifyNoMoreInteractions()` when appropriate
 

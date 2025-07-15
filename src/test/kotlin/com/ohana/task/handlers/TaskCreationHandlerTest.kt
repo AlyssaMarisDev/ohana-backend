@@ -24,7 +24,6 @@ class TaskCreationHandlerTest {
     private lateinit var memberRepository: MemberRepository
     private lateinit var handler: TaskCreationHandler
     private lateinit var householdMemberValidator: HouseholdMemberValidator
-    private val userId = "user-1"
 
     @BeforeEach
     fun setUp() {
@@ -44,6 +43,8 @@ class TaskCreationHandlerTest {
     fun `handle should create task when validation passes`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
+            val userId = UUID.randomUUID().toString()
+            val householdId = UUID.randomUUID().toString()
             val request =
                 TaskCreationHandler.Request(
                     id = UUID.randomUUID().toString(),
@@ -51,7 +52,6 @@ class TaskCreationHandlerTest {
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(1000),
                     status = TaskStatus.pending,
-                    householdId = UUID.randomUUID().toString(),
                 )
 
             val task =
@@ -62,14 +62,14 @@ class TaskCreationHandlerTest {
                     dueDate = request.dueDate,
                     status = request.status,
                     createdBy = userId,
-                    householdId = request.householdId,
+                    householdId = householdId,
                 )
 
             whenever(taskRepository.create(any())).thenReturn(task)
 
-            val response = handler.handle(userId, request)
+            val response = handler.handle(userId, householdId, request)
 
-            verify(householdMemberValidator).validate(context, request.householdId, userId)
+            verify(householdMemberValidator).validate(context, householdId, userId)
             verify(taskRepository).create(task)
 
             assertEquals(task.id, response.id)
@@ -85,24 +85,25 @@ class TaskCreationHandlerTest {
     fun `handle should throw when validation fails`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
+            val userId = UUID.randomUUID().toString()
+            val householdId = UUID.randomUUID().toString()
 
             val request =
                 TaskCreationHandler.Request(
                     id = UUID.randomUUID().toString(),
                     title = "Test Task",
                     description = "Test Description",
-                    dueDate = Instant.now(),
+                    dueDate = Instant.now().plusSeconds(1000),
                     status = TaskStatus.pending,
-                    householdId = UUID.randomUUID().toString(),
                 )
 
             whenever(
-                householdMemberValidator.validate(context, request.householdId, userId),
+                householdMemberValidator.validate(context, householdId, userId),
             ).thenThrow(AuthorizationException("User is not a member of the household"))
 
             val ex =
                 assertThrows<AuthorizationException> {
-                    handler.handle(userId, request)
+                    handler.handle(userId, householdId, request)
                 }
             assertEquals("User is not a member of the household", ex.message)
         }
@@ -112,21 +113,22 @@ class TaskCreationHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
+            val userId = UUID.randomUUID().toString()
+            val householdId = UUID.randomUUID().toString()
             val request =
                 TaskCreationHandler.Request(
                     id = UUID.randomUUID().toString(),
                     title = "Test Task",
                     description = "Test Description",
-                    dueDate = Instant.now(),
+                    dueDate = Instant.now().plusSeconds(1000),
                     status = TaskStatus.pending,
-                    householdId = UUID.randomUUID().toString(),
                 )
 
             whenever(taskRepository.create(any())).thenThrow(RuntimeException("DB error"))
 
             val ex =
                 assertThrows<RuntimeException> {
-                    handler.handle(userId, request)
+                    handler.handle(userId, householdId, request)
                 }
             assertEquals("DB error", ex.message)
         }

@@ -1,7 +1,9 @@
 package com.ohana.household.controllers
 
+import com.ohana.exceptions.ValidationError
 import com.ohana.exceptions.ValidationException
 import com.ohana.household.handlers.*
+import com.ohana.shared.ObjectValidator
 import com.ohana.utils.getUserId
 import io.ktor.http.*
 import io.ktor.server.auth.*
@@ -11,6 +13,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 class HouseholdController(
+    private val objectValidator: ObjectValidator,
     private val householdAcceptInviteHandler: HouseholdAcceptInviteHandler,
     private val householdCreationHandler: HouseholdCreationHandler,
     private val householdGetAllHandler: HouseholdGetAllHandler,
@@ -22,6 +25,8 @@ class HouseholdController(
             route("/households") {
                 post("") {
                     val request = call.receive<HouseholdCreationHandler.Request>()
+                    objectValidator.validate(request)
+
                     val userId = getUserId(call.principal<JWTPrincipal>())
 
                     val response = householdCreationHandler.handle(userId, request)
@@ -29,8 +34,14 @@ class HouseholdController(
                     call.respond(HttpStatusCode.Created, response)
                 }
 
-                get("/{id}") {
-                    val id = call.parameters["id"] ?: throw ValidationException("Household ID is required")
+                get("/{householdId}") {
+                    val id =
+                        call.parameters["householdId"]
+                            ?: throw ValidationException(
+                                "Household ID is required",
+                                listOf(ValidationError("householdId", "Household ID is required")),
+                            )
+
                     val response = householdGetByIdHandler.handle(id)
                     call.respond(HttpStatusCode.OK, response)
                 }
@@ -40,18 +51,31 @@ class HouseholdController(
                     call.respond(HttpStatusCode.OK, response)
                 }
 
-                post("/{id}/members") {
+                post("/{householdId}/members") {
                     val userId = getUserId(call.principal<JWTPrincipal>())
 
-                    val id = call.parameters["id"] ?: throw ValidationException("Household ID is required")
+                    val id =
+                        call.parameters["householdId"]
+                            ?: throw ValidationException(
+                                "Household ID is required",
+                                listOf(ValidationError("householdId", "Household ID is required")),
+                            )
                     val request = call.receive<HouseholdInviteMemberHandler.Request>()
+                    objectValidator.validate(request)
+
                     householdInviteMemberHandler.handle(userId, id, request)
                     call.respond(HttpStatusCode.OK)
                 }
 
-                post("/{id}/accept-invite") {
+                post("/{householdId}/accept-invite") {
                     val userId = getUserId(call.principal<JWTPrincipal>())
-                    val id = call.parameters["id"] ?: throw ValidationException("Household ID is required")
+                    val id =
+                        call.parameters["householdId"]
+                            ?: throw ValidationException(
+                                "Household ID is required",
+                                listOf(ValidationError("householdId", "Household ID is required")),
+                            )
+
                     householdAcceptInviteHandler.handle(userId, id)
                     call.respond(HttpStatusCode.OK)
                 }

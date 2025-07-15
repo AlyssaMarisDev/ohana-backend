@@ -1,10 +1,10 @@
 package com.ohana.utils
 
-import com.ohana.exceptions.ValidationException
+import com.ohana.exceptions.AuthorizationException
 import io.ktor.server.auth.jwt.JWTPrincipal
 
 fun getUserId(principal: JWTPrincipal?): String =
     principal
         ?.payload
         ?.getClaim("userId")
-        ?.asString() ?: throw ValidationException("User ID is required")
+        ?.asString() ?: throw AuthorizationException("User is not authenticated")

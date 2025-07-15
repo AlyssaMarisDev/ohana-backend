@@ -2,9 +2,12 @@ package com.ohana.household.handlers
 
 import com.ohana.exceptions.AuthorizationException
 import com.ohana.exceptions.ConflictException
+import com.ohana.exceptions.ValidationError
+import com.ohana.shared.Guid
 import com.ohana.shared.HouseholdMember
 import com.ohana.shared.HouseholdMemberRole
 import com.ohana.shared.UnitOfWork
+import com.ohana.shared.Validatable
 import java.util.UUID
 
 class HouseholdInviteMemberHandler(
@@ -13,7 +16,16 @@ class HouseholdInviteMemberHandler(
     data class Request(
         val memberId: String,
         val role: HouseholdMemberRole,
-    )
+    ) : Validatable {
+        override fun validate(): List<ValidationError> {
+            val errors = mutableListOf<ValidationError>()
+
+            if (memberId.isEmpty()) errors.add(ValidationError("memberId", "Member ID is required"))
+            if (!Guid.isValid(memberId)) errors.add(ValidationError("memberId", "Member ID must be a valid GUID"))
+
+            return errors
+        }
+    }
 
     suspend fun handle(
         userId: String,
