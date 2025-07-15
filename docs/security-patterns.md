@@ -27,11 +27,12 @@ JWT tokens contain user identification and are signed with HMAC256:
 object JwtCreator {
     fun generateToken(userId: String): String {
         val secret = System.getenv("JWT_SECRET") ?: "default-secret"
+        val expirationHours = System.getenv("JWT_EXPIRATION_HOURS")?.toIntOrNull() ?: 1
 
         return JWT.create()
             .withClaim("userId", userId)
             .withIssuedAt(Date())
-            .withExpiresAt(Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)) // 24 hours
+            .withExpiresAt(Date.from(Instant.now().plus(JWT_EXPIRATION_HOURS.toLong(), ChronoUnit.HOURS))) // Configurable hours
             .sign(Algorithm.HMAC256(secret))
     }
 }
@@ -467,10 +468,12 @@ install(RateLimit) {
 ```kotlin
 // JWT tokens with appropriate expiration
 fun generateToken(userId: String): String {
+    val expirationHours = System.getenv("JWT_EXPIRATION_HOURS")?.toIntOrNull() ?: 1
+
     return JWT.create()
         .withClaim("userId", userId)
         .withIssuedAt(Date())
-        .withExpiresAt(Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)) // 24 hours
+        .withExpiresAt(Date.from(Instant.now().plus(JWT_EXPIRATION_HOURS.toLong(), ChronoUnit.HOURS))) // Configurable hours
         .sign(Algorithm.HMAC256(jwtSecret))
 }
 ```

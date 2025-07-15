@@ -9,6 +9,7 @@ import java.util.Date
 class JwtCreator {
     companion object {
         private val JWT_SECRET = System.getenv("JWT_SECRET") ?: "a-string-secret-at-least-256-bits-long"
+        private val JWT_EXPIRATION_HOURS = System.getenv("JWT_EXPIRATION_HOURS")?.toIntOrNull() ?: 1
 
         fun generateToken(userId: String): String =
             JWT
@@ -16,7 +17,8 @@ class JwtCreator {
                 .withAudience("Ohana")
                 .withIssuer("https://ohana.com")
                 .withClaim("userId", userId)
-                .withExpiresAt(Date.from(Instant.now().plus(30, ChronoUnit.DAYS))) // 30 days expiry
+                .withIssuedAt(Date.from(Instant.now()))
+                .withExpiresAt(Date.from(Instant.now().plus(JWT_EXPIRATION_HOURS.toLong(), ChronoUnit.HOURS)))
                 .sign(Algorithm.HMAC256(JWT_SECRET))
     }
 }

@@ -20,6 +20,7 @@ DB_PASSWORD=root
 
 # JWT configuration
 JWT_SECRET=your-super-secret-jwt-key-here
+JWT_EXPIRATION_HOURS=1
 
 # Server configuration
 PORT=4242
@@ -132,6 +133,7 @@ data class DatabaseConfig(
 data class AppConfig(
     val port: Int,
     val jwtSecret: String,
+    val jwtExpirationHours: Int,
     val logLevel: String,
     val allowedOrigins: List<String>,
     val rateLimit: Int,
@@ -143,6 +145,7 @@ data class AppConfig(
                 port = System.getenv("PORT")?.toIntOrNull() ?: 4242,
                 jwtSecret = System.getenv("JWT_SECRET")
                     ?: throw IllegalStateException("JWT_SECRET is required"),
+                jwtExpirationHours = System.getenv("JWT_EXPIRATION_HOURS")?.toIntOrNull() ?: 1,
                 logLevel = System.getenv("LOG_LEVEL") ?: "INFO",
                 allowedOrigins = System.getenv("ALLOWED_ORIGINS")?.split(",") ?: listOf("*"),
                 rateLimit = System.getenv("RATE_LIMIT")?.toIntOrNull() ?: 100,
@@ -285,6 +288,48 @@ fun Application.configureDatabaseMigrations() {
 
         handle.execute(migrationScript)
     }
+}
+```
+
+## JWT Configuration
+
+### JWT Token Expiration
+
+The application uses JWT tokens for authentication with configurable expiration times. JWT tokens are automatically validated for expiration on each request.
+
+#### Configuration Parameters
+
+- **JWT_SECRET**: Secret key for JWT token signing (required)
+- **JWT_EXPIRATION_HOURS**: Token expiration time in hours (default: 1)
+
+#### JWT Token Behavior
+
+- **Automatic Expiration**: Tokens automatically expire after the configured time
+- **Secure Validation**: Expired tokens are rejected with proper error handling
+- **Audience Validation**: Tokens are validated for correct audience ("Ohana")
+- **Issuer Validation**: Tokens are validated for correct issuer ("https://ohana.com")
+
+#### Example Configuration
+
+```bash
+# Development - Longer token expiration for convenience
+JWT_SECRET=dev-secret-key
+JWT_EXPIRATION_HOURS=24
+
+# Production - Shorter token expiration for security
+JWT_SECRET=super-secure-jwt-secret-key
+JWT_EXPIRATION_HOURS=1
+```
+
+#### Token Structure
+
+```json
+{
+  "aud": "Ohana",
+  "iss": "https://ohana.com",
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "exp": 1640995200,
+  "iat": 1640991600
 }
 ```
 
@@ -431,6 +476,7 @@ services:
       - DB_USER=ohana_user
       - DB_PASSWORD=ohana_password
       - JWT_SECRET=your-jwt-secret
+      - JWT_EXPIRATION_HOURS=1
       - PORT=8080
       - RATE_LIMIT=100
       - RATE_LIMIT_REFILL_PERIOD_SECONDS=60
