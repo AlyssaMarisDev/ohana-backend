@@ -1,7 +1,8 @@
 ---
+globs: src/test/**
 alwaysApply: false
 ---
 
 - Read and apply the patterns shown in this file when writing unit tests
 
-@testpatterns.md
+@tests.md
