@@ -13,9 +13,9 @@ class TaskUpdateByIdHandler(
 ) {
     data class Request(
         val title: String,
-        val description: String?,
+        val description: String,
         val dueDate: Instant,
-        val status: com.ohana.shared.TaskStatus?,
+        val status: com.ohana.shared.TaskStatus,
     ) : Validatable {
         override fun validate(): List<ValidationError> {
             val errors = mutableListOf<ValidationError>()
@@ -23,7 +23,7 @@ class TaskUpdateByIdHandler(
             if (title.isEmpty()) errors.add(ValidationError("title", "Title is required"))
             if (title.length < 1) errors.add(ValidationError("title", "Title must be at least 1 character long"))
             if (title.length > 255) errors.add(ValidationError("title", "Title must be at most 255 characters long"))
-            if (description?.length ?: 0 >
+            if (description.length >
                 1000
             ) {
                 errors.add(ValidationError("description", "Description must be at most 1000 characters long"))
@@ -63,9 +63,9 @@ class TaskUpdateByIdHandler(
                 context.tasks.update(
                     existingTask.copy(
                         title = request.title,
-                        description = request.description ?: existingTask.description,
+                        description = request.description,
                         dueDate = request.dueDate,
-                        status = request.status ?: existingTask.status,
+                        status = request.status,
                     ),
                 )
 
