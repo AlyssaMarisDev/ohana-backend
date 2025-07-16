@@ -3,6 +3,7 @@ package com.ohana.task.handlers
 import com.ohana.TestUtils
 import com.ohana.exceptions.AuthorizationException
 import com.ohana.shared.HouseholdMemberValidator
+import com.ohana.shared.HouseholdRepository
 import com.ohana.shared.TaskRepository
 import com.ohana.shared.TaskStatus
 import com.ohana.shared.UnitOfWork
@@ -21,6 +22,7 @@ class TaskGetAllHandlerTest {
     private lateinit var unitOfWork: UnitOfWork
     private lateinit var context: UnitOfWorkContext
     private lateinit var taskRepository: TaskRepository
+    private lateinit var householdRepository: HouseholdRepository
     private lateinit var householdMemberValidator: HouseholdMemberValidator
     private lateinit var handler: TaskGetAllHandler
 
@@ -31,10 +33,12 @@ class TaskGetAllHandlerTest {
     @BeforeEach
     fun setUp() {
         taskRepository = mock()
+        householdRepository = mock()
         householdMemberValidator = mock()
         context =
             mock {
                 on { tasks } doReturn taskRepository
+                on { households } doReturn householdRepository
             }
         unitOfWork = mock()
         handler = TaskGetAllHandler(unitOfWork, householdMemberValidator)
@@ -307,5 +311,86 @@ class TaskGetAllHandlerTest {
             assertTrue(response.isEmpty())
             verify(taskRepository).findByHouseholdIds(emptyList())
             verify(householdMemberValidator, never()).validate(any(), any(), any())
+        }
+
+    @Test
+    fun `handle should return all tasks when no household IDs provided`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val userHouseholds =
+                listOf(
+                    TestUtils.getHousehold(id = householdId, name = "Household 1"),
+                    TestUtils.getHousehold(id = householdId2, name = "Household 2"),
+                )
+
+            val tasks =
+                listOf(
+                    TestUtils.getTask(
+                        title = "Task from Household 1",
+                        createdBy = userId,
+                        householdId = householdId,
+                    ),
+                    TestUtils.getTask(
+                        title = "Task from Household 2",
+                        createdBy = userId,
+                        householdId = householdId2,
+                    ),
+                )
+
+            whenever(householdRepository.findByMemberId(userId)).thenReturn(userHouseholds)
+            whenever(taskRepository.findByHouseholdIds(listOf(householdId, householdId2))).thenReturn(tasks)
+
+            val response = handler.handle(emptyList(), userId)
+
+            assertEquals(2, response.size)
+            verify(householdRepository).findByMemberId(userId)
+            verify(taskRepository).findByHouseholdIds(listOf(householdId, householdId2))
+            verify(householdMemberValidator, never()).validate(any(), any(), any())
+        }
+
+    @Test
+    fun `handle should return empty list when user has no households`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            whenever(householdRepository.findByMemberId(userId)).thenReturn(emptyList())
+
+            val response = handler.handle(emptyList(), userId)
+
+            assertTrue(response.isEmpty())
+            verify(householdRepository).findByMemberId(userId)
+            verify(taskRepository).findByHouseholdIds(emptyList())
+            verify(householdMemberValidator, never()).validate(any(), any(), any())
+        }
+
+    @Test
+    fun `handle should work with null household IDs`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val userHouseholds =
+                listOf(
+                    TestUtils.getHousehold(id = householdId, name = "Household 1"),
+                )
+
+            val tasks =
+                listOf(
+                    TestUtils.getTask(
+                        title = "Task from Household 1",
+                        createdBy = userId,
+                        householdId = householdId,
+                    ),
+                )
+
+            whenever(householdRepository.findByMemberId(userId)).thenReturn(userHouseholds)
+            whenever(taskRepository.findByHouseholdIds(listOf(householdId))).thenReturn(tasks)
+
+            val response = handler.handle(emptyList(), userId)
+
+            assertEquals(1, response.size)
+            assertEquals(householdId, response[0].householdId)
+            verify(householdRepository).findByMemberId(userId)
+            verify(taskRepository).findByHouseholdIds(listOf(householdId))
         }
 }

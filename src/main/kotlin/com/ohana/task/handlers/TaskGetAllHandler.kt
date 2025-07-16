@@ -2,6 +2,7 @@ package com.ohana.task.handlers
 
 import com.ohana.shared.HouseholdMemberValidator
 import com.ohana.shared.UnitOfWork
+import com.ohana.shared.UnitOfWorkContext
 
 class TaskGetAllHandler(
     private val unitOfWork: UnitOfWork,
@@ -22,13 +23,10 @@ class TaskGetAllHandler(
         userId: String,
     ): List<Response> =
         unitOfWork.execute { context ->
-            // Validate that the user has access to all households
-            householdIds.forEach { householdId ->
-                householdMemberValidator.validate(context, householdId, userId)
-            }
+            val effectiveHouseholdIds = getEffectiveHouseholdIds(context, householdIds, userId)
 
             // Fetch tasks for all households in a single database query
-            context.tasks.findByHouseholdIds(householdIds).map { task ->
+            context.tasks.findByHouseholdIds(effectiveHouseholdIds).map { task ->
                 Response(
                     id = task.id,
                     title = task.title,
@@ -40,4 +38,21 @@ class TaskGetAllHandler(
                 )
             }
         }
+
+    private fun getEffectiveHouseholdIds(
+        context: UnitOfWorkContext,
+        householdIds: List<String>,
+        userId: String,
+    ): List<String> {
+        if (householdIds.isEmpty()) {
+            // If no household IDs provided, get all households the user has access to
+            return context.households.findByMemberId(userId).map { it.id }
+        } else {
+            // Validate that the user has access to all specified households
+            householdIds.forEach { householdId ->
+                householdMemberValidator.validate(context, householdId, userId)
+            }
+            return householdIds
+        }
+    }
 }
