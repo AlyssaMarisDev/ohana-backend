@@ -1,8 +1,8 @@
 package com.ohana.domain.household
 
+import com.ohana.data.unitOfWork.*
+import com.ohana.domain.validators.HouseholdMemberValidator
 import com.ohana.exceptions.NotFoundException
-import com.ohana.shared.HouseholdMemberValidator
-import com.ohana.shared.UnitOfWork
 
 class HouseholdGetByIdHandler(
     private val unitOfWork: UnitOfWork,

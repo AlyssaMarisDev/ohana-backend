@@ -1,6 +1,5 @@
 package com.ohana
 
-import com.ohana.config.AppConfig
 import com.ohana.plugins.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*

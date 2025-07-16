@@ -1,6 +1,6 @@
 package com.ohana.domain.member
 
-import com.ohana.shared.UnitOfWork
+import com.ohana.data.unitOfWork.*
 
 class MemberGetAllHandler(
     private val unitOfWork: UnitOfWork,

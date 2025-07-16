@@ -1,6 +1,6 @@
 package com.ohana.domain.household
 
-import com.ohana.shared.UnitOfWork
+import com.ohana.data.unitOfWork.*
 
 class HouseholdGetAllHandler(
     private val unitOfWork: UnitOfWork,

@@ -1,8 +1,8 @@
 package com.ohana.domain.task
 
-import com.ohana.shared.HouseholdMemberValidator
-import com.ohana.shared.UnitOfWork
-import com.ohana.shared.UnitOfWorkContext
+import com.ohana.data.unitOfWork.*
+import com.ohana.domain.validators.HouseholdMemberValidator
+import com.ohana.shared.enums.TaskStatus
 
 class TaskGetAllHandler(
     private val unitOfWork: UnitOfWork,
@@ -13,7 +13,7 @@ class TaskGetAllHandler(
         val title: String,
         val description: String,
         val dueDate: java.time.Instant,
-        val status: com.ohana.shared.TaskStatus,
+        val status: TaskStatus,
         val createdBy: String,
         val householdId: String,
     )

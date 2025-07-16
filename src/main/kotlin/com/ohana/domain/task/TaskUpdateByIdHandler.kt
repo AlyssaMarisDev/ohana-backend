@@ -1,10 +1,9 @@
 package com.ohana.domain.task
 
+import com.ohana.data.unitOfWork.*
+import com.ohana.domain.validators.*
 import com.ohana.exceptions.NotFoundException
-import com.ohana.shared.HouseholdMemberValidator
-import com.ohana.shared.TaskStatus
-import com.ohana.shared.UnitOfWork
-import com.ohana.shared.validators.FutureDate
+import com.ohana.shared.enums.TaskStatus
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import java.time.Instant
@@ -21,7 +20,7 @@ class TaskUpdateByIdHandler(
         val description: String,
         @field:FutureDate(message = "Due date cannot be in the past")
         val dueDate: Instant,
-        val status: com.ohana.shared.TaskStatus,
+        val status: TaskStatus,
     )
 
     data class Response(
@@ -29,7 +28,7 @@ class TaskUpdateByIdHandler(
         val title: String,
         val description: String?,
         val dueDate: Instant,
-        val status: com.ohana.shared.TaskStatus?,
+        val status: TaskStatus?,
         val createdBy: String,
         val householdId: String,
     )

@@ -1,10 +1,9 @@
 package com.ohana.domain.task
 
-import com.ohana.shared.HouseholdMemberValidator
-import com.ohana.shared.TaskStatus
-import com.ohana.shared.UnitOfWork
-import com.ohana.shared.validators.FutureDate
-import com.ohana.task.entities.Task
+import com.ohana.data.task.*
+import com.ohana.data.unitOfWork.*
+import com.ohana.domain.validators.*
+import com.ohana.shared.enums.*
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size

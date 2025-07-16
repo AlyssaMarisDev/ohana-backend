@@ -1,0 +1,6 @@
+---
+alwaysApply: true
+---
+
+- When moving files around, also update the package at the top of the file accordingly
+- When moving files around, also update the import references in other files accordingly

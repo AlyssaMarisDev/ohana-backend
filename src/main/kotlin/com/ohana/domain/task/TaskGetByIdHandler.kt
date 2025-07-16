@@ -1,8 +1,9 @@
 package com.ohana.domain.task
 
+import com.ohana.data.unitOfWork.*
+import com.ohana.domain.validators.HouseholdMemberValidator
 import com.ohana.exceptions.NotFoundException
-import com.ohana.shared.HouseholdMemberValidator
-import com.ohana.shared.UnitOfWork
+import com.ohana.shared.enums.TaskStatus
 
 class TaskGetByIdHandler(
     private val unitOfWork: UnitOfWork,
@@ -13,7 +14,7 @@ class TaskGetByIdHandler(
         val title: String,
         val description: String,
         val dueDate: java.time.Instant,
-        val status: com.ohana.shared.TaskStatus,
+        val status: TaskStatus,
         val createdBy: String,
         val householdId: String,
     )

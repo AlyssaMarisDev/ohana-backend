@@ -16,7 +16,7 @@ import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.*
 import org.slf4j.LoggerFactory
 
-private val logger = LoggerFactory.getLogger("com.ohana.plugins.CallLogging")
+private val logger = LoggerFactory.getLogger("com.ohana.plugins.ExceptionHandling")
 
 fun Application.configureExceptionHandling() {
     install(StatusPages) {

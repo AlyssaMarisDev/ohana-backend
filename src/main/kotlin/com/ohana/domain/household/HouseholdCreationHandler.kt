@@ -1,9 +1,8 @@
 package com.ohana.domain.household
 
-import com.ohana.shared.Household
-import com.ohana.shared.HouseholdMember
-import com.ohana.shared.HouseholdMemberRole
-import com.ohana.shared.UnitOfWork
+import com.ohana.data.household.*
+import com.ohana.data.unitOfWork.*
+import com.ohana.shared.enums.HouseholdMemberRole
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size

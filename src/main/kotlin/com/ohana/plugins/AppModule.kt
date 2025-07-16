@@ -1,18 +1,17 @@
 package com.ohana.plugins
 
-import com.ohana.api.AuthController
-import com.ohana.api.HealthController
-import com.ohana.api.HouseholdController
-import com.ohana.api.MemberController
-import com.ohana.api.TaskController
-import com.ohana.config.AppConfig
+import com.ohana.api.auth.AuthController
+import com.ohana.api.health.HealthController
+import com.ohana.api.household.HouseholdController
+import com.ohana.api.member.MemberController
+import com.ohana.api.task.TaskController
+import com.ohana.data.unitOfWork.JdbiUnitOfWork
+import com.ohana.data.unitOfWork.UnitOfWork
 import com.ohana.domain.auth.*
 import com.ohana.domain.household.*
 import com.ohana.domain.member.*
 import com.ohana.domain.task.*
-import com.ohana.shared.HouseholdMemberValidator
-import com.ohana.shared.JdbiUnitOfWork
-import com.ohana.shared.UnitOfWork
+import com.ohana.domain.validators.HouseholdMemberValidator
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.KotlinPlugin
 import org.koin.dsl.module

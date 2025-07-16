@@ -1,6 +1,5 @@
 package com.ohana.plugins
 
-import com.ohana.config.RateLimitConfig
 import io.ktor.server.application.*
 import io.ktor.server.plugins.origin
 import io.ktor.server.plugins.ratelimit.*
