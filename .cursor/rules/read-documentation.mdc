@@ -5,9 +5,4 @@ alwaysApply: true
 
 - Read and apply the patterns shown in these files when implementing changes and giving suggestions
 
-@architecture-overview.md
-@api-design.md
-@data-access-patterns.md
-@domain-architecture.md
-@entities.md
-@validation-patterns.md
+@architecture

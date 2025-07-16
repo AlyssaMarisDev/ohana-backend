@@ -79,33 +79,12 @@ Each domain contains:
 - **Consistent**: Same patterns used throughout
 - **Type Safe**: Compile-time error checking
 
-## Quick Start for Developers
-
-### Adding a New Feature
-
-1. Create entity in appropriate domain
-2. Add repository interface
-3. Implement repository with JDBI
-4. Create handler with business logic
-5. Create controller with HTTP endpoints
-6. Add to dependency injection
-7. Add to routing
-
-### Key Files to Understand
-
-- `Application.kt` - Main entry point
-- `plugins/` - Ktor configuration
-- `shared/UnitOfWork.kt` - Transaction management
-- `AppModule.kt` - Dependency injection setup
-- `Routing.kt` - HTTP route registration
-
-## Next Steps
-
 For detailed information about specific aspects, see:
 
-- [Domain Architecture](domain-architecture.md) - How domains are organized
-- [Data Access Patterns](data-access-patterns.md) - Repository and Unit of Work patterns
+- [Domain Architecture](domain-architecture.md) - How domains are organized and layered architecture
+- [Data Access Patterns](data-access.md) - Repository and Unit of Work patterns
 - [API Design](api-design.md) - HTTP endpoints and controllers
-- [Testing Strategy](testing-strategy.md) - How to test the application
-- [Security Patterns](security-patterns.md) - Authentication and authorization
+- [Entities](entities.md) - Data models and entity relationships
+- [Security](security.md) - Authentication, authorization, and security patterns
+- [Validation](validation.md) - Input validation and business rule enforcement
 - [Configuration](configuration.md) - Environment setup and configuration

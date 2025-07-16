@@ -1,0 +1,8 @@
+---
+globs: src/test/**
+alwaysApply: false
+---
+
+- Read and apply the patterns shown in these files when writing tests
+
+@testing
