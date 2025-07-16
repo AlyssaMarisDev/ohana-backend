@@ -47,6 +47,8 @@ interface HouseholdRepository {
 
     fun findAll(): List<Household>
 
+    fun findByMemberId(memberId: String): List<Household>
+
     fun create(household: Household): Household
 
     fun findMemberById(

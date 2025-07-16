@@ -46,7 +46,8 @@ class HouseholdController(
                 }
 
                 get("") {
-                    val response = householdGetAllHandler.handle()
+                    val userId = getUserId(call.principal<JWTPrincipal>())
+                    val response = householdGetAllHandler.handle(userId)
                     call.respond(HttpStatusCode.OK, response)
                 }
 

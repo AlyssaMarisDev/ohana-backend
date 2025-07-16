@@ -35,12 +35,13 @@ class HouseholdGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
-            whenever(householdRepository.findAll()).thenReturn(emptyList())
+            val userId = UUID.randomUUID().toString()
+            whenever(householdRepository.findByMemberId(userId)).thenReturn(emptyList())
 
-            val response = handler.handle()
+            val response = handler.handle(userId)
 
             assertTrue(response.isEmpty())
-            verify(householdRepository).findAll()
+            verify(householdRepository).findByMemberId(userId)
             verifyNoMoreInteractions(householdRepository)
         }
 
@@ -49,6 +50,7 @@ class HouseholdGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
+            val userId = UUID.randomUUID().toString()
             val household =
                 TestUtils.getHousehold(
                     id = UUID.randomUUID().toString(),
@@ -57,9 +59,9 @@ class HouseholdGetAllHandlerTest {
                     createdBy = UUID.randomUUID().toString(),
                 )
 
-            whenever(householdRepository.findAll()).thenReturn(listOf(household))
+            whenever(householdRepository.findByMemberId(userId)).thenReturn(listOf(household))
 
-            val response = handler.handle()
+            val response = handler.handle(userId)
 
             assertEquals(1, response.size)
             val responseItem = response.first()
@@ -68,7 +70,7 @@ class HouseholdGetAllHandlerTest {
             assertEquals(household.description, responseItem.description)
             assertEquals(household.createdBy, responseItem.createdBy)
 
-            verify(householdRepository).findAll()
+            verify(householdRepository).findByMemberId(userId)
             verifyNoMoreInteractions(householdRepository)
         }
 
@@ -77,6 +79,7 @@ class HouseholdGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
+            val userId = UUID.randomUUID().toString()
             val household1 =
                 TestUtils.getHousehold(
                     id = UUID.randomUUID().toString(),
@@ -101,9 +104,9 @@ class HouseholdGetAllHandlerTest {
                     createdBy = UUID.randomUUID().toString(),
                 )
 
-            whenever(householdRepository.findAll()).thenReturn(listOf(household1, household2, household3))
+            whenever(householdRepository.findByMemberId(userId)).thenReturn(listOf(household1, household2, household3))
 
-            val response = handler.handle()
+            val response = handler.handle(userId)
 
             assertEquals(3, response.size)
 
@@ -128,7 +131,7 @@ class HouseholdGetAllHandlerTest {
             assertEquals(household3.description, response3.description)
             assertEquals(household3.createdBy, response3.createdBy)
 
-            verify(householdRepository).findAll()
+            verify(householdRepository).findByMemberId(userId)
             verifyNoMoreInteractions(householdRepository)
         }
 
@@ -137,6 +140,7 @@ class HouseholdGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
+            val userId = UUID.randomUUID().toString()
             val household =
                 TestUtils.getHousehold(
                     id = UUID.randomUUID().toString(),
@@ -145,9 +149,9 @@ class HouseholdGetAllHandlerTest {
                     createdBy = UUID.randomUUID().toString(),
                 )
 
-            whenever(householdRepository.findAll()).thenReturn(listOf(household))
+            whenever(householdRepository.findByMemberId(userId)).thenReturn(listOf(household))
 
-            val response = handler.handle()
+            val response = handler.handle(userId)
 
             assertEquals(1, response.size)
             val responseItem = response.first()
@@ -156,7 +160,7 @@ class HouseholdGetAllHandlerTest {
             assertEquals(household.description, responseItem.description)
             assertEquals(household.createdBy, responseItem.createdBy)
 
-            verify(householdRepository).findAll()
+            verify(householdRepository).findByMemberId(userId)
             verifyNoMoreInteractions(householdRepository)
         }
 
@@ -165,6 +169,7 @@ class HouseholdGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
+            val userId = UUID.randomUUID().toString()
             val longName = "A".repeat(255) // Maximum length name
             val longDescription = "A".repeat(1000) // Maximum length description
 
@@ -176,9 +181,9 @@ class HouseholdGetAllHandlerTest {
                     createdBy = UUID.randomUUID().toString(),
                 )
 
-            whenever(householdRepository.findAll()).thenReturn(listOf(household))
+            whenever(householdRepository.findByMemberId(userId)).thenReturn(listOf(household))
 
-            val response = handler.handle()
+            val response = handler.handle(userId)
 
             assertEquals(1, response.size)
             val responseItem = response.first()
@@ -187,7 +192,7 @@ class HouseholdGetAllHandlerTest {
             assertEquals(longDescription, responseItem.description)
             assertEquals(household.createdBy, responseItem.createdBy)
 
-            verify(householdRepository).findAll()
+            verify(householdRepository).findByMemberId(userId)
             verifyNoMoreInteractions(householdRepository)
         }
 
@@ -196,6 +201,7 @@ class HouseholdGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
+            val userId = UUID.randomUUID().toString()
             val household =
                 TestUtils.getHousehold(
                     id = UUID.randomUUID().toString(),
@@ -204,9 +210,9 @@ class HouseholdGetAllHandlerTest {
                     createdBy = UUID.randomUUID().toString(),
                 )
 
-            whenever(householdRepository.findAll()).thenReturn(listOf(household))
+            whenever(householdRepository.findByMemberId(userId)).thenReturn(listOf(household))
 
-            val response = handler.handle()
+            val response = handler.handle(userId)
 
             assertEquals(1, response.size)
             val responseItem = response.first()
@@ -215,7 +221,7 @@ class HouseholdGetAllHandlerTest {
             assertEquals(household.description, responseItem.description)
             assertEquals(household.createdBy, responseItem.createdBy)
 
-            verify(householdRepository).findAll()
+            verify(householdRepository).findByMemberId(userId)
             verifyNoMoreInteractions(householdRepository)
         }
 
@@ -224,6 +230,7 @@ class HouseholdGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
+            val userId = UUID.randomUUID().toString()
             val household =
                 TestUtils.getHousehold(
                     id = UUID.randomUUID().toString(),
@@ -232,9 +239,9 @@ class HouseholdGetAllHandlerTest {
                     createdBy = UUID.randomUUID().toString(),
                 )
 
-            whenever(householdRepository.findAll()).thenReturn(listOf(household))
+            whenever(householdRepository.findByMemberId(userId)).thenReturn(listOf(household))
 
-            val response = handler.handle()
+            val response = handler.handle(userId)
 
             assertEquals(1, response.size)
             val responseItem = response.first()
@@ -243,7 +250,7 @@ class HouseholdGetAllHandlerTest {
             assertEquals("", responseItem.description)
             assertEquals(household.createdBy, responseItem.createdBy)
 
-            verify(householdRepository).findAll()
+            verify(householdRepository).findByMemberId(userId)
             verifyNoMoreInteractions(householdRepository)
         }
 
@@ -252,15 +259,16 @@ class HouseholdGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
-            whenever(householdRepository.findAll()).thenThrow(RuntimeException("Database connection failed"))
+            val userId = UUID.randomUUID().toString()
+            whenever(householdRepository.findByMemberId(userId)).thenThrow(RuntimeException("Database connection failed"))
 
             val ex =
                 assertThrows<RuntimeException> {
-                    handler.handle()
+                    handler.handle(userId)
                 }
 
             assertEquals("Database connection failed", ex.message)
-            verify(householdRepository).findAll()
+            verify(householdRepository).findByMemberId(userId)
             verifyNoMoreInteractions(householdRepository)
         }
 
@@ -269,15 +277,16 @@ class HouseholdGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
-            whenever(householdRepository.findAll()).thenThrow(RuntimeException("SQL syntax error"))
+            val userId = UUID.randomUUID().toString()
+            whenever(householdRepository.findByMemberId(userId)).thenThrow(RuntimeException("SQL syntax error"))
 
             val ex =
                 assertThrows<RuntimeException> {
-                    handler.handle()
+                    handler.handle(userId)
                 }
 
             assertEquals("SQL syntax error", ex.message)
-            verify(householdRepository).findAll()
+            verify(householdRepository).findByMemberId(userId)
             verifyNoMoreInteractions(householdRepository)
         }
 
@@ -286,6 +295,7 @@ class HouseholdGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
+            val userId = UUID.randomUUID().toString()
             val household1 =
                 TestUtils.getHousehold(
                     id = "1",
@@ -311,16 +321,16 @@ class HouseholdGetAllHandlerTest {
                 )
 
             val households = listOf(household1, household2, household3)
-            whenever(householdRepository.findAll()).thenReturn(households)
+            whenever(householdRepository.findByMemberId(userId)).thenReturn(households)
 
-            val response = handler.handle()
+            val response = handler.handle(userId)
 
             assertEquals(3, response.size)
             assertEquals("1", response[0].id)
             assertEquals("2", response[1].id)
             assertEquals("3", response[2].id)
 
-            verify(householdRepository).findAll()
+            verify(householdRepository).findByMemberId(userId)
             verifyNoMoreInteractions(householdRepository)
         }
 
@@ -329,6 +339,7 @@ class HouseholdGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
+            val userId = UUID.randomUUID().toString()
             val household =
                 TestUtils.getHousehold(
                     id = UUID.randomUUID().toString(),
@@ -337,9 +348,9 @@ class HouseholdGetAllHandlerTest {
                     createdBy = UUID.randomUUID().toString(),
                 )
 
-            whenever(householdRepository.findAll()).thenReturn(listOf(household))
+            whenever(householdRepository.findByMemberId(userId)).thenReturn(listOf(household))
 
-            val response = handler.handle()
+            val response = handler.handle(userId)
 
             assertEquals(1, response.size)
             val responseItem = response.first()
@@ -350,7 +361,7 @@ class HouseholdGetAllHandlerTest {
             assertEquals(household.description, responseItem.description)
             assertEquals(household.createdBy, responseItem.createdBy)
 
-            verify(householdRepository).findAll()
+            verify(householdRepository).findByMemberId(userId)
             verifyNoMoreInteractions(householdRepository)
         }
 }

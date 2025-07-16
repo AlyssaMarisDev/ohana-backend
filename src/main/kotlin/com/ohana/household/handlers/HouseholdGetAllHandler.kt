@@ -12,9 +12,9 @@ class HouseholdGetAllHandler(
         val createdBy: String,
     )
 
-    suspend fun handle(): List<Response> =
+    suspend fun handle(userId: String): List<Response> =
         unitOfWork.execute { context ->
-            context.households.findAll().map { household ->
+            context.households.findByMemberId(userId).map { household ->
                 Response(
                     id = household.id,
                     name = household.name,
