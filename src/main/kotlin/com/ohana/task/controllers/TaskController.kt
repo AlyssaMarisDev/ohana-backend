@@ -56,15 +56,24 @@ class TaskController(
                 }
 
                 get("") {
-                    val householdId =
-                        call.parameters["householdId"]
+                    val householdIdsParam =
+                        call.request.queryParameters["householdIds"]
                             ?: throw ValidationException(
-                                "Household ID is required",
-                                listOf(ValidationError("householdId", "Household ID is required")),
+                                "Household IDs are required",
+                                listOf(ValidationError("householdIds", "Household IDs are required")),
                             )
+
+                    val householdIds = householdIdsParam.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                    if (householdIds.isEmpty()) {
+                        throw ValidationException(
+                            "At least one household ID is required",
+                            listOf(ValidationError("householdIds", "At least one household ID is required")),
+                        )
+                    }
+
                     val userId = getUserId(call.principal<JWTPrincipal>())
 
-                    val response = taskGetAllHandler.handle(householdId, userId)
+                    val response = taskGetAllHandler.handle(householdIds, userId)
 
                     call.respond(HttpStatusCode.OK, response)
                 }

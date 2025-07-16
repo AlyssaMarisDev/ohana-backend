@@ -27,6 +27,8 @@ interface TaskRepository {
 
     fun findByHouseholdId(householdId: String): List<Task>
 
+    fun findByHouseholdIds(householdIds: List<String>): List<Task>
+
     fun update(task: Task): Task
 }
 

@@ -83,6 +83,30 @@ class JdbiTaskRepository(
             )
     }
 
+    override fun findByHouseholdIds(householdIds: List<String>): List<Task> {
+        if (householdIds.isEmpty()) {
+            return emptyList()
+        }
+
+        val placeholders = householdIds.mapIndexed { index, _ -> ":household_id_$index" }.joinToString(", ")
+        val selectQuery = """
+            SELECT id, title, description, due_date as dueDate, status, created_by as createdBy, household_id as householdId
+            FROM tasks
+            WHERE household_id IN ($placeholders)
+            ORDER BY created_at DESC
+        """
+
+        val params = householdIds.mapIndexed { index, id -> "household_id_$index" to id }.toMap()
+
+        return DatabaseUtils
+            .get(
+                handle,
+                selectQuery,
+                params,
+                Task::class,
+            )
+    }
+
     override fun update(task: Task): Task {
         val updateQuery = """
             UPDATE tasks

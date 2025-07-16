@@ -18,13 +18,17 @@ class TaskGetAllHandler(
     )
 
     suspend fun handle(
-        householdId: String,
+        householdIds: List<String>,
         userId: String,
     ): List<Response> =
         unitOfWork.execute { context ->
-            householdMemberValidator.validate(context, householdId, userId)
+            // Validate that the user has access to all households
+            householdIds.forEach { householdId ->
+                householdMemberValidator.validate(context, householdId, userId)
+            }
 
-            context.tasks.findByHouseholdId(householdId).map { task ->
+            // Fetch tasks for all households in a single database query
+            context.tasks.findByHouseholdIds(householdIds).map { task ->
                 Response(
                     id = task.id,
                     title = task.title,
