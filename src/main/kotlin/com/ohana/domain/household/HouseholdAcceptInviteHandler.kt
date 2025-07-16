@@ -1,7 +1,7 @@
 package com.ohana.domain.household
 
 import com.ohana.data.unitOfWork.*
-import com.ohana.exceptions.AuthorizationException
+import com.ohana.shared.exceptions.AuthorizationException
 import java.time.Instant
 
 class HouseholdAcceptInviteHandler(

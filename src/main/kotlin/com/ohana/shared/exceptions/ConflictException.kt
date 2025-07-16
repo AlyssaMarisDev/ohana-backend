@@ -1,6 +1,6 @@
-package com.ohana.exceptions
+package com.ohana.shared.exceptions
 
-class AuthorizationException(
+class ConflictException(
     message: String,
     cause: Throwable? = null,
 ) : RuntimeException(message, cause),

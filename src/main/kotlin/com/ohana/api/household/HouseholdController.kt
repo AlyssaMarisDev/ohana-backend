@@ -6,9 +6,9 @@ import com.ohana.domain.household.HouseholdCreationHandler
 import com.ohana.domain.household.HouseholdGetAllHandler
 import com.ohana.domain.household.HouseholdGetByIdHandler
 import com.ohana.domain.household.HouseholdInviteMemberHandler
-import com.ohana.exceptions.ValidationError
-import com.ohana.exceptions.ValidationException
 import com.ohana.plugins.validateAndReceive
+import com.ohana.shared.exceptions.ValidationError
+import com.ohana.shared.exceptions.ValidationException
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.JWTPrincipal

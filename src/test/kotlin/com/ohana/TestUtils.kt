@@ -1,13 +1,12 @@
 package com.ohana
 
-import com.ohana.member.entities.Member
-import com.ohana.shared.Household
-import com.ohana.shared.HouseholdMember
-import com.ohana.shared.HouseholdMemberRole
-import com.ohana.shared.TaskStatus
-import com.ohana.shared.UnitOfWork
-import com.ohana.shared.UnitOfWorkContext
-import com.ohana.task.entities.Task
+import com.ohana.data.household.Household
+import com.ohana.data.household.HouseholdMember
+import com.ohana.data.member.Member
+import com.ohana.data.task.Task
+import com.ohana.data.unitOfWork.*
+import com.ohana.shared.enums.HouseholdMemberRole
+import com.ohana.shared.enums.TaskStatus
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import java.time.Instant

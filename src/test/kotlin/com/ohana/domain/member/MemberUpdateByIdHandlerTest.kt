@@ -1,10 +1,9 @@
-package com.ohana.member.handlers
+package com.ohana.domain.member
 
 import com.ohana.TestUtils
-import com.ohana.exceptions.NotFoundException
-import com.ohana.shared.MemberRepository
-import com.ohana.shared.UnitOfWork
-import com.ohana.shared.UnitOfWorkContext
+import com.ohana.data.member.MemberRepository
+import com.ohana.data.unitOfWork.*
+import com.ohana.shared.exceptions.NotFoundException
 import jakarta.validation.Validation
 import jakarta.validation.Validator
 import kotlinx.coroutines.test.runTest

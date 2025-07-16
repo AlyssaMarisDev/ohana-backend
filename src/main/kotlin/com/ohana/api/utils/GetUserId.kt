@@ -1,6 +1,6 @@
 package com.ohana.api.utils
 
-import com.ohana.exceptions.AuthorizationException
+import com.ohana.shared.exceptions.AuthorizationException
 import io.ktor.server.auth.jwt.JWTPrincipal
 
 fun getUserId(principal: JWTPrincipal?): String =

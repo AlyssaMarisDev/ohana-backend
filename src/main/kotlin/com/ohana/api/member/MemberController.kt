@@ -3,9 +3,9 @@ package com.ohana.api.member
 import com.ohana.domain.member.MemberGetAllHandler
 import com.ohana.domain.member.MemberGetByIdHandler
 import com.ohana.domain.member.MemberUpdateByIdHandler
-import com.ohana.exceptions.ValidationError
-import com.ohana.exceptions.ValidationException
 import com.ohana.plugins.validateAndReceive
+import com.ohana.shared.exceptions.ValidationError
+import com.ohana.shared.exceptions.ValidationException
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*

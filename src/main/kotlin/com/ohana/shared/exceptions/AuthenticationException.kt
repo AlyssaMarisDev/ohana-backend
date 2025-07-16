@@ -1,6 +1,6 @@
-package com.ohana.exceptions
+package com.ohana.shared.exceptions
 
-class NotFoundException(
+class AuthenticationException(
     message: String,
     cause: Throwable? = null,
 ) : RuntimeException(message, cause),

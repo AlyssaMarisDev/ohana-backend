@@ -1,6 +1,6 @@
-package com.ohana.exceptions
+package com.ohana.shared.exceptions
 
-class AuthenticationException(
+class DbException(
     message: String,
     cause: Throwable? = null,
 ) : RuntimeException(message, cause),

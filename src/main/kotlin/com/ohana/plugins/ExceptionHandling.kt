@@ -1,11 +1,11 @@
 package com.ohana.plugins
 
-import com.ohana.exceptions.AuthenticationException
-import com.ohana.exceptions.AuthorizationException
-import com.ohana.exceptions.ConflictException
-import com.ohana.exceptions.DbException
-import com.ohana.exceptions.NotFoundException
-import com.ohana.exceptions.ValidationException
+import com.ohana.shared.exceptions.AuthenticationException
+import com.ohana.shared.exceptions.AuthorizationException
+import com.ohana.shared.exceptions.ConflictException
+import com.ohana.shared.exceptions.DbException
+import com.ohana.shared.exceptions.NotFoundException
+import com.ohana.shared.exceptions.ValidationException
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*

@@ -1,7 +1,7 @@
 package com.ohana.domain.member
 
 import com.ohana.data.unitOfWork.*
-import com.ohana.exceptions.NotFoundException
+import com.ohana.shared.exceptions.NotFoundException
 
 class MemberGetByIdHandler(
     private val unitOfWork: UnitOfWork,

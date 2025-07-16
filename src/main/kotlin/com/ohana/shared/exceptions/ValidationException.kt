@@ -1,4 +1,4 @@
-package com.ohana.exceptions
+package com.ohana.shared.exceptions
 
 data class ValidationError(
     val field: String,

@@ -1,13 +1,12 @@
-package com.ohana.task.handlers
+package com.ohana.domain.task
 
 import com.ohana.TestUtils
-import com.ohana.exceptions.AuthorizationException
-import com.ohana.exceptions.NotFoundException
-import com.ohana.shared.HouseholdMemberValidator
-import com.ohana.shared.TaskRepository
-import com.ohana.shared.TaskStatus
-import com.ohana.shared.UnitOfWork
-import com.ohana.shared.UnitOfWorkContext
+import com.ohana.data.task.TaskRepository
+import com.ohana.data.unitOfWork.*
+import com.ohana.domain.validators.HouseholdMemberValidator
+import com.ohana.shared.enums.TaskStatus
+import com.ohana.shared.exceptions.AuthorizationException
+import com.ohana.shared.exceptions.NotFoundException
 import jakarta.validation.Validation
 import jakarta.validation.Validator
 import kotlinx.coroutines.test.runTest

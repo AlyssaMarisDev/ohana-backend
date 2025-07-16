@@ -1,8 +1,8 @@
 package com.ohana.data.task
 
 import com.ohana.data.utils.DatabaseUtils
-import com.ohana.exceptions.DbException
-import com.ohana.exceptions.NotFoundException
+import com.ohana.shared.exceptions.DbException
+import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
 
 class JdbiTaskRepository(

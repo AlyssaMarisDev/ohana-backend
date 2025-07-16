@@ -1,7 +1,7 @@
 package com.ohana.plugins
 
-import com.ohana.exceptions.ValidationError
-import com.ohana.exceptions.ValidationException
+import com.ohana.shared.exceptions.ValidationError
+import com.ohana.shared.exceptions.ValidationException
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*

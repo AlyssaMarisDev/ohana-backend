@@ -3,7 +3,7 @@ package com.ohana.domain.auth
 import com.ohana.data.auth.AuthMember
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.auth.utils.*
-import com.ohana.exceptions.ConflictException
+import com.ohana.shared.exceptions.ConflictException
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern

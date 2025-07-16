@@ -1,12 +1,10 @@
-package com.ohana.auth.handlers
+package com.ohana.domain.auth
 
 import com.ohana.TestUtils
-import com.ohana.auth.entities.AuthMember
-import com.ohana.auth.utils.Hasher
-import com.ohana.exceptions.AuthorizationException
-import com.ohana.shared.AuthMemberRepository
-import com.ohana.shared.UnitOfWork
-import com.ohana.shared.UnitOfWorkContext
+import com.ohana.data.auth.*
+import com.ohana.data.unitOfWork.*
+import com.ohana.domain.auth.utils.Hasher
+import com.ohana.shared.exceptions.AuthorizationException
 import jakarta.validation.Validation
 import jakarta.validation.Validator
 import kotlinx.coroutines.test.runTest

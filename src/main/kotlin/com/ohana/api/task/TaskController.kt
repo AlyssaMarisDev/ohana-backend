@@ -5,9 +5,9 @@ import com.ohana.domain.task.TaskCreationHandler
 import com.ohana.domain.task.TaskGetAllHandler
 import com.ohana.domain.task.TaskGetByIdHandler
 import com.ohana.domain.task.TaskUpdateByIdHandler
-import com.ohana.exceptions.ValidationError
-import com.ohana.exceptions.ValidationException
 import com.ohana.plugins.validateAndReceive
+import com.ohana.shared.exceptions.ValidationError
+import com.ohana.shared.exceptions.ValidationException
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.JWTPrincipal

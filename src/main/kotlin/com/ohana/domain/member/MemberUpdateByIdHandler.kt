@@ -1,7 +1,7 @@
 package com.ohana.domain.member
 
 import com.ohana.data.unitOfWork.*
-import com.ohana.exceptions.NotFoundException
+import com.ohana.shared.exceptions.NotFoundException
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 

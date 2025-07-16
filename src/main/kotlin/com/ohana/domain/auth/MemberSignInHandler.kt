@@ -2,7 +2,7 @@ package com.ohana.domain.auth
 
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.auth.utils.*
-import com.ohana.exceptions.AuthorizationException
+import com.ohana.shared.exceptions.AuthorizationException
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 

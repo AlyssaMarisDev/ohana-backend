@@ -1,8 +1,11 @@
-package com.ohana.shared
+package com.ohana.domain.shared
 
 import com.ohana.TestUtils
-import com.ohana.exceptions.AuthorizationException
-import com.ohana.exceptions.NotFoundException
+import com.ohana.data.household.HouseholdRepository
+import com.ohana.data.unitOfWork.*
+import com.ohana.domain.validators.HouseholdMemberValidator
+import com.ohana.shared.exceptions.AuthorizationException
+import com.ohana.shared.exceptions.NotFoundException
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

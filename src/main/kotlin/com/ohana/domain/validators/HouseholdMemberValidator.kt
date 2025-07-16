@@ -1,9 +1,9 @@
 package com.ohana.domain.validators
 
 import com.ohana.data.unitOfWork.UnitOfWorkContext
-import com.ohana.exceptions.AuthorizationException
-import com.ohana.exceptions.NotFoundException
 import com.ohana.shared.Guid
+import com.ohana.shared.exceptions.AuthorizationException
+import com.ohana.shared.exceptions.NotFoundException
 
 class HouseholdMemberValidator {
     fun validate(

@@ -2,9 +2,9 @@ package com.ohana.domain.household
 
 import com.ohana.data.household.HouseholdMember
 import com.ohana.data.unitOfWork.*
-import com.ohana.exceptions.AuthorizationException
-import com.ohana.exceptions.ConflictException
 import com.ohana.shared.enums.HouseholdMemberRole
+import com.ohana.shared.exceptions.AuthorizationException
+import com.ohana.shared.exceptions.ConflictException
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import java.util.UUID

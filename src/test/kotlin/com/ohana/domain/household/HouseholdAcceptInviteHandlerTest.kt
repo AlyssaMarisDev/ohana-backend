@@ -1,11 +1,10 @@
-package com.ohana.household.handlers
+package com.ohana.domain.household
 
 import com.ohana.TestUtils
-import com.ohana.exceptions.AuthorizationException
-import com.ohana.shared.HouseholdMemberRole
-import com.ohana.shared.HouseholdRepository
-import com.ohana.shared.UnitOfWork
-import com.ohana.shared.UnitOfWorkContext
+import com.ohana.data.household.HouseholdRepository
+import com.ohana.data.unitOfWork.*
+import com.ohana.shared.enums.HouseholdMemberRole
+import com.ohana.shared.exceptions.AuthorizationException
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
