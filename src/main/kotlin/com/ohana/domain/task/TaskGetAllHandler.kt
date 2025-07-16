@@ -1,4 +1,4 @@
-package com.ohana.task.handlers
+package com.ohana.domain.task
 
 import com.ohana.shared.HouseholdMemberValidator
 import com.ohana.shared.UnitOfWork

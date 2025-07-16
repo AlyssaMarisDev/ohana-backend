@@ -1,4 +1,4 @@
-package com.ohana.member.handlers
+package com.ohana.domain.member
 
 import com.ohana.shared.UnitOfWork
 

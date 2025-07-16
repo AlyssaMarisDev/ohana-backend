@@ -1,4 +1,4 @@
-package com.ohana.health.controllers
+package com.ohana.api
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*

@@ -1,4 +1,4 @@
-package com.ohana.household.handlers
+package com.ohana.domain.household
 
 import com.ohana.exceptions.NotFoundException
 import com.ohana.shared.HouseholdMemberValidator

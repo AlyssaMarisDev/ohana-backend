@@ -1,8 +1,10 @@
-package com.ohana.member.controllers
+package com.ohana.api
 
+import com.ohana.domain.member.MemberGetAllHandler
+import com.ohana.domain.member.MemberGetByIdHandler
+import com.ohana.domain.member.MemberUpdateByIdHandler
 import com.ohana.exceptions.ValidationError
 import com.ohana.exceptions.ValidationException
-import com.ohana.member.handlers.*
 import com.ohana.plugins.validateAndReceive
 import io.ktor.http.*
 import io.ktor.server.auth.*

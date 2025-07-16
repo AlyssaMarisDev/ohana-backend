@@ -1,4 +1,4 @@
-package com.ohana.household.handlers
+package com.ohana.domain.household
 
 import com.ohana.shared.Household
 import com.ohana.shared.HouseholdMember

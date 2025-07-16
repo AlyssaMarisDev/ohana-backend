@@ -1,4 +1,4 @@
-package com.ohana.task.handlers
+package com.ohana.domain.task
 
 import com.ohana.exceptions.NotFoundException
 import com.ohana.shared.HouseholdMemberValidator

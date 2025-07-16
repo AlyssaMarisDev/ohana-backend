@@ -1,8 +1,12 @@
-package com.ohana.household.controllers
+package com.ohana.api
 
+import com.ohana.domain.household.HouseholdAcceptInviteHandler
+import com.ohana.domain.household.HouseholdCreationHandler
+import com.ohana.domain.household.HouseholdGetAllHandler
+import com.ohana.domain.household.HouseholdGetByIdHandler
+import com.ohana.domain.household.HouseholdInviteMemberHandler
 import com.ohana.exceptions.ValidationError
 import com.ohana.exceptions.ValidationException
-import com.ohana.household.handlers.*
 import com.ohana.plugins.validateAndReceive
 import com.ohana.utils.getUserId
 import io.ktor.http.*

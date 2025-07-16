@@ -1,10 +1,10 @@
 package com.ohana.plugins
 
-import com.ohana.auth.controllers.AuthController
-import com.ohana.health.controllers.HealthController
-import com.ohana.household.controllers.HouseholdController
-import com.ohana.member.controllers.MemberController
-import com.ohana.task.controllers.TaskController
+import com.ohana.api.AuthController
+import com.ohana.api.HealthController
+import com.ohana.api.HouseholdController
+import com.ohana.api.MemberController
+import com.ohana.api.TaskController
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject

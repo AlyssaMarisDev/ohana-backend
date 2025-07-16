@@ -1,8 +1,8 @@
-package com.ohana.auth.controllers
+package com.ohana.api
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.ohana.auth.handlers.MemberRegistrationHandler
-import com.ohana.auth.handlers.MemberSignInHandler
+import com.ohana.domain.auth.MemberRegistrationHandler
+import com.ohana.domain.auth.MemberSignInHandler
 import com.ohana.plugins.validateAndReceive
 import io.ktor.http.*
 import io.ktor.server.application.*

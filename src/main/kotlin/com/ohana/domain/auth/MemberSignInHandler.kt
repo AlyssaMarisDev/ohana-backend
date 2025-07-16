@@ -1,4 +1,4 @@
-package com.ohana.auth.handlers
+package com.ohana.domain.auth
 
 import com.ohana.auth.utils.Hasher
 import com.ohana.auth.utils.JwtCreator
