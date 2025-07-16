@@ -21,18 +21,14 @@ class TaskGetByIdHandler(
 
     suspend fun handle(
         id: String,
-        householdId: String,
         userId: String,
     ): Response =
         unitOfWork.execute { context ->
-            householdMemberValidator.validate(context, householdId, userId)
-
+            // First, find the task to get its household ID
             val task = context.tasks.findById(id) ?: throw NotFoundException("Task not found")
 
-            // Validate that the task belongs to the specified household
-            if (task.householdId != householdId) {
-                throw NotFoundException("Task not found in this household")
-            }
+            // Validate that the user is an active member of the household that the task belongs to
+            householdMemberValidator.validate(context, task.householdId, userId)
 
             Response(
                 id = task.id,

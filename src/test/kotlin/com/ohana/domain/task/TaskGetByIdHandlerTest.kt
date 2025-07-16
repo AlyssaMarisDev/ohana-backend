@@ -57,7 +57,7 @@ class TaskGetByIdHandlerTest {
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
 
-            val response = handler.handle(taskId, householdId, userId)
+            val response = handler.handle(taskId, userId)
 
             verify(householdMemberValidator).validate(context, householdId, userId)
             verify(taskRepository).findById(taskId)
@@ -93,7 +93,7 @@ class TaskGetByIdHandlerTest {
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
 
-            val response = handler.handle(taskId, householdId, userId)
+            val response = handler.handle(taskId, userId)
 
             assertEquals(TaskStatus.in_progress, response.status)
         }
@@ -120,62 +120,18 @@ class TaskGetByIdHandlerTest {
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
 
-            val response = handler.handle(taskId, householdId, userId)
+            val response = handler.handle(taskId, userId)
 
             assertEquals(TaskStatus.completed, response.status)
         }
 
     @Test
-    fun `handle should throw AuthorizationException when user is not member of household`() =
+    fun `handle should throw AuthorizationException when user is not member of task's household`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val taskId = UUID.randomUUID().toString()
             val householdId = UUID.randomUUID().toString()
-            val userId = UUID.randomUUID().toString()
-
-            whenever(householdMemberValidator.validate(context, householdId, userId))
-                .thenThrow(AuthorizationException("User is not a member of the household"))
-
-            val ex =
-                assertThrows<AuthorizationException> {
-                    handler.handle(taskId, householdId, userId)
-                }
-
-            assertEquals("User is not a member of the household", ex.message)
-            verify(householdMemberValidator).validate(context, householdId, userId)
-            verify(taskRepository, never()).findById(any())
-        }
-
-    @Test
-    fun `handle should throw NotFoundException when task does not exist`() =
-        runTest {
-            TestUtils.mockUnitOfWork(unitOfWork, context)
-
-            val taskId = UUID.randomUUID().toString()
-            val householdId = UUID.randomUUID().toString()
-            val userId = UUID.randomUUID().toString()
-
-            whenever(taskRepository.findById(taskId)).thenReturn(null)
-
-            val ex =
-                assertThrows<NotFoundException> {
-                    handler.handle(taskId, householdId, userId)
-                }
-
-            assertEquals("Task not found", ex.message)
-            verify(householdMemberValidator).validate(context, householdId, userId)
-            verify(taskRepository).findById(taskId)
-        }
-
-    @Test
-    fun `handle should throw NotFoundException when task exists but not in household`() =
-        runTest {
-            TestUtils.mockUnitOfWork(unitOfWork, context)
-
-            val taskId = UUID.randomUUID().toString()
-            val householdId = UUID.randomUUID().toString()
-            val otherHouseholdId = UUID.randomUUID().toString()
             val userId = UUID.randomUUID().toString()
 
             val task =
@@ -186,19 +142,41 @@ class TaskGetByIdHandlerTest {
                     dueDate = Instant.now().plusSeconds(3600),
                     status = TaskStatus.pending,
                     createdBy = userId,
-                    householdId = otherHouseholdId, // Different household
+                    householdId = householdId,
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
+            whenever(householdMemberValidator.validate(context, householdId, userId))
+                .thenThrow(AuthorizationException("User is not a member of the household"))
+
+            val ex =
+                assertThrows<AuthorizationException> {
+                    handler.handle(taskId, userId)
+                }
+
+            assertEquals("User is not a member of the household", ex.message)
+            verify(householdMemberValidator).validate(context, householdId, userId)
+            verify(taskRepository).findById(taskId)
+        }
+
+    @Test
+    fun `handle should throw NotFoundException when task does not exist`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val taskId = UUID.randomUUID().toString()
+            val userId = UUID.randomUUID().toString()
+
+            whenever(taskRepository.findById(taskId)).thenReturn(null)
 
             val ex =
                 assertThrows<NotFoundException> {
-                    handler.handle(taskId, householdId, userId)
+                    handler.handle(taskId, userId)
                 }
 
-            assertEquals("Task not found in this household", ex.message)
-            verify(householdMemberValidator).validate(context, householdId, userId)
+            assertEquals("Task not found", ex.message)
             verify(taskRepository).findById(taskId)
+            verify(householdMemberValidator, never()).validate(any(), any(), any())
         }
 
     @Test
@@ -207,19 +185,18 @@ class TaskGetByIdHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val taskId = UUID.randomUUID().toString()
-            val householdId = UUID.randomUUID().toString()
             val userId = UUID.randomUUID().toString()
 
             whenever(taskRepository.findById(taskId)).thenThrow(RuntimeException("DB error"))
 
             val ex =
                 assertThrows<RuntimeException> {
-                    handler.handle(taskId, householdId, userId)
+                    handler.handle(taskId, userId)
                 }
 
             assertEquals("DB error", ex.message)
-            verify(householdMemberValidator).validate(context, householdId, userId)
             verify(taskRepository).findById(taskId)
+            verify(householdMemberValidator, never()).validate(any(), any(), any())
         }
 
     @Test
@@ -245,7 +222,7 @@ class TaskGetByIdHandlerTest {
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
 
-            val response = handler.handle(taskId, householdId, userId)
+            val response = handler.handle(taskId, userId)
 
             assertEquals(taskCreatorId, response.createdBy)
             assertEquals(userId, userId) // Current user should still be the one making the request
@@ -273,7 +250,7 @@ class TaskGetByIdHandlerTest {
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
 
-            val response = handler.handle(taskId, householdId, userId)
+            val response = handler.handle(taskId, userId)
 
             assertEquals("", response.description)
         }
@@ -300,7 +277,7 @@ class TaskGetByIdHandlerTest {
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
 
-            val response = handler.handle(taskId, householdId, userId)
+            val response = handler.handle(taskId, userId)
 
             assertEquals(task.dueDate, response.dueDate)
         }
@@ -328,7 +305,7 @@ class TaskGetByIdHandlerTest {
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
 
-            val response = handler.handle(taskId, householdId, userId)
+            val response = handler.handle(taskId, userId)
 
             assertEquals(currentTime, response.dueDate)
         }
