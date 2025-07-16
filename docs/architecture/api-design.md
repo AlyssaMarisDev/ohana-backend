@@ -418,49 +418,6 @@ route("/api/v2") {
 - **v2**: Future breaking changes
 - Maintain backward compatibility within major versions
 
-## Testing Controllers
-
-### Controller Testing
-
-```kotlin
-@Test
-fun `POST /tasks should create task when valid request`() = testApplication {
-    // Setup
-    val request = TaskCreationHandler.Request(
-        title = "Test Task",
-        description = "Test Description",
-        dueDate = Instant.now().plusSeconds(3600),
-        status = TaskStatus.pending,
-        householdId = UUID.randomUUID().toString(),
-    )
-
-    // Execute
-    client.post("/api/v1/tasks") {
-        setBody(request)
-        header(HttpHeaders.Authorization, "Bearer $validToken")
-        contentType(ContentType.Application.Json)
-    }.apply {
-        // Assert
-        assertEquals(HttpStatusCode.Created, status)
-        val response = body<TaskCreationHandler.Response>()
-        assertEquals(request.title, response.title)
-    }
-}
-```
-
-### Mocking Dependencies
-
-```kotlin
-@Test
-fun `GET /tasks should return tasks for household`() = testApplication {
-    // Mock handler
-    val mockHandler = mock<TaskGetAllHandler>()
-    whenever(mockHandler.handle(any(), any())).thenReturn(listOf(task))
-
-    // Test implementation
-}
-```
-
 ## Best Practices
 
 ### 1. Consistent Naming

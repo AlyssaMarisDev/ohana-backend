@@ -377,43 +377,6 @@ logger.error("Database error: ${exception.message}")
 logger.info("User password: ${password}")
 ```
 
-## Testing Security
-
-### Security Testing
-
-```kotlin
-@Test
-fun `should reject invalid JWT token`() = testApplication {
-    client.get("/api/v1/tasks") {
-        header(HttpHeaders.Authorization, "Bearer invalid-token")
-    }.apply {
-        assertEquals(HttpStatusCode.Unauthorized, status)
-    }
-}
-
-@Test
-fun `should reject SQL injection attempt`() = testApplication {
-    val maliciousInput = "'; DROP TABLE tasks; --"
-
-    client.get("/api/v1/tasks?householdId=$maliciousInput") {
-        header(HttpHeaders.Authorization, "Bearer $validToken")
-    }.apply {
-        // Should not crash or expose data
-        assertNotEquals(HttpStatusCode.InternalServerError, status)
-    }
-}
-
-@Test
-fun `should validate user permissions`() = testApplication {
-    // Test that users can only access their own data
-    client.get("/api/v1/tasks?householdId=${otherUserHouseholdId}") {
-        header(HttpHeaders.Authorization, "Bearer $userToken")
-    }.apply {
-        assertEquals(HttpStatusCode.Forbidden, status)
-    }
-}
-```
-
 ## Security Best Practices
 
 ### 1. Always Validate Input
