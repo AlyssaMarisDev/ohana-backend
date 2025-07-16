@@ -60,7 +60,7 @@ val appModule =
         single { HouseholdAcceptInviteHandler(get()) }
         single { HouseholdCreationHandler(get()) }
         single { HouseholdGetAllHandler(get()) }
-        single { HouseholdGetByIdHandler(get()) }
+        single { HouseholdGetByIdHandler(get(), get()) }
         single { HouseholdInviteMemberHandler(get()) }
 
         // Controllers

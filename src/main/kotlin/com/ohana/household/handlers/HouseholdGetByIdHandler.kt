@@ -1,10 +1,12 @@
 package com.ohana.household.handlers
 
 import com.ohana.exceptions.NotFoundException
+import com.ohana.shared.HouseholdMemberValidator
 import com.ohana.shared.UnitOfWork
 
 class HouseholdGetByIdHandler(
     private val unitOfWork: UnitOfWork,
+    private val householdMemberValidator: HouseholdMemberValidator,
 ) {
     data class Response(
         val id: String,
@@ -13,8 +15,14 @@ class HouseholdGetByIdHandler(
         val createdBy: String,
     )
 
-    suspend fun handle(id: String): Response =
+    suspend fun handle(
+        id: String,
+        userId: String,
+    ): Response =
         unitOfWork.execute { context ->
+            // Validate that the user is a member of the household
+            householdMemberValidator.validate(context, id, userId)
+
             val household = context.households.findById(id) ?: throw NotFoundException("Household not found")
 
             Response(

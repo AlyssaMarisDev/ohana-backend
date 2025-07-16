@@ -34,6 +34,7 @@ class HouseholdController(
                 }
 
                 get("/{householdId}") {
+                    val userId = getUserId(call.principal<JWTPrincipal>())
                     val id =
                         call.parameters["householdId"]
                             ?: throw ValidationException(
@@ -41,7 +42,7 @@ class HouseholdController(
                                 listOf(ValidationError("householdId", "Household ID is required")),
                             )
 
-                    val response = householdGetByIdHandler.handle(id)
+                    val response = householdGetByIdHandler.handle(id, userId)
                     call.respond(HttpStatusCode.OK, response)
                 }
 

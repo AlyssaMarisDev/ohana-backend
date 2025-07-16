@@ -2,6 +2,7 @@ package com.ohana.household.handlers
 
 import com.ohana.TestUtils
 import com.ohana.exceptions.NotFoundException
+import com.ohana.shared.HouseholdMemberValidator
 import com.ohana.shared.HouseholdRepository
 import com.ohana.shared.UnitOfWork
 import com.ohana.shared.UnitOfWorkContext
@@ -17,6 +18,7 @@ class HouseholdGetByIdHandlerTest {
     private lateinit var unitOfWork: UnitOfWork
     private lateinit var context: UnitOfWorkContext
     private lateinit var householdRepository: HouseholdRepository
+    private lateinit var householdMemberValidator: HouseholdMemberValidator
     private lateinit var handler: HouseholdGetByIdHandler
 
     @BeforeEach
@@ -27,7 +29,8 @@ class HouseholdGetByIdHandlerTest {
                 on { households } doReturn householdRepository
             }
         unitOfWork = mock()
-        handler = HouseholdGetByIdHandler(unitOfWork)
+        householdMemberValidator = mock()
+        handler = HouseholdGetByIdHandler(unitOfWork, householdMemberValidator)
     }
 
     @Test
@@ -35,6 +38,7 @@ class HouseholdGetByIdHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
+            val userId = UUID.randomUUID().toString()
             val household =
                 TestUtils.getHousehold(
                     id = UUID.randomUUID().toString(),
@@ -45,31 +49,33 @@ class HouseholdGetByIdHandlerTest {
 
             whenever(householdRepository.findById(household.id)).thenReturn(household)
 
-            val response = handler.handle(household.id)
+            val response = handler.handle(household.id, userId)
 
             assertEquals(household.id, response.id)
             assertEquals(household.name, response.name)
             assertEquals(household.description, response.description)
             assertEquals(household.createdBy, response.createdBy)
 
+            verify(householdMemberValidator).validate(context, household.id, userId)
             verify(householdRepository).findById(household.id)
             verifyNoMoreInteractions(householdRepository)
         }
 
     @Test
-    fun `handle should throw NotFoundException when household does not exist`() =
+    fun `handle should propagate exception from validator`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
+            val userId = UUID.randomUUID().toString()
             val id = UUID.randomUUID().toString()
-            whenever(householdRepository.findById(id)).thenReturn(null)
+            whenever(householdMemberValidator.validate(context, id, userId)).thenThrow(NotFoundException("Household not found"))
 
             val ex =
                 assertThrows<NotFoundException> {
-                    handler.handle(id)
+                    handler.handle(id, userId)
                 }
             assertEquals("Household not found", ex.message)
-            verify(householdRepository).findById(id)
+            verify(householdMemberValidator).validate(context, id, userId)
             verifyNoMoreInteractions(householdRepository)
         }
 
@@ -78,12 +84,13 @@ class HouseholdGetByIdHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
+            val userId = UUID.randomUUID().toString()
             val id = UUID.randomUUID().toString()
             whenever(householdRepository.findById(id)).thenThrow(RuntimeException("DB error"))
 
             val ex =
                 assertThrows<RuntimeException> {
-                    handler.handle(id)
+                    handler.handle(id, userId)
                 }
             assertEquals("DB error", ex.message)
             verify(householdRepository).findById(id)

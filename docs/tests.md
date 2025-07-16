@@ -167,6 +167,41 @@ fun `handle should propagate exception from repository`() = runTest {
 }
 ```
 
+#### 6. Void Method Exception Testing Pattern
+
+```kotlin
+@Test
+fun `handle should throw when validator fails`() = runTest {
+    TestUtils.mockUnitOfWork(unitOfWork, context)
+
+    // Mock void method to throw exception
+    whenever(validator.validate(context, id, userId)).thenThrow(AuthorizationException("User not authorized"))
+
+    // Assert exception is thrown
+    val ex = assertThrows<AuthorizationException> {
+        handler.handle(id, userId)
+    }
+    assertEquals("User not authorized", ex.message)
+}
+```
+
+#### 7. Void Method Success Testing Pattern
+
+```kotlin
+@Test
+fun `handle should succeed when validator passes`() = runTest {
+    TestUtils.mockUnitOfWork(unitOfWork, context)
+
+    // Don't need to mock void method success
+
+    val response = handler.handle(id, userId)
+
+    // Assert successful response
+    assertEquals(expectedValue, response.property)
+    verify(validator).validate(context, id, userId)
+}
+```
+
 ### Important Notes
 
 - **Always set up mocks in @BeforeEach**: This ensures mocks aren't shared between test cases
@@ -401,6 +436,18 @@ fun `handle should propagate exception from repository`() = runTest {
     }
     assertEquals("DB error", ex.message)
 }
+
+@Test
+fun `handle should propagate exception from validator`() = runTest {
+    // Mock validator to throw exception
+    whenever(validator.validate(context, id, userId)).thenThrow(AuthorizationException("User not authorized"))
+
+    // Assert exception is propagated
+    val ex = assertThrows<AuthorizationException> {
+        handler.handle(id, userId)
+    }
+    assertEquals("User not authorized", ex.message)
+}
 ```
 
 ### 4. Edge Case Tests
@@ -451,6 +498,9 @@ fun `handle should handle empty result set`() = runTest {
 - Test both expected and unexpected exceptions
 - Verify exception messages
 - Test exception propagation from dependencies
+- Use `whenever(method()).thenThrow(exception)` for void methods that throw exceptions
+- Don't need to mock void methods that succeed
+- Avoid using `doThrow().whenever()` pattern - prefer `whenever().thenThrow()`
 
 ### 6. Performance
 
