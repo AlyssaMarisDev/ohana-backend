@@ -129,4 +129,20 @@ class JdbiTaskRepository(
 
         return findById(task.id) ?: throw NotFoundException("Task not found after update")
     }
+
+    override fun deleteById(id: String): Boolean {
+        val deleteQuery = """
+            DELETE FROM tasks
+            WHERE id = :id
+        """
+
+        val deletedRows =
+            DatabaseUtils.delete(
+                handle,
+                deleteQuery,
+                mapOf("id" to id),
+            )
+
+        return deletedRows > 0
+    }
 }

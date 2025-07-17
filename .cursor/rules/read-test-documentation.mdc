@@ -1,8 +1,8 @@
 ---
-globs: src/test/**
+description: When writing or updating unit tests
 alwaysApply: false
 ---
 
-- Read and apply the patterns shown in these files when writing tests
+- Read and apply the patterns shown in this file
 
-@testing
+@docs/testing/unit-tests.md

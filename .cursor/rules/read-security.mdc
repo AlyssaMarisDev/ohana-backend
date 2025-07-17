@@ -1,0 +1,8 @@
+---
+description: When needing to understand how auth works in this project
+alwaysApply: false
+---
+
+- Read this file
+
+@docs/architecture/security.md

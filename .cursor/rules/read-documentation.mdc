@@ -1,8 +1,0 @@
----
-description: Apply defined architecture patterns for codebase
-alwaysApply: true
----
-
-- Read and apply the patterns shown in these files when implementing changes and giving suggestions
-
-@architecture

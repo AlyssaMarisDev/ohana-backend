@@ -57,6 +57,27 @@ class DatabaseUtils(
             return updated
         }
 
+        fun delete(
+            handle: Handle,
+            deleteQuery: String,
+            params: Map<String, Any?>,
+        ): Int {
+            logger.debug("Starting delete")
+            var delete = handle.createUpdate(deleteQuery)
+
+            params.forEach { (key, value) ->
+                delete = delete.bind(key, value)
+            }
+
+            logger.debug("Deleting")
+
+            val deleted = delete.execute()
+
+            logger.debug("Delete completed")
+
+            return deleted
+        }
+
         fun <T : Any> get(
             handle: Handle,
             query: String,

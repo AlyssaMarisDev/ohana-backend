@@ -2,6 +2,7 @@ package com.ohana.api.task
 
 import com.ohana.api.utils.getUserId
 import com.ohana.domain.task.TaskCreationHandler
+import com.ohana.domain.task.TaskDeleteByIdHandler
 import com.ohana.domain.task.TaskGetAllHandler
 import com.ohana.domain.task.TaskGetByIdHandler
 import com.ohana.domain.task.TaskUpdateByIdHandler
@@ -17,6 +18,7 @@ import io.ktor.server.routing.*
 
 class TaskController(
     private val taskCreationHandler: TaskCreationHandler,
+    private val taskDeleteByIdHandler: TaskDeleteByIdHandler,
     private val taskGetAllHandler: TaskGetAllHandler,
     private val taskGetByIdHandler: TaskGetByIdHandler,
     private val taskUpdateByIdHandler: TaskUpdateByIdHandler,
@@ -85,6 +87,21 @@ class TaskController(
                     val response = taskUpdateByIdHandler.handle(id, householdId, userId, request)
 
                     call.respond(HttpStatusCode.OK, response)
+                }
+
+                delete("/{taskId}") {
+                    val userId = getUserId(call.principal<JWTPrincipal>())
+                    val id =
+                        call.parameters["taskId"]
+                            ?: throw ValidationException("Task ID is required", listOf(ValidationError("taskId", "Task ID is required")))
+
+                    val deleted = taskDeleteByIdHandler.handle(id, userId)
+
+                    if (deleted) {
+                        call.respond(HttpStatusCode.NoContent)
+                    } else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
                 }
             }
         }

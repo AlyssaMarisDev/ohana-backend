@@ -12,4 +12,6 @@ interface TaskRepository {
     fun findByHouseholdIds(householdIds: List<String>): List<Task>
 
     fun update(task: Task): Task
+
+    fun deleteById(id: String): Boolean
 }

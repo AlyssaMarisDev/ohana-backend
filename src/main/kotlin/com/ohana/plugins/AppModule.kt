@@ -50,6 +50,7 @@ val appModule =
 
         // Tasks handlers - now only need UnitOfWork
         single { TaskCreationHandler(get(), get()) }
+        single { TaskDeleteByIdHandler(get(), get()) }
         single { TaskGetAllHandler(get(), get()) }
         single { TaskGetByIdHandler(get(), get()) }
         single { TaskUpdateByIdHandler(get(), get()) }
@@ -66,5 +67,5 @@ val appModule =
         single { HealthController() }
         single { HouseholdController(get(), get(), get(), get(), get()) }
         single { MemberController(get(), get(), get()) }
-        single { TaskController(get(), get(), get(), get()) }
+        single { TaskController(get(), get(), get(), get(), get()) }
     }

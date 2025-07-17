@@ -1,0 +1,8 @@
+---
+description: When adding or updating environment variables
+alwaysApply: false
+---
+
+- Read and apply the patterns shown in this file
+
+@docs/architecture/configuration.md

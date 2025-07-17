@@ -1,0 +1,8 @@
+---
+description: When needing to fetch data from the database
+alwaysApply: false
+---
+
+- Read and apply the patterns shown in this file
+
+@docs/architecture/data-access.md
