@@ -1,5 +1,9 @@
 package com.ohana.data.auth
 
+import org.jdbi.v3.core.mapper.RowMapper
+import org.jdbi.v3.core.statement.StatementContext
+import java.sql.ResultSet
+
 data class AuthMember(
     val id: String,
     val name: String,
@@ -9,6 +13,24 @@ data class AuthMember(
     val age: Int? = null,
     val gender: String? = null,
 ) {
+    companion object {
+        /**
+         * Maps a database row to an AuthMember object
+         */
+        val mapper: RowMapper<AuthMember> =
+            RowMapper { rs: ResultSet, _: StatementContext ->
+                AuthMember(
+                    id = rs.getString("id"),
+                    name = rs.getString("name"),
+                    email = rs.getString("email"),
+                    password = rs.getString("password"),
+                    salt = rs.getBytes("salt"),
+                    age = rs.getObject("age") as? Int,
+                    gender = rs.getString("gender"),
+                )
+            }
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

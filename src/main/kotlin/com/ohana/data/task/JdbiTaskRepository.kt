@@ -1,7 +1,6 @@
 package com.ohana.data.task
 
 import com.ohana.data.utils.DatabaseUtils
-import com.ohana.data.utils.RowMappers
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
@@ -47,7 +46,7 @@ class JdbiTaskRepository(
                 handle,
                 selectQuery,
                 mapOf("id" to id),
-                RowMappers.taskMapper,
+                Task.mapper,
             ).firstOrNull()
     }
 
@@ -62,7 +61,7 @@ class JdbiTaskRepository(
                 handle,
                 selectQuery,
                 mapOf(),
-                RowMappers.taskMapper,
+                Task.mapper,
             )
     }
 
@@ -78,7 +77,7 @@ class JdbiTaskRepository(
                 handle,
                 selectQuery,
                 mapOf("household_id" to householdId),
-                RowMappers.taskMapper,
+                Task.mapper,
             )
     }
 
@@ -102,7 +101,7 @@ class JdbiTaskRepository(
                 handle,
                 selectQuery,
                 params,
-                RowMappers.taskMapper,
+                Task.mapper,
             )
     }
 

@@ -1,7 +1,6 @@
 package com.ohana.data.auth
 
 import com.ohana.data.utils.DatabaseUtils
-import com.ohana.data.utils.RowMappers
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
@@ -47,7 +46,7 @@ class JdbiRefreshTokenRepository(
                 handle,
                 selectQuery,
                 mapOf("token" to token),
-                RowMappers.refreshTokenMapper,
+                RefreshToken.mapper,
             ).firstOrNull()
     }
 
@@ -64,7 +63,7 @@ class JdbiRefreshTokenRepository(
                 handle,
                 selectQuery,
                 mapOf("user_id" to userId),
-                RowMappers.refreshTokenMapper,
+                RefreshToken.mapper,
             )
     }
 
@@ -133,7 +132,7 @@ class JdbiRefreshTokenRepository(
                 handle,
                 selectQuery,
                 mapOf("id" to id),
-                RowMappers.refreshTokenMapper,
+                RefreshToken.mapper,
             ).firstOrNull()
     }
 }

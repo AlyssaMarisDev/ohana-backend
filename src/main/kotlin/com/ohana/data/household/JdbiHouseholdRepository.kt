@@ -1,7 +1,6 @@
 package com.ohana.data.household
 
 import com.ohana.data.utils.DatabaseUtils
-import com.ohana.data.utils.RowMappers
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
@@ -21,7 +20,7 @@ class JdbiHouseholdRepository(
                 handle,
                 selectQuery,
                 mapOf("id" to id),
-                RowMappers.householdMapper,
+                Household.mapper,
             ).firstOrNull()
     }
 
@@ -36,7 +35,7 @@ class JdbiHouseholdRepository(
                 handle,
                 selectQuery,
                 mapOf(),
-                RowMappers.householdMapper,
+                Household.mapper,
             )
     }
 
@@ -53,7 +52,7 @@ class JdbiHouseholdRepository(
                 handle,
                 selectQuery,
                 mapOf("memberId" to memberId),
-                RowMappers.householdMapper,
+                Household.mapper,
             )
     }
 
@@ -98,7 +97,7 @@ class JdbiHouseholdRepository(
                     "householdId" to householdId,
                     "memberId" to memberId,
                 ),
-                RowMappers.householdMemberMapper,
+                HouseholdMember.mapper,
             ).firstOrNull()
     }
 
@@ -116,7 +115,7 @@ class JdbiHouseholdRepository(
                     "id" to member.id,
                     "householdId" to member.householdId,
                     "memberId" to member.memberId,
-                    "role" to member.role,
+                    "role" to member.role.name,
                     "isActive" to member.isActive,
                     "invitedBy" to member.invitedBy,
                     "joinedAt" to member.joinedAt,

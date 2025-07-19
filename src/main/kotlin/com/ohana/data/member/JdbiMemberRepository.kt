@@ -1,7 +1,6 @@
 package com.ohana.data.member
 
 import com.ohana.data.utils.DatabaseUtils
-import com.ohana.data.utils.RowMappers
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
@@ -21,7 +20,7 @@ class JdbiMemberRepository(
                 handle,
                 selectQuery,
                 mapOf("id" to id),
-                RowMappers.memberMapper,
+                Member.mapper,
             ).firstOrNull()
     }
 
@@ -36,7 +35,7 @@ class JdbiMemberRepository(
                 handle,
                 selectQuery,
                 mapOf(),
-                RowMappers.memberMapper,
+                Member.mapper,
             )
     }
 
@@ -52,7 +51,7 @@ class JdbiMemberRepository(
                 handle,
                 selectQuery,
                 mapOf("email" to email),
-                RowMappers.memberMapper,
+                Member.mapper,
             ).firstOrNull()
     }
 
