@@ -324,7 +324,7 @@ fun `should validate valid request`() {
         title = "Valid Title",
         description = "Valid description",
         dueDate = Instant.now().plusSeconds(3600),
-        status = TaskStatus.pending
+        status = TaskStatus.PENDING
     )
 
     val violations = validator.validate(request)
@@ -338,7 +338,7 @@ fun `should fail validation with invalid data`() {
         title = "",
         description = "",
         dueDate = Instant.now().minusSeconds(3600),
-        status = TaskStatus.pending
+        status = TaskStatus.PENDING
     )
 
     val violations = validator.validate(request)

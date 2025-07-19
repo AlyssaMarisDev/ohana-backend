@@ -29,7 +29,7 @@ class TestUtils {
             title: String = "Test Task",
             description: String = "Test Description",
             dueDate: Instant = Instant.now(),
-            status: TaskStatus = TaskStatus.pending,
+            status: TaskStatus = TaskStatus.PENDING,
             createdBy: String = UUID.randomUUID().toString(),
             householdId: String = UUID.randomUUID().toString(),
         ): Task = Task(id, title, description, dueDate, status, createdBy, householdId)
@@ -53,7 +53,7 @@ class TestUtils {
             id: String = UUID.randomUUID().toString(),
             householdId: String = UUID.randomUUID().toString(),
             memberId: String = UUID.randomUUID().toString(),
-            role: HouseholdMemberRole = HouseholdMemberRole.member,
+            role: HouseholdMemberRole = HouseholdMemberRole.MEMBER,
             isActive: Boolean = true,
             invitedBy: String? = UUID.randomUUID().toString(),
             joinedAt: Instant? = Instant.now(),

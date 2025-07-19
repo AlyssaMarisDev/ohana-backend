@@ -43,7 +43,7 @@ class HouseholdAcceptInviteHandlerTest {
                 TestUtils.getHouseholdMember(
                     householdId = householdId,
                     memberId = userId,
-                    role = HouseholdMemberRole.member,
+                    role = HouseholdMemberRole.MEMBER,
                     isActive = false, // Not yet active
                     invitedBy = UUID.randomUUID().toString(),
                 )
@@ -69,7 +69,7 @@ class HouseholdAcceptInviteHandlerTest {
                 TestUtils.getHouseholdMember(
                     householdId = householdId,
                     memberId = userId,
-                    role = HouseholdMemberRole.admin,
+                    role = HouseholdMemberRole.ADMIN,
                     isActive = false,
                     invitedBy = UUID.randomUUID().toString(),
                 )
@@ -95,7 +95,7 @@ class HouseholdAcceptInviteHandlerTest {
                 TestUtils.getHouseholdMember(
                     householdId = householdId,
                     memberId = userId,
-                    role = HouseholdMemberRole.member,
+                    role = HouseholdMemberRole.MEMBER,
                     isActive = true, // Already active
                     invitedBy = UUID.randomUUID().toString(),
                     joinedAt = Instant.now().minusSeconds(3600), // Joined 1 hour ago
@@ -142,7 +142,7 @@ class HouseholdAcceptInviteHandlerTest {
                 TestUtils.getHouseholdMember(
                     householdId = householdId,
                     memberId = userId,
-                    role = HouseholdMemberRole.member,
+                    role = HouseholdMemberRole.MEMBER,
                     isActive = false,
                     invitedBy = UUID.randomUUID().toString(),
                 )
@@ -172,7 +172,7 @@ class HouseholdAcceptInviteHandlerTest {
                 TestUtils.getHouseholdMember(
                     householdId = householdId,
                     memberId = userId,
-                    role = HouseholdMemberRole.member,
+                    role = HouseholdMemberRole.MEMBER,
                     isActive = false,
                     invitedBy = UUID.randomUUID().toString(),
                 )

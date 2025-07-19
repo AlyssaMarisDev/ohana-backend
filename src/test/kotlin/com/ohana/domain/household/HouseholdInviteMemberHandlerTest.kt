@@ -42,13 +42,13 @@ class HouseholdInviteMemberHandlerTest {
             val request =
                 HouseholdInviteMemberHandler.Request(
                     memberId = memberId,
-                    role = HouseholdMemberRole.member,
+                    role = HouseholdMemberRole.MEMBER,
                 )
             val adminMember =
                 TestUtils.getHouseholdMember(
                     householdId = householdId,
                     memberId = userId,
-                    role = HouseholdMemberRole.admin,
+                    role = HouseholdMemberRole.ADMIN,
                 )
 
             whenever(householdRepository.findMemberById(householdId, userId)).thenReturn(adminMember)
@@ -57,7 +57,7 @@ class HouseholdInviteMemberHandlerTest {
                 TestUtils.getHouseholdMember(
                     householdId = householdId,
                     memberId = memberId,
-                    role = HouseholdMemberRole.member,
+                    role = HouseholdMemberRole.MEMBER,
                     isActive = false,
                     invitedBy = userId,
                 ),
@@ -71,7 +71,7 @@ class HouseholdInviteMemberHandlerTest {
                 argThat {
                     this.householdId == householdId &&
                         this.memberId == memberId &&
-                        this.role == HouseholdMemberRole.member &&
+                        this.role == HouseholdMemberRole.MEMBER &&
                         !this.isActive &&
                         this.invitedBy == userId
                 },
@@ -90,7 +90,7 @@ class HouseholdInviteMemberHandlerTest {
             val request =
                 HouseholdInviteMemberHandler.Request(
                     memberId = memberId,
-                    role = HouseholdMemberRole.member,
+                    role = HouseholdMemberRole.MEMBER,
                 )
 
             whenever(householdRepository.findMemberById(householdId, userId)).thenReturn(null)
@@ -115,13 +115,13 @@ class HouseholdInviteMemberHandlerTest {
             val request =
                 HouseholdInviteMemberHandler.Request(
                     memberId = memberId,
-                    role = HouseholdMemberRole.member,
+                    role = HouseholdMemberRole.MEMBER,
                 )
             val nonAdminMember =
                 TestUtils.getHouseholdMember(
                     householdId = householdId,
                     memberId = userId,
-                    role = HouseholdMemberRole.member,
+                    role = HouseholdMemberRole.MEMBER,
                 )
 
             whenever(householdRepository.findMemberById(householdId, userId)).thenReturn(nonAdminMember)
@@ -146,19 +146,19 @@ class HouseholdInviteMemberHandlerTest {
             val request =
                 HouseholdInviteMemberHandler.Request(
                     memberId = memberId,
-                    role = HouseholdMemberRole.member,
+                    role = HouseholdMemberRole.MEMBER,
                 )
             val adminMember =
                 TestUtils.getHouseholdMember(
                     householdId = householdId,
                     memberId = userId,
-                    role = HouseholdMemberRole.admin,
+                    role = HouseholdMemberRole.ADMIN,
                 )
             val alreadyMember =
                 TestUtils.getHouseholdMember(
                     householdId = householdId,
                     memberId = memberId,
-                    role = HouseholdMemberRole.member,
+                    role = HouseholdMemberRole.MEMBER,
                 )
 
             whenever(householdRepository.findMemberById(householdId, userId)).thenReturn(adminMember)
@@ -185,13 +185,13 @@ class HouseholdInviteMemberHandlerTest {
             val request =
                 HouseholdInviteMemberHandler.Request(
                     memberId = memberId,
-                    role = HouseholdMemberRole.member,
+                    role = HouseholdMemberRole.MEMBER,
                 )
             val adminMember =
                 TestUtils.getHouseholdMember(
                     householdId = householdId,
                     memberId = userId,
-                    role = HouseholdMemberRole.admin,
+                    role = HouseholdMemberRole.ADMIN,
                 )
 
             whenever(householdRepository.findMemberById(householdId, userId)).thenReturn(adminMember)

@@ -54,7 +54,7 @@ class TaskGetAllHandlerTest {
                         title = "Task 1",
                         description = "Description 1",
                         dueDate = Instant.now().plusSeconds(3600),
-                        status = TaskStatus.pending,
+                        status = TaskStatus.PENDING,
                         createdBy = userId,
                         householdId = householdId,
                     ),
@@ -62,7 +62,7 @@ class TaskGetAllHandlerTest {
                         title = "Task 2",
                         description = "Description 2",
                         dueDate = Instant.now().plusSeconds(7200),
-                        status = TaskStatus.in_progress,
+                        status = TaskStatus.IN_PROGRESS,
                         createdBy = UUID.randomUUID().toString(),
                         householdId = householdId,
                     ),
@@ -70,7 +70,7 @@ class TaskGetAllHandlerTest {
                         title = "Task 3",
                         description = "Description 3",
                         dueDate = Instant.now().plusSeconds(10800),
-                        status = TaskStatus.completed,
+                        status = TaskStatus.COMPLETED,
                         createdBy = userId,
                         householdId = householdId,
                     ),
@@ -181,19 +181,19 @@ class TaskGetAllHandlerTest {
                 listOf(
                     TestUtils.getTask(
                         title = "Pending Task",
-                        status = TaskStatus.pending,
+                        status = TaskStatus.PENDING,
                         createdBy = userId,
                         householdId = householdId,
                     ),
                     TestUtils.getTask(
                         title = "In Progress Task",
-                        status = TaskStatus.in_progress,
+                        status = TaskStatus.IN_PROGRESS,
                         createdBy = userId,
                         householdId = householdId,
                     ),
                     TestUtils.getTask(
                         title = "Completed Task",
-                        status = TaskStatus.completed,
+                        status = TaskStatus.COMPLETED,
                         createdBy = userId,
                         householdId = householdId,
                     ),
@@ -204,9 +204,9 @@ class TaskGetAllHandlerTest {
             val response = handler.handle(listOf(householdId), userId)
 
             assertEquals(3, response.size)
-            assertEquals(TaskStatus.pending, response[0].status)
-            assertEquals(TaskStatus.in_progress, response[1].status)
-            assertEquals(TaskStatus.completed, response[2].status)
+            assertEquals(TaskStatus.PENDING, response[0].status)
+            assertEquals(TaskStatus.IN_PROGRESS, response[1].status)
+            assertEquals(TaskStatus.COMPLETED, response[2].status)
         }
 
     @Test

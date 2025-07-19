@@ -62,7 +62,7 @@ class HouseholdCreationHandlerTest {
                     id = UUID.randomUUID().toString(),
                     householdId = householdId,
                     memberId = userId,
-                    role = HouseholdMemberRole.admin,
+                    role = HouseholdMemberRole.ADMIN,
                 )
 
             whenever(householdRepository.create(any())).thenReturn(expectedHousehold)
@@ -87,7 +87,7 @@ class HouseholdCreationHandlerTest {
                 argThat { member ->
                     member.householdId == householdId &&
                         member.memberId == userId &&
-                        member.role == HouseholdMemberRole.admin &&
+                        member.role == HouseholdMemberRole.ADMIN &&
                         member.isActive &&
                         member.invitedBy == userId &&
                         member.joinedAt != null
@@ -122,7 +122,7 @@ class HouseholdCreationHandlerTest {
                     id = UUID.randomUUID().toString(),
                     householdId = householdId,
                     memberId = userId,
-                    role = HouseholdMemberRole.admin,
+                    role = HouseholdMemberRole.ADMIN,
                 )
 
             whenever(householdRepository.create(any())).thenReturn(expectedHousehold)
@@ -164,7 +164,7 @@ class HouseholdCreationHandlerTest {
                     id = UUID.randomUUID().toString(),
                     householdId = householdId,
                     memberId = userId,
-                    role = HouseholdMemberRole.admin,
+                    role = HouseholdMemberRole.ADMIN,
                 )
 
             whenever(householdRepository.create(any())).thenReturn(expectedHousehold)
@@ -363,7 +363,7 @@ class HouseholdCreationHandlerTest {
                     id = UUID.randomUUID().toString(),
                     householdId = householdId,
                     memberId = userId,
-                    role = HouseholdMemberRole.admin,
+                    role = HouseholdMemberRole.ADMIN,
                 )
 
             whenever(householdRepository.create(any())).thenReturn(expectedHousehold)
@@ -373,7 +373,7 @@ class HouseholdCreationHandlerTest {
 
             verify(householdRepository).createMember(
                 argThat { member ->
-                    member.role == HouseholdMemberRole.admin &&
+                    member.role == HouseholdMemberRole.ADMIN &&
                         member.isActive &&
                         member.invitedBy == userId &&
                         member.joinedAt != null &&
@@ -410,7 +410,7 @@ class HouseholdCreationHandlerTest {
                     id = UUID.randomUUID().toString(),
                     householdId = householdId,
                     memberId = userId,
-                    role = HouseholdMemberRole.admin,
+                    role = HouseholdMemberRole.ADMIN,
                 )
 
             whenever(householdRepository.create(any())).thenReturn(expectedHousehold)
@@ -452,7 +452,7 @@ class HouseholdCreationHandlerTest {
                     id = UUID.randomUUID().toString(),
                     householdId = householdId,
                     memberId = userId,
-                    role = HouseholdMemberRole.admin,
+                    role = HouseholdMemberRole.ADMIN,
                 )
 
             whenever(householdRepository.create(any())).thenReturn(expectedHousehold)

@@ -50,7 +50,7 @@ class TaskCreationHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(1000),
-                    status = TaskStatus.pending,
+                    status = TaskStatus.PENDING,
                 )
 
             val task =
@@ -93,7 +93,7 @@ class TaskCreationHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(1000),
-                    status = TaskStatus.pending,
+                    status = TaskStatus.PENDING,
                 )
 
             whenever(
@@ -120,7 +120,7 @@ class TaskCreationHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(1000),
-                    status = TaskStatus.pending,
+                    status = TaskStatus.PENDING,
                 )
 
             whenever(taskRepository.create(any())).thenThrow(RuntimeException("DB error"))

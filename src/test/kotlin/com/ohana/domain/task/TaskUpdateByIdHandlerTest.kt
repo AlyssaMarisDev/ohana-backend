@@ -55,7 +55,7 @@ class TaskUpdateByIdHandlerTest {
                     title = "Original Title",
                     description = "Original Description",
                     dueDate = Instant.now().plusSeconds(3600),
-                    status = TaskStatus.pending,
+                    status = TaskStatus.PENDING,
                     createdBy = userId,
                     householdId = householdId,
                 )
@@ -65,7 +65,7 @@ class TaskUpdateByIdHandlerTest {
                     title = "Updated Title",
                     description = "Updated Description",
                     dueDate = Instant.now().plusSeconds(7200),
-                    status = TaskStatus.in_progress,
+                    status = TaskStatus.IN_PROGRESS,
                 )
 
             val expectedUpdatedTask =
@@ -108,7 +108,7 @@ class TaskUpdateByIdHandlerTest {
                     title = "Updated Title",
                     description = "Updated Description",
                     dueDate = Instant.now().plusSeconds(7200),
-                    status = TaskStatus.in_progress,
+                    status = TaskStatus.IN_PROGRESS,
                 )
 
             whenever(householdMemberValidator.validate(context, householdId, userId))
@@ -139,7 +139,7 @@ class TaskUpdateByIdHandlerTest {
                     title = "Updated Title",
                     description = "Updated Description",
                     dueDate = Instant.now().plusSeconds(7200),
-                    status = TaskStatus.in_progress,
+                    status = TaskStatus.IN_PROGRESS,
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(null)
@@ -171,7 +171,7 @@ class TaskUpdateByIdHandlerTest {
                     title = "Original Title",
                     description = "Original Description",
                     dueDate = Instant.now().plusSeconds(3600),
-                    status = TaskStatus.pending,
+                    status = TaskStatus.PENDING,
                     createdBy = userId,
                     householdId = otherHouseholdId, // Different household
                 )
@@ -181,7 +181,7 @@ class TaskUpdateByIdHandlerTest {
                     title = "Updated Title",
                     description = "Updated Description",
                     dueDate = Instant.now().plusSeconds(7200),
-                    status = TaskStatus.in_progress,
+                    status = TaskStatus.IN_PROGRESS,
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(existingTask)
@@ -212,7 +212,7 @@ class TaskUpdateByIdHandlerTest {
                     title = "Original Title",
                     description = "Original Description",
                     dueDate = Instant.now().plusSeconds(3600),
-                    status = TaskStatus.pending,
+                    status = TaskStatus.PENDING,
                     createdBy = userId,
                     householdId = householdId,
                 )
@@ -222,7 +222,7 @@ class TaskUpdateByIdHandlerTest {
                     title = "Updated Title",
                     description = "Updated Description",
                     dueDate = Instant.now().plusSeconds(7200),
-                    status = TaskStatus.in_progress,
+                    status = TaskStatus.IN_PROGRESS,
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(existingTask)
@@ -246,7 +246,7 @@ class TaskUpdateByIdHandlerTest {
                 title = "Valid Title",
                 description = "Valid description",
                 dueDate = Instant.now().plusSeconds(3600),
-                status = TaskStatus.pending,
+                status = TaskStatus.PENDING,
             )
         val violations = validator.validate(request)
         assertEquals(0, violations.size)
@@ -259,7 +259,7 @@ class TaskUpdateByIdHandlerTest {
                 title = "",
                 description = "Valid description",
                 dueDate = Instant.now().plusSeconds(3600),
-                status = TaskStatus.pending,
+                status = TaskStatus.PENDING,
             )
         val violations = validator.validate(request)
         val messages = violations.map { it.propertyPath.toString() to it.message }
@@ -275,7 +275,7 @@ class TaskUpdateByIdHandlerTest {
                 title = "", // Empty string is less than 1 character
                 description = "Valid description",
                 dueDate = Instant.now().plusSeconds(3600),
-                status = TaskStatus.pending,
+                status = TaskStatus.PENDING,
             )
         val violations = validator.validate(request)
         val messages = violations.map { it.propertyPath.toString() to it.message }
@@ -292,7 +292,7 @@ class TaskUpdateByIdHandlerTest {
                 title = longTitle,
                 description = "Valid description",
                 dueDate = Instant.now().plusSeconds(3600),
-                status = TaskStatus.pending,
+                status = TaskStatus.PENDING,
             )
         val violations = validator.validate(request)
         val messages = violations.map { it.propertyPath.toString() to it.message }
@@ -308,7 +308,7 @@ class TaskUpdateByIdHandlerTest {
                 title = "Valid Title",
                 description = longDescription,
                 dueDate = Instant.now().plusSeconds(3600),
-                status = TaskStatus.pending,
+                status = TaskStatus.PENDING,
             )
         val violations = validator.validate(request)
         val messages = violations.map { it.propertyPath.toString() to it.message }
@@ -323,7 +323,7 @@ class TaskUpdateByIdHandlerTest {
                 title = "Valid Title",
                 description = "Valid description",
                 dueDate = Instant.now().minusSeconds(3600), // Past date
-                status = TaskStatus.pending,
+                status = TaskStatus.PENDING,
             )
         val violations = validator.validate(request)
         val messages = violations.map { it.propertyPath.toString() to it.message }
@@ -338,7 +338,7 @@ class TaskUpdateByIdHandlerTest {
                 title = "Valid Title",
                 description = "Valid description",
                 dueDate = Instant.now().plusSeconds(3600), // Future date
-                status = TaskStatus.pending,
+                status = TaskStatus.PENDING,
             )
         val violations = validator.validate(request)
         assertEquals(0, violations.size)
@@ -351,7 +351,7 @@ class TaskUpdateByIdHandlerTest {
                 title = "", // Empty title
                 description = "a".repeat(1001), // Too long description
                 dueDate = Instant.now().minusSeconds(3600), // Past date
-                status = TaskStatus.pending,
+                status = TaskStatus.PENDING,
             )
         val violations = validator.validate(request)
         val fields = violations.map { it.propertyPath.toString() }.toSet()

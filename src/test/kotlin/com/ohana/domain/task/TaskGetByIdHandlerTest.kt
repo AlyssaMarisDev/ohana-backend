@@ -50,7 +50,7 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(3600),
-                    status = TaskStatus.pending,
+                    status = TaskStatus.PENDING,
                     createdBy = userId,
                     householdId = householdId,
                 )
@@ -86,7 +86,7 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(3600),
-                    status = TaskStatus.in_progress,
+                    status = TaskStatus.IN_PROGRESS,
                     createdBy = userId,
                     householdId = householdId,
                 )
@@ -95,7 +95,7 @@ class TaskGetByIdHandlerTest {
 
             val response = handler.handle(taskId, userId)
 
-            assertEquals(TaskStatus.in_progress, response.status)
+            assertEquals(TaskStatus.IN_PROGRESS, response.status)
         }
 
     @Test
@@ -113,7 +113,7 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(3600),
-                    status = TaskStatus.completed,
+                    status = TaskStatus.COMPLETED,
                     createdBy = userId,
                     householdId = householdId,
                 )
@@ -122,7 +122,7 @@ class TaskGetByIdHandlerTest {
 
             val response = handler.handle(taskId, userId)
 
-            assertEquals(TaskStatus.completed, response.status)
+            assertEquals(TaskStatus.COMPLETED, response.status)
         }
 
     @Test
@@ -140,7 +140,7 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(3600),
-                    status = TaskStatus.pending,
+                    status = TaskStatus.PENDING,
                     createdBy = userId,
                     householdId = householdId,
                 )
@@ -215,7 +215,7 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(3600),
-                    status = TaskStatus.pending,
+                    status = TaskStatus.PENDING,
                     createdBy = taskCreatorId, // Different user
                     householdId = householdId,
                 )
@@ -243,7 +243,7 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "", // Empty description
                     dueDate = Instant.now().plusSeconds(3600),
-                    status = TaskStatus.pending,
+                    status = TaskStatus.PENDING,
                     createdBy = userId,
                     householdId = householdId,
                 )
@@ -270,7 +270,7 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now().minusSeconds(3600), // Past due date
-                    status = TaskStatus.pending,
+                    status = TaskStatus.PENDING,
                     createdBy = userId,
                     householdId = householdId,
                 )
@@ -298,7 +298,7 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = currentTime, // Current time
-                    status = TaskStatus.pending,
+                    status = TaskStatus.PENDING,
                     createdBy = userId,
                     householdId = householdId,
                 )

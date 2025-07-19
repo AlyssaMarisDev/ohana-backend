@@ -52,7 +52,7 @@ class HouseholdCreationHandler(
                     id = UUID.randomUUID().toString(),
                     householdId = request.id,
                     memberId = userId,
-                    role = HouseholdMemberRole.admin,
+                    role = HouseholdMemberRole.ADMIN,
                     isActive = true,
                     invitedBy = userId,
                     joinedAt = Instant.now(),

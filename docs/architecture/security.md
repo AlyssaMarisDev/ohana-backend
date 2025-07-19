@@ -144,7 +144,7 @@ enum class HouseholdMemberRole {
 
 // Check admin permissions
 fun validateAdminAccess(member: HouseholdMember) {
-    if (member.role != HouseholdMemberRole.admin) {
+    if (member.role != HouseholdMemberRole.ADMIN) {
         throw AuthorizationException("User is not an admin of the household")
     }
 }
@@ -152,7 +152,7 @@ fun validateAdminAccess(member: HouseholdMember) {
 // Check specific permissions
 fun validateTaskPermission(member: HouseholdMember, task: Task) {
     // Users can only modify tasks they created or if they're admin
-    if (member.role != HouseholdMemberRole.admin && member.memberId != task.createdBy) {
+    if (member.role != HouseholdMemberRole.ADMIN && member.memberId != task.createdBy) {
         throw AuthorizationException("User can only modify their own tasks")
     }
 }
@@ -177,7 +177,7 @@ class TaskUpdateHandler(
 
             // Check ownership or admin role
             val member = context.households.findMemberById(task.householdId, userId)!!
-            if (member.role != HouseholdMemberRole.admin && member.memberId != task.createdBy) {
+            if (member.role != HouseholdMemberRole.ADMIN && member.memberId != task.createdBy) {
                 throw AuthorizationException("User can only modify their own tasks")
             }
 

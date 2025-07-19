@@ -220,7 +220,7 @@ object TestUtils {
         title: String = "Test Task",
         description: String = "Test Description",
         dueDate: Instant = Instant.now(),
-        status: TaskStatus = TaskStatus.pending,
+        status: TaskStatus = TaskStatus.PENDING,
         createdBy: String = UUID.randomUUID().toString(),
     ): Task = Task(id, title, description, dueDate, status, createdBy)
 
@@ -255,7 +255,7 @@ fun `handle should create task when user exists`() = runTest {
         title = "Test Task",
         description = "Test Description",
         dueDate = Instant.now(),
-        status = TaskStatus.pending,
+        status = TaskStatus.PENDING,
     )
     val member = TestUtils.getMember()
 

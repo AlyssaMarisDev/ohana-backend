@@ -28,7 +28,7 @@ object RowMappers {
                 title = rs.getString("title"),
                 description = rs.getString("description"),
                 dueDate = rs.getTimestamp("due_date")?.toInstant() ?: Instant.now(),
-                status = TaskStatus.valueOf(rs.getString("status")),
+                status = TaskStatus.valueOf(rs.getString("status").uppercase()),
                 createdBy = rs.getString("created_by"),
                 householdId = rs.getString("household_id"),
             )
@@ -86,7 +86,7 @@ object RowMappers {
                 id = rs.getString("id"),
                 householdId = rs.getString("household_id"),
                 memberId = rs.getString("member_id"),
-                role = HouseholdMemberRole.valueOf(rs.getString("role")),
+                role = HouseholdMemberRole.valueOf(rs.getString("role").uppercase()),
                 isActive = rs.getBoolean("is_active"),
                 invitedBy = rs.getString("invited_by"),
                 joinedAt = rs.getTimestamp("joined_at")?.toInstant(),

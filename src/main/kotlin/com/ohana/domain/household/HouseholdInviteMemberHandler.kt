@@ -29,7 +29,7 @@ class HouseholdInviteMemberHandler(
         if (actorHouseholdMember == null) {
             throw AuthorizationException("User is not a member of the household")
         }
-        if (actorHouseholdMember.role != HouseholdMemberRole.admin) {
+        if (actorHouseholdMember.role != HouseholdMemberRole.ADMIN) {
             throw AuthorizationException("User is not an admin of the household")
         }
 
