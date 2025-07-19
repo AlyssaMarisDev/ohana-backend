@@ -1,6 +1,7 @@
 package com.ohana.data.unitOfWork
 
 import com.ohana.data.auth.AuthMemberRepository
+import com.ohana.data.auth.RefreshTokenRepository
 import com.ohana.data.household.HouseholdRepository
 import com.ohana.data.member.MemberRepository
 import com.ohana.data.task.TaskRepository
@@ -16,4 +17,5 @@ interface UnitOfWorkContext {
     val members: MemberRepository
     val households: HouseholdRepository
     val authMembers: AuthMemberRepository
+    val refreshTokens: RefreshTokenRepository
 }

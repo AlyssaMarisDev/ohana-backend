@@ -1,6 +1,7 @@
 package com.ohana.data.household
 
 import com.ohana.data.utils.DatabaseUtils
+import com.ohana.data.utils.RowMappers
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
@@ -10,49 +11,49 @@ class JdbiHouseholdRepository(
 ) : HouseholdRepository {
     override fun findById(id: String): Household? {
         val selectQuery = """
-            SELECT id, name, description, created_by as createdBy
+            SELECT id, name, description, created_by
             FROM households
             WHERE id = :id
         """
 
         return DatabaseUtils
-            .get(
+            .getWithMapper(
                 handle,
                 selectQuery,
                 mapOf("id" to id),
-                Household::class,
+                RowMappers.householdMapper,
             ).firstOrNull()
     }
 
     override fun findAll(): List<Household> {
         val selectQuery = """
-            SELECT id, name, description, created_by as createdBy
+            SELECT id, name, description, created_by
             FROM households
         """
 
         return DatabaseUtils
-            .get(
+            .getWithMapper(
                 handle,
                 selectQuery,
                 mapOf(),
-                Household::class,
+                RowMappers.householdMapper,
             )
     }
 
     override fun findByMemberId(memberId: String): List<Household> {
         val selectQuery = """
-            SELECT h.id, h.name, h.description, h.created_by as createdBy
+            SELECT h.id, h.name, h.description, h.created_by
             FROM households h
             INNER JOIN household_members hm ON h.id = hm.household_id
             WHERE hm.member_id = :memberId AND hm.is_active = true
         """
 
         return DatabaseUtils
-            .get(
+            .getWithMapper(
                 handle,
                 selectQuery,
                 mapOf("memberId" to memberId),
-                Household::class,
+                RowMappers.householdMapper,
             )
     }
 
@@ -84,20 +85,20 @@ class JdbiHouseholdRepository(
         memberId: String,
     ): HouseholdMember? {
         val selectQuery = """
-            SELECT id, household_id as householdId, member_id as memberId, role, is_active as isActive, invited_by as invitedBy, joined_at as joinedAt
+            SELECT id, household_id, member_id, role, is_active, invited_by, joined_at
             FROM household_members
             WHERE household_id = :householdId AND member_id = :memberId
         """
 
         return DatabaseUtils
-            .get(
+            .getWithMapper(
                 handle,
                 selectQuery,
                 mapOf(
                     "householdId" to householdId,
                     "memberId" to memberId,
                 ),
-                HouseholdMember::class,
+                RowMappers.householdMemberMapper,
             ).firstOrNull()
     }
 

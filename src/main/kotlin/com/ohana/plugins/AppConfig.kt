@@ -57,17 +57,21 @@ data class DatabaseConfig(
 
 data class JwtConfig(
     val secret: String,
+    val refreshSecret: String,
     val issuer: String,
     val audience: String,
     val expirationHours: Long,
+    val refreshExpirationDays: Long,
 ) {
     companion object {
         fun fromEnvironment(): JwtConfig =
             JwtConfig(
                 secret = System.getenv("JWT_SECRET") ?: "your-secret-key-change-in-production",
+                refreshSecret = System.getenv("JWT_REFRESH_SECRET") ?: "your-refresh-secret-key-change-in-production",
                 issuer = System.getenv("JWT_ISSUER") ?: "ohana-backend",
                 audience = System.getenv("JWT_AUDIENCE") ?: "ohana-users",
-                expirationHours = System.getenv("JWT_EXPIRATION_HOURS")?.toLongOrNull() ?: 24,
+                expirationHours = System.getenv("JWT_EXPIRATION_HOURS")?.toLongOrNull() ?: 1,
+                refreshExpirationDays = System.getenv("JWT_REFRESH_EXPIRATION_DAYS")?.toLongOrNull() ?: 30,
             )
     }
 }

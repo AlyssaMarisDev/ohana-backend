@@ -42,6 +42,8 @@ val appModule =
         // Auth handlers
         single { MemberRegistrationHandler(get()) }
         single { MemberSignInHandler(get()) }
+        single { TokenRefreshHandler(get()) }
+        single { LogoutHandler(get()) }
 
         // Members handlers - now only need UnitOfWork
         single { MemberGetAllHandler(get()) }
@@ -63,7 +65,7 @@ val appModule =
         single { HouseholdInviteMemberHandler(get()) }
 
         // Controllers
-        single { AuthController(get(), get()) }
+        single { AuthController(get(), get(), get(), get()) }
         single { HealthController() }
         single { HouseholdController(get(), get(), get(), get(), get()) }
         single { MemberController(get(), get(), get()) }

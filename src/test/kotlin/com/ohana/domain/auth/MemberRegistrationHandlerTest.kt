@@ -3,6 +3,8 @@ package com.ohana.domain.auth
 import com.ohana.TestUtils
 import com.ohana.data.auth.AuthMember
 import com.ohana.data.auth.AuthMemberRepository
+import com.ohana.data.auth.RefreshToken
+import com.ohana.data.auth.RefreshTokenRepository
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.auth.utils.Hasher
 import com.ohana.shared.exceptions.ConflictException
@@ -21,15 +23,18 @@ class MemberRegistrationHandlerTest {
     private lateinit var unitOfWork: UnitOfWork
     private lateinit var context: UnitOfWorkContext
     private lateinit var authMemberRepository: AuthMemberRepository
+    private lateinit var refreshTokenRepository: RefreshTokenRepository
     private lateinit var handler: MemberRegistrationHandler
     private lateinit var validator: Validator
 
     @BeforeEach
     fun setUp() {
         authMemberRepository = mock()
+        refreshTokenRepository = mock()
         context =
             mock {
                 on { authMembers } doReturn authMemberRepository
+                on { refreshTokens } doReturn refreshTokenRepository
             }
         unitOfWork = mock()
         handler = MemberRegistrationHandler(unitOfWork)
@@ -59,11 +64,16 @@ class MemberRegistrationHandlerTest {
 
             whenever(authMemberRepository.findByEmail(request.email)).thenReturn(null)
             whenever(authMemberRepository.create(any())).thenReturn(authMember)
+            whenever(refreshTokenRepository.create(any())).thenAnswer { invocation ->
+                val token = invocation.getArgument<RefreshToken>(0)
+                token
+            }
 
             val response = handler.handle(request)
 
             assertEquals(authMember.id, response.id)
-            assertTrue(response.token.isNotEmpty())
+            assertTrue(response.accessToken.isNotEmpty())
+            assertTrue(response.refreshToken.isNotEmpty())
 
             verify(authMemberRepository).findByEmail(request.email)
             verify(authMemberRepository).create(
@@ -75,7 +85,8 @@ class MemberRegistrationHandlerTest {
                         member.salt.isNotEmpty()
                 },
             )
-            verifyNoMoreInteractions(authMemberRepository)
+            verify(refreshTokenRepository).create(any())
+            verifyNoMoreInteractions(authMemberRepository, refreshTokenRepository)
         }
 
     @Test
@@ -348,8 +359,10 @@ class MemberRegistrationHandlerTest {
 
             val response = handler.handle(request)
 
-            assertTrue(response.token.isNotEmpty())
-            // Token should be different from ID
-            assertTrue(response.token != response.id)
+            assertTrue(response.accessToken.isNotEmpty())
+            assertTrue(response.refreshToken.isNotEmpty())
+            // Tokens should be different from ID
+            assertTrue(response.accessToken != response.id)
+            assertTrue(response.refreshToken != response.id)
         }
 }

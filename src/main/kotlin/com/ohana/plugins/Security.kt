@@ -2,7 +2,6 @@ package com.ohana.plugins
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.auth0.jwt.exceptions.TokenExpiredException
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -19,26 +18,17 @@ fun Application.configureSecurity(jwtConfig: JwtConfig) {
                     .require(Algorithm.HMAC256(jwtConfig.secret))
                     .withAudience(jwtConfig.audience)
                     .withIssuer(jwtConfig.issuer)
-                    .acceptExpiresAt(System.currentTimeMillis() / 1000) // Accept current time for expiration check
+                    .withClaim("tokenType", "access")
                     .build(),
             )
             validate { credential ->
                 try {
                     if (credential.payload.audience.contains(jwtConfig.audience)) {
-                        // Check if token is expired
-                        val expiresAt = credential.payload.expiresAt
-                        if (expiresAt != null && expiresAt.before(java.util.Date())) {
-                            logger.info("JWT token expired for user: ${credential.payload.getClaim("userId").asString()}")
-                            null
-                        } else {
-                            JWTPrincipal(credential.payload)
-                        }
+                        JWTPrincipal(credential.payload)
                     } else {
+                        logger.info("JWT token audience mismatch")
                         null
                     }
-                } catch (e: TokenExpiredException) {
-                    logger.info("JWT token expired: ${e.message}")
-                    null
                 } catch (e: Exception) {
                     logger.error("JWT validation error: ${e.message}")
                     null

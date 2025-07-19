@@ -2,6 +2,8 @@ package com.ohana.data.unitOfWork
 
 import com.ohana.data.auth.AuthMemberRepository
 import com.ohana.data.auth.JdbiAuthMemberRepository
+import com.ohana.data.auth.JdbiRefreshTokenRepository
+import com.ohana.data.auth.RefreshTokenRepository
 import com.ohana.data.household.HouseholdRepository
 import com.ohana.data.household.JdbiHouseholdRepository
 import com.ohana.data.member.JdbiMemberRepository
@@ -34,4 +36,5 @@ class JdbiUnitOfWorkContext(
     override val members: MemberRepository = JdbiMemberRepository(handle)
     override val households: HouseholdRepository = JdbiHouseholdRepository(handle)
     override val authMembers: AuthMemberRepository = JdbiAuthMemberRepository(handle)
+    override val refreshTokens: RefreshTokenRepository = JdbiRefreshTokenRepository(handle)
 }

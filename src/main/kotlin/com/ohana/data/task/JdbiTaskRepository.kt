@@ -1,6 +1,7 @@
 package com.ohana.data.task
 
 import com.ohana.data.utils.DatabaseUtils
+import com.ohana.data.utils.RowMappers
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
@@ -36,48 +37,48 @@ class JdbiTaskRepository(
 
     override fun findById(id: String): Task? {
         val selectQuery = """
-            SELECT id, title, description, due_date as dueDate, status, created_by as createdBy, household_id as householdId
+            SELECT id, title, description, due_date, status, created_by, household_id
             FROM tasks
             WHERE id = :id
         """
 
         return DatabaseUtils
-            .get(
+            .getWithMapper(
                 handle,
                 selectQuery,
                 mapOf("id" to id),
-                Task::class,
+                RowMappers.taskMapper,
             ).firstOrNull()
     }
 
     override fun findAll(): List<Task> {
         val selectQuery = """
-            SELECT id, title, description, due_date as dueDate, status, created_by as createdBy, household_id as householdId
+            SELECT id, title, description, due_date, status, created_by, household_id
             FROM tasks
         """
 
         return DatabaseUtils
-            .get(
+            .getWithMapper(
                 handle,
                 selectQuery,
                 mapOf(),
-                Task::class,
+                RowMappers.taskMapper,
             )
     }
 
     override fun findByHouseholdId(householdId: String): List<Task> {
         val selectQuery = """
-            SELECT id, title, description, due_date as dueDate, status, created_by as createdBy, household_id as householdId
+            SELECT id, title, description, due_date, status, created_by, household_id
             FROM tasks
             WHERE household_id = :household_id
         """
 
         return DatabaseUtils
-            .get(
+            .getWithMapper(
                 handle,
                 selectQuery,
                 mapOf("household_id" to householdId),
-                Task::class,
+                RowMappers.taskMapper,
             )
     }
 
@@ -88,7 +89,7 @@ class JdbiTaskRepository(
 
         val placeholders = householdIds.mapIndexed { index, _ -> ":household_id_$index" }.joinToString(", ")
         val selectQuery = """
-            SELECT id, title, description, due_date as dueDate, status, created_by as createdBy, household_id as householdId
+            SELECT id, title, description, due_date, status, created_by, household_id
             FROM tasks
             WHERE household_id IN ($placeholders)
             ORDER BY created_at DESC
@@ -97,11 +98,11 @@ class JdbiTaskRepository(
         val params = householdIds.mapIndexed { index, id -> "household_id_$index" to id }.toMap()
 
         return DatabaseUtils
-            .get(
+            .getWithMapper(
                 handle,
                 selectQuery,
                 params,
-                Task::class,
+                RowMappers.taskMapper,
             )
     }
 

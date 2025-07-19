@@ -1,7 +1,10 @@
 package com.ohana.domain.auth
 
 import com.ohana.TestUtils
-import com.ohana.data.auth.*
+import com.ohana.data.auth.AuthMember
+import com.ohana.data.auth.AuthMemberRepository
+import com.ohana.data.auth.RefreshToken
+import com.ohana.data.auth.RefreshTokenRepository
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.auth.utils.Hasher
 import com.ohana.shared.exceptions.AuthorizationException
@@ -20,15 +23,18 @@ class MemberSignInHandlerTest {
     private lateinit var unitOfWork: UnitOfWork
     private lateinit var context: UnitOfWorkContext
     private lateinit var authMemberRepository: AuthMemberRepository
+    private lateinit var refreshTokenRepository: RefreshTokenRepository
     private lateinit var handler: MemberSignInHandler
     private lateinit var validator: Validator
 
     @BeforeEach
     fun setUp() {
         authMemberRepository = mock()
+        refreshTokenRepository = mock()
         context =
             mock {
                 on { authMembers } doReturn authMemberRepository
+                on { refreshTokens } doReturn refreshTokenRepository
             }
         unitOfWork = mock()
         handler = MemberSignInHandler(unitOfWork)
@@ -36,37 +42,39 @@ class MemberSignInHandlerTest {
     }
 
     @Test
-    fun `handle should sign in successfully with valid credentials`() =
+    fun `handle should sign in member successfully`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
-            val email = "test@example.com"
-            val password = "ValidPass123!"
-            val salt = Hasher.generateSalt()
-            val hashedPassword = Hasher.hashPassword(password, salt)
-
             val request =
                 MemberSignInHandler.Request(
-                    email = email,
-                    password = password,
+                    email = "test@example.com",
+                    password = "ValidPass123!",
                 )
 
             val authMember =
                 AuthMember(
                     id = UUID.randomUUID().toString(),
                     name = "Test User",
-                    email = email,
-                    password = hashedPassword,
-                    salt = salt,
+                    email = request.email,
+                    password = Hasher.hashPassword(request.password, ByteArray(16)),
+                    salt = ByteArray(16),
                 )
 
-            whenever(authMemberRepository.findByEmail(email)).thenReturn(authMember)
+            whenever(authMemberRepository.findByEmail(request.email)).thenReturn(authMember)
+            whenever(refreshTokenRepository.create(any())).thenAnswer { invocation ->
+                val token = invocation.getArgument<RefreshToken>(0)
+                token
+            }
 
             val response = handler.handle(request)
 
-            assertTrue(response.token.isNotEmpty())
-            verify(authMemberRepository).findByEmail(email)
-            verifyNoMoreInteractions(authMemberRepository)
+            assertTrue(response.accessToken.isNotEmpty())
+            assertTrue(response.refreshToken.isNotEmpty())
+
+            verify(authMemberRepository).findByEmail(request.email)
+            verify(refreshTokenRepository).create(any())
+            verifyNoMoreInteractions(authMemberRepository, refreshTokenRepository)
         }
 
     @Test
@@ -88,7 +96,7 @@ class MemberSignInHandlerTest {
                 }
             assertEquals("Invalid email or password", ex.message)
             verify(authMemberRepository).findByEmail(request.email)
-            verifyNoMoreInteractions(authMemberRepository)
+            verifyNoMoreInteractions(authMemberRepository, refreshTokenRepository)
         }
 
     @Test
@@ -125,7 +133,7 @@ class MemberSignInHandlerTest {
                 }
             assertEquals("Invalid email or password", ex.message)
             verify(authMemberRepository).findByEmail(email)
-            verifyNoMoreInteractions(authMemberRepository)
+            verifyNoMoreInteractions(authMemberRepository, refreshTokenRepository)
         }
 
     @Test
@@ -147,7 +155,7 @@ class MemberSignInHandlerTest {
                 }
             assertEquals("DB error", ex.message)
             verify(authMemberRepository).findByEmail(request.email)
-            verifyNoMoreInteractions(authMemberRepository)
+            verifyNoMoreInteractions(authMemberRepository, refreshTokenRepository)
         }
 
     @Test
@@ -230,10 +238,12 @@ class MemberSignInHandlerTest {
 
             val response = handler.handle(request)
 
-            assertTrue(response.token.isNotEmpty())
-            assertTrue(response.token != authMember.id) // Token should be different from ID
+            assertTrue(response.accessToken.isNotEmpty())
+            assertTrue(response.refreshToken.isNotEmpty())
+            assertTrue(response.accessToken != authMember.id) // Token should be different from ID
             verify(authMemberRepository).findByEmail(email)
-            verifyNoMoreInteractions(authMemberRepository)
+            verify(refreshTokenRepository).create(any())
+            verifyNoMoreInteractions(authMemberRepository, refreshTokenRepository)
         }
 
     @Test
@@ -267,8 +277,10 @@ class MemberSignInHandlerTest {
 
             // Verify that the password hash verification works correctly
             assertTrue(Hasher.hashPassword(password, salt) == hashedPassword)
-            assertTrue(response.token.isNotEmpty())
+            assertTrue(response.accessToken.isNotEmpty())
+            assertTrue(response.refreshToken.isNotEmpty())
             verify(authMemberRepository).findByEmail(email)
-            verifyNoMoreInteractions(authMemberRepository)
+            verify(refreshTokenRepository).create(any())
+            verifyNoMoreInteractions(authMemberRepository, refreshTokenRepository)
         }
 }

@@ -82,6 +82,24 @@ CREATE TABLE `tasks` (
   CONSTRAINT `fk_tasks_household_id` FOREIGN KEY (`household_id`) REFERENCES `households` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores task information';
 
+-- Refresh tokens table - stores refresh tokens for authentication
+CREATE TABLE `refresh_tokens` (
+  `id` char(36) NOT NULL COMMENT 'UUID for refresh token record',
+  `token` text NOT NULL COMMENT 'The refresh token value',
+  `user_id` char(36) NOT NULL COMMENT 'ID of the user this token belongs to',
+  `expires_at` timestamp NOT NULL COMMENT 'When the refresh token expires',
+  `is_revoked` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Whether the token has been revoked',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Record creation timestamp',
+  `revoked_at` timestamp NULL DEFAULT NULL COMMENT 'When the token was revoked',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_token` (`token`(255)),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_expires_at` (`expires_at`),
+  KEY `idx_is_revoked` (`is_revoked`),
+  KEY `idx_user_active_tokens` (`user_id`, `is_revoked`),
+  CONSTRAINT `fk_refresh_tokens_user_id` FOREIGN KEY (`user_id`) REFERENCES `members` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores refresh tokens for authentication';
+
 -- Insert sample data (optional)
 -- Uncomment the following lines if you want to insert sample data
 
@@ -111,3 +129,4 @@ DESCRIBE members;
 DESCRIBE households;
 DESCRIBE household_members;
 DESCRIBE tasks;
+DESCRIBE refresh_tokens;
