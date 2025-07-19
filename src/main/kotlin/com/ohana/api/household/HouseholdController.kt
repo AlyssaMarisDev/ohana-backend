@@ -46,7 +46,7 @@ class HouseholdController(
                                 listOf(ValidationError("householdId", "Household ID is required")),
                             )
 
-                    val response = householdGetByIdHandler.handle(id, userId)
+                    val response = householdGetByIdHandler.handle(userId, id)
                     call.respond(HttpStatusCode.OK, response)
                 }
 

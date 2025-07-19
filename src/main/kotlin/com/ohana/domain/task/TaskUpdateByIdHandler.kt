@@ -34,9 +34,9 @@ class TaskUpdateByIdHandler(
     )
 
     suspend fun handle(
+        userId: String,
         id: String,
         householdId: String,
-        userId: String,
         request: Request,
     ): Response =
         unitOfWork.execute { context ->

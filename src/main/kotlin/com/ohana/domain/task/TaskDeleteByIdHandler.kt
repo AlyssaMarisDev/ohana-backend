@@ -9,8 +9,8 @@ class TaskDeleteByIdHandler(
     private val householdMemberValidator: HouseholdMemberValidator,
 ) {
     suspend fun handle(
-        id: String,
         userId: String,
+        id: String,
     ): Boolean =
         unitOfWork.execute { context ->
             // First, find the task to get its household ID

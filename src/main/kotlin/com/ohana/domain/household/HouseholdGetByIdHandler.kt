@@ -16,8 +16,8 @@ class HouseholdGetByIdHandler(
     )
 
     suspend fun handle(
-        id: String,
         userId: String,
+        id: String,
     ): Response =
         unitOfWork.execute { context ->
             // Validate that the user is a member of the household

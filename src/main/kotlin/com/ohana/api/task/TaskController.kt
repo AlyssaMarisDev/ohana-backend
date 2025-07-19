@@ -49,7 +49,7 @@ class TaskController(
                         call.parameters["taskId"]
                             ?: throw ValidationException("Task ID is required", listOf(ValidationError("taskId", "Task ID is required")))
 
-                    val response = taskGetByIdHandler.handle(id, userId)
+                    val response = taskGetByIdHandler.handle(userId, id)
 
                     call.respond(HttpStatusCode.OK, response)
                 }
@@ -64,7 +64,7 @@ class TaskController(
 
                     val userId = getUserId(call.principal<JWTPrincipal>())
 
-                    val response = taskGetAllHandler.handle(householdIds, userId)
+                    val response = taskGetAllHandler.handle(userId, householdIds)
 
                     call.respond(HttpStatusCode.OK, response)
                 }
@@ -84,7 +84,7 @@ class TaskController(
                     // Use annotation-based validation
                     val request = call.validateAndReceive<TaskUpdateByIdHandler.Request>()
 
-                    val response = taskUpdateByIdHandler.handle(id, householdId, userId, request)
+                    val response = taskUpdateByIdHandler.handle(userId, id, householdId, request)
 
                     call.respond(HttpStatusCode.OK, response)
                 }
@@ -95,7 +95,7 @@ class TaskController(
                         call.parameters["taskId"]
                             ?: throw ValidationException("Task ID is required", listOf(ValidationError("taskId", "Task ID is required")))
 
-                    val deleted = taskDeleteByIdHandler.handle(id, userId)
+                    val deleted = taskDeleteByIdHandler.handle(userId, id)
 
                     if (deleted) {
                         call.respond(HttpStatusCode.NoContent)

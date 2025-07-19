@@ -19,8 +19,8 @@ class TaskGetAllHandler(
     )
 
     suspend fun handle(
-        householdIds: List<String>,
         userId: String,
+        householdIds: List<String>,
     ): List<Response> =
         unitOfWork.execute { context ->
             val effectiveHouseholdIds = getEffectiveHouseholdIds(context, householdIds, userId)

@@ -4,8 +4,6 @@ import com.ohana.TestUtils
 import com.ohana.data.task.TaskRepository
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.validators.HouseholdMemberValidator
-import com.ohana.shared.enums.TaskStatus
-import com.ohana.shared.exceptions.AuthorizationException
 import com.ohana.shared.exceptions.NotFoundException
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -36,7 +34,7 @@ class TaskGetByIdHandlerTest {
     }
 
     @Test
-    fun `handle should return task when validation passes`() =
+    fun `handle should return task when found and user is authorized`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
@@ -50,17 +48,14 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(3600),
-                    status = TaskStatus.PENDING,
+                    status = com.ohana.shared.enums.TaskStatus.PENDING,
                     createdBy = userId,
                     householdId = householdId,
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
 
-            val response = handler.handle(taskId, userId)
-
-            verify(householdMemberValidator).validate(context, householdId, userId)
-            verify(taskRepository).findById(taskId)
+            val response = handler.handle(userId, taskId)
 
             assertEquals(task.id, response.id)
             assertEquals(task.title, response.title)
@@ -69,6 +64,10 @@ class TaskGetByIdHandlerTest {
             assertEquals(task.status, response.status)
             assertEquals(task.createdBy, response.createdBy)
             assertEquals(task.householdId, response.householdId)
+
+            verify(householdMemberValidator).validate(context, householdId, userId)
+            verify(taskRepository).findById(taskId)
+            verifyNoMoreInteractions(taskRepository)
         }
 
     @Test
@@ -86,16 +85,16 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(3600),
-                    status = TaskStatus.IN_PROGRESS,
+                    status = com.ohana.shared.enums.TaskStatus.IN_PROGRESS,
                     createdBy = userId,
                     householdId = householdId,
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
 
-            val response = handler.handle(taskId, userId)
+            val response = handler.handle(userId, taskId)
 
-            assertEquals(TaskStatus.IN_PROGRESS, response.status)
+            assertEquals(com.ohana.shared.enums.TaskStatus.IN_PROGRESS, response.status)
         }
 
     @Test
@@ -113,16 +112,16 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(3600),
-                    status = TaskStatus.COMPLETED,
+                    status = com.ohana.shared.enums.TaskStatus.COMPLETED,
                     createdBy = userId,
                     householdId = householdId,
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
 
-            val response = handler.handle(taskId, userId)
+            val response = handler.handle(userId, taskId)
 
-            assertEquals(TaskStatus.COMPLETED, response.status)
+            assertEquals(com.ohana.shared.enums.TaskStatus.COMPLETED, response.status)
         }
 
     @Test
@@ -140,18 +139,21 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(3600),
-                    status = TaskStatus.PENDING,
+                    status = com.ohana.shared.enums.TaskStatus.PENDING,
                     createdBy = userId,
                     householdId = householdId,
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
             whenever(householdMemberValidator.validate(context, householdId, userId))
-                .thenThrow(AuthorizationException("User is not a member of the household"))
+                .thenThrow(
+                    com.ohana.shared.exceptions
+                        .AuthorizationException("User is not a member of the household"),
+                )
 
             val ex =
-                assertThrows<AuthorizationException> {
-                    handler.handle(taskId, userId)
+                assertThrows<com.ohana.shared.exceptions.AuthorizationException> {
+                    handler.handle(userId, taskId)
                 }
 
             assertEquals("User is not a member of the household", ex.message)
@@ -171,7 +173,7 @@ class TaskGetByIdHandlerTest {
 
             val ex =
                 assertThrows<NotFoundException> {
-                    handler.handle(taskId, userId)
+                    handler.handle(userId, taskId)
                 }
 
             assertEquals("Task not found", ex.message)
@@ -191,7 +193,7 @@ class TaskGetByIdHandlerTest {
 
             val ex =
                 assertThrows<RuntimeException> {
-                    handler.handle(taskId, userId)
+                    handler.handle(userId, taskId)
                 }
 
             assertEquals("DB error", ex.message)
@@ -215,14 +217,14 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(3600),
-                    status = TaskStatus.PENDING,
+                    status = com.ohana.shared.enums.TaskStatus.PENDING,
                     createdBy = taskCreatorId, // Different user
                     householdId = householdId,
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
 
-            val response = handler.handle(taskId, userId)
+            val response = handler.handle(userId, taskId)
 
             assertEquals(taskCreatorId, response.createdBy)
             assertEquals(userId, userId) // Current user should still be the one making the request
@@ -243,14 +245,14 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "", // Empty description
                     dueDate = Instant.now().plusSeconds(3600),
-                    status = TaskStatus.PENDING,
+                    status = com.ohana.shared.enums.TaskStatus.PENDING,
                     createdBy = userId,
                     householdId = householdId,
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
 
-            val response = handler.handle(taskId, userId)
+            val response = handler.handle(userId, taskId)
 
             assertEquals("", response.description)
         }
@@ -270,14 +272,14 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = Instant.now().minusSeconds(3600), // Past due date
-                    status = TaskStatus.PENDING,
+                    status = com.ohana.shared.enums.TaskStatus.PENDING,
                     createdBy = userId,
                     householdId = householdId,
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
 
-            val response = handler.handle(taskId, userId)
+            val response = handler.handle(userId, taskId)
 
             assertEquals(task.dueDate, response.dueDate)
         }
@@ -298,14 +300,14 @@ class TaskGetByIdHandlerTest {
                     title = "Test Task",
                     description = "Test Description",
                     dueDate = currentTime, // Current time
-                    status = TaskStatus.PENDING,
+                    status = com.ohana.shared.enums.TaskStatus.PENDING,
                     createdBy = userId,
                     householdId = householdId,
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
 
-            val response = handler.handle(taskId, userId)
+            val response = handler.handle(userId, taskId)
 
             assertEquals(currentTime, response.dueDate)
         }

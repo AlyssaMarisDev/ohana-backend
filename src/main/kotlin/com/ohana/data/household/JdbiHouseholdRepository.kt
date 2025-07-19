@@ -101,6 +101,22 @@ class JdbiHouseholdRepository(
             ).firstOrNull()
     }
 
+    override fun findMembersByHouseholdId(householdId: String): List<HouseholdMember> {
+        val selectQuery = """
+            SELECT id, household_id, member_id, role, is_active, invited_by, joined_at
+            FROM household_members
+            WHERE household_id = :householdId
+        """
+
+        return DatabaseUtils
+            .getWithMapper(
+                handle,
+                selectQuery,
+                mapOf("householdId" to householdId),
+                HouseholdMember.mapper,
+            )
+    }
+
     override fun createMember(member: HouseholdMember): HouseholdMember {
         val insertQuery = """
             INSERT INTO household_members (id, household_id, member_id, role, is_active, invited_by, joined_at)

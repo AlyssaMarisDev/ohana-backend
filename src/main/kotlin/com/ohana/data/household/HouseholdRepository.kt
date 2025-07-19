@@ -14,6 +14,8 @@ interface HouseholdRepository {
         memberId: String,
     ): HouseholdMember?
 
+    fun findMembersByHouseholdId(householdId: String): List<HouseholdMember>
+
     fun createMember(member: HouseholdMember): HouseholdMember
 
     fun updateMember(member: HouseholdMember): HouseholdMember
