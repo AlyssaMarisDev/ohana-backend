@@ -125,7 +125,7 @@ domain/
 │   ├── MemberSignInHandler.kt
 │   └── utils/
 │       ├── Hasher.kt
-│       └── JwtCreator.kt
+│       └── JwtManager.kt
 ├── household/
 │   ├── HouseholdCreationHandler.kt
 │   ├── HouseholdInviteMemberHandler.kt
@@ -183,7 +183,7 @@ domain/
 - `MemberRegistrationHandler.kt` - Registration business logic
 - `MemberSignInHandler.kt` - Login business logic
 - `utils/Hasher.kt` - Password hashing
-- `utils/JwtCreator.kt` - JWT token generation
+- `utils/JwtManager.kt` - JWT token generation
 
 **Key Operations**:
 

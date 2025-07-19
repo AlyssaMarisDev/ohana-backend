@@ -24,7 +24,7 @@ JWT tokens contain user identification and are signed with HMAC256:
 #### Token Generation
 
 ```kotlin
-object JwtCreator {
+object JwtManager {
     fun generateToken(userId: String): String {
         val secret = System.getenv("JWT_SECRET") ?: "default-secret"
         val expirationHours = System.getenv("JWT_EXPIRATION_HOURS")?.toIntOrNull() ?: 1

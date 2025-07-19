@@ -71,7 +71,7 @@ class MemberRegistrationHandler(
                 )
 
             // Generate token pair
-            val tokenPair = JwtCreator.generateTokenPair(member.id)
+            val tokenPair = JwtManager.generateTokenPair(member.id)
 
             // Store refresh token
             val refreshToken =

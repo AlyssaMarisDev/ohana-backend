@@ -4,7 +4,7 @@ import com.ohana.TestUtils
 import com.ohana.data.auth.RefreshToken
 import com.ohana.data.auth.RefreshTokenRepository
 import com.ohana.data.unitOfWork.*
-import com.ohana.domain.auth.utils.JwtCreator
+import com.ohana.domain.auth.utils.JwtManager
 import com.ohana.shared.exceptions.AuthorizationException
 import jakarta.validation.Validation
 import jakarta.validation.Validator
@@ -44,7 +44,7 @@ class TokenRefreshHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val userId = UUID.randomUUID().toString()
-            val oldRefreshToken = JwtCreator.generateRefreshToken(userId)
+            val oldRefreshToken = JwtManager.generateRefreshToken(userId)
 
             val storedToken =
                 RefreshToken(
@@ -97,7 +97,7 @@ class TokenRefreshHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val userId = UUID.randomUUID().toString()
-            val refreshToken = JwtCreator.generateRefreshToken(userId)
+            val refreshToken = JwtManager.generateRefreshToken(userId)
 
             whenever(refreshTokenRepository.findByToken(refreshToken)).thenReturn(null)
 
@@ -119,7 +119,7 @@ class TokenRefreshHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val userId = UUID.randomUUID().toString()
-            val refreshToken = JwtCreator.generateRefreshToken(userId)
+            val refreshToken = JwtManager.generateRefreshToken(userId)
 
             val storedToken =
                 RefreshToken(
@@ -150,7 +150,7 @@ class TokenRefreshHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val userId = UUID.randomUUID().toString()
-            val refreshToken = JwtCreator.generateRefreshToken(userId)
+            val refreshToken = JwtManager.generateRefreshToken(userId)
 
             val storedToken =
                 RefreshToken(
@@ -181,7 +181,7 @@ class TokenRefreshHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val userId = UUID.randomUUID().toString()
-            val refreshToken = JwtCreator.generateRefreshToken(userId)
+            val refreshToken = JwtManager.generateRefreshToken(userId)
 
             val storedToken =
                 RefreshToken(

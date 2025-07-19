@@ -26,7 +26,7 @@ class TokenRefreshHandler(
         unitOfWork.execute { context ->
             // Validate the refresh token
             val decodedToken =
-                JwtCreator.validateRefreshToken(request.refreshToken)
+                JwtManager.validateRefreshToken(request.refreshToken)
                     ?: throw AuthorizationException("Invalid refresh token")
 
             val userId =
@@ -55,7 +55,7 @@ class TokenRefreshHandler(
             context.refreshTokens.revokeToken(request.refreshToken)
 
             // Generate new token pair
-            val newTokenPair = JwtCreator.generateTokenPair(userId)
+            val newTokenPair = JwtManager.generateTokenPair(userId)
 
             // Store new refresh token
             val newRefreshToken =

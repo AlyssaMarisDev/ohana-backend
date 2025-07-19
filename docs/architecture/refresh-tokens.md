@@ -152,25 +152,25 @@ CREATE TABLE `refresh_tokens` (
 
 ```kotlin
 // Generate both tokens
-val tokenPair = JwtCreator.generateTokenPair(userId)
+val tokenPair = JwtManager.generateTokenPair(userId)
 
 // Or generate individually
-val accessToken = JwtCreator.generateAccessToken(userId)
-val refreshToken = JwtCreator.generateRefreshToken(userId)
+val accessToken = JwtManager.generateAccessToken(userId)
+val refreshToken = JwtManager.generateRefreshToken(userId)
 ```
 
 ### Token Validation
 
 ```kotlin
 // Validate access token
-val decodedAccessToken = JwtCreator.validateAccessToken(token)
+val decodedAccessToken = JwtManager.validateAccessToken(token)
 
 // Validate refresh token
-val decodedRefreshToken = JwtCreator.validateRefreshToken(token)
+val decodedRefreshToken = JwtManager.validateRefreshToken(token)
 
 // Extract user ID
-val userId = JwtCreator.getUserIdFromToken(accessToken)
-val userId = JwtCreator.getUserIdFromRefreshToken(refreshToken)
+val userId = JwtManager.getUserIdFromToken(accessToken)
+val userId = JwtManager.getUserIdFromRefreshToken(refreshToken)
 ```
 
 ### Database Operations
