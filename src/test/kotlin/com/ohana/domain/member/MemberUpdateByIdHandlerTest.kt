@@ -3,6 +3,7 @@ package com.ohana.domain.member
 import com.ohana.TestUtils
 import com.ohana.data.member.MemberRepository
 import com.ohana.data.unitOfWork.*
+import com.ohana.shared.exceptions.AuthorizationException
 import com.ohana.shared.exceptions.NotFoundException
 import jakarta.validation.Validation
 import jakarta.validation.Validator
@@ -35,11 +36,13 @@ class MemberUpdateByIdHandlerTest {
     }
 
     @Test
-    fun `handle should update member successfully`() =
+    fun `handle should update member successfully when user is authorized`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val memberId = UUID.randomUUID().toString()
+            val userId = memberId // Same user updating their own data
+
             val existingMember =
                 TestUtils.getMember(
                     id = memberId,
@@ -64,7 +67,7 @@ class MemberUpdateByIdHandlerTest {
             whenever(memberRepository.findById(memberId)).thenReturn(existingMember)
             whenever(memberRepository.update(any())).thenReturn(updatedMember)
 
-            val response = handler.handle(memberId, request)
+            val response = handler.handle(userId, memberId, request)
 
             assertEquals(memberId, response.id)
             assertEquals("Updated Name", response.name)
@@ -86,11 +89,13 @@ class MemberUpdateByIdHandlerTest {
         }
 
     @Test
-    fun `handle should update member with null optional fields`() =
+    fun `handle should update member with null optional fields when user is authorized`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val memberId = UUID.randomUUID().toString()
+            val userId = memberId // Same user updating their own data
+
             val existingMember =
                 TestUtils.getMember(
                     id = memberId,
@@ -115,7 +120,7 @@ class MemberUpdateByIdHandlerTest {
             whenever(memberRepository.findById(memberId)).thenReturn(existingMember)
             whenever(memberRepository.update(any())).thenReturn(updatedMember)
 
-            val response = handler.handle(memberId, request)
+            val response = handler.handle(userId, memberId, request)
 
             assertEquals(memberId, response.id)
             assertEquals("Updated Name", response.name)
@@ -137,11 +142,36 @@ class MemberUpdateByIdHandlerTest {
         }
 
     @Test
+    fun `handle should throw AuthorizationException when user tries to update different member`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val memberId = UUID.randomUUID().toString()
+            val userId = UUID.randomUUID().toString() // Different user
+
+            val request =
+                MemberUpdateByIdHandler.Request(
+                    name = "Updated Name",
+                    age = 30,
+                    gender = "Female",
+                )
+
+            val ex =
+                assertThrows<AuthorizationException> {
+                    handler.handle(userId, memberId, request)
+                }
+            assertEquals("You can only update your own member information", ex.message)
+            verifyNoInteractions(memberRepository)
+        }
+
+    @Test
     fun `handle should throw NotFoundException when member does not exist`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val memberId = UUID.randomUUID().toString()
+            val userId = memberId // Same user updating their own data
+
             val request =
                 MemberUpdateByIdHandler.Request(
                     name = "Updated Name",
@@ -153,7 +183,7 @@ class MemberUpdateByIdHandlerTest {
 
             val ex =
                 assertThrows<NotFoundException> {
-                    handler.handle(memberId, request)
+                    handler.handle(userId, memberId, request)
                 }
             assertEquals("Member not found", ex.message)
             verify(memberRepository).findById(memberId)
@@ -166,6 +196,8 @@ class MemberUpdateByIdHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val memberId = UUID.randomUUID().toString()
+            val userId = memberId // Same user updating their own data
+
             val existingMember = TestUtils.getMember(id = memberId)
             val request =
                 MemberUpdateByIdHandler.Request(
@@ -179,7 +211,7 @@ class MemberUpdateByIdHandlerTest {
 
             val ex =
                 assertThrows<RuntimeException> {
-                    handler.handle(memberId, request)
+                    handler.handle(userId, memberId, request)
                 }
             assertEquals("DB error", ex.message)
             verify(memberRepository).findById(memberId)
@@ -247,6 +279,8 @@ class MemberUpdateByIdHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val memberId = UUID.randomUUID().toString()
+            val userId = memberId // Same user updating their own data
+
             val existingMember =
                 TestUtils.getMember(
                     id = memberId,
@@ -271,7 +305,7 @@ class MemberUpdateByIdHandlerTest {
             whenever(memberRepository.findById(memberId)).thenReturn(existingMember)
             whenever(memberRepository.update(any())).thenReturn(updatedMember)
 
-            val response = handler.handle(memberId, request)
+            val response = handler.handle(userId, memberId, request)
 
             assertEquals("preserved@example.com", response.email)
             verify(memberRepository).update(

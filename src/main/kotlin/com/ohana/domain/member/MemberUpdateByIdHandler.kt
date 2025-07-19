@@ -1,6 +1,7 @@
 package com.ohana.domain.member
 
 import com.ohana.data.unitOfWork.*
+import com.ohana.shared.exceptions.AuthorizationException
 import com.ohana.shared.exceptions.NotFoundException
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
@@ -25,10 +26,16 @@ class MemberUpdateByIdHandler(
     )
 
     suspend fun handle(
+        userId: String,
         id: String,
         request: Request,
     ): Response =
         unitOfWork.execute { context ->
+            // Check that the user is trying to update their own member information
+            if (id != userId) {
+                throw AuthorizationException("You can only update your own member information")
+            }
+
             // Get existing member
             val existingMember = context.members.findById(id) ?: throw NotFoundException("Member not found")
 

@@ -1,5 +1,6 @@
 package com.ohana.api.member
 
+import com.ohana.api.utils.getUserId
 import com.ohana.domain.member.MemberGetAllHandler
 import com.ohana.domain.member.MemberGetByIdHandler
 import com.ohana.domain.member.MemberUpdateByIdHandler
@@ -27,7 +28,9 @@ class MemberController(
                                 "Member ID is required",
                                 listOf(ValidationError("memberId", "Member ID is required")),
                             )
-                    val response = memberGetByIdHandler.handle(id)
+
+                    val userId = getUserId(call.principal())
+                    val response = memberGetByIdHandler.handle(userId, id)
                     call.respond(HttpStatusCode.OK, response)
                 }
 
@@ -47,7 +50,8 @@ class MemberController(
                     // Use annotation-based validation
                     val request = call.validateAndReceive<MemberUpdateByIdHandler.Request>()
 
-                    val response = memberUpdateByIdHandler.handle(id, request)
+                    val userId = getUserId(call.principal())
+                    val response = memberUpdateByIdHandler.handle(userId, id, request)
                     call.respond(HttpStatusCode.OK, response)
                 }
             }

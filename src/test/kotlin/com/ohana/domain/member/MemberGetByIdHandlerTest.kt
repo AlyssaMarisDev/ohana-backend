@@ -3,6 +3,7 @@ package com.ohana.domain.member
 import com.ohana.TestUtils
 import com.ohana.data.member.MemberRepository
 import com.ohana.data.unitOfWork.*
+import com.ohana.shared.exceptions.AuthorizationException
 import com.ohana.shared.exceptions.NotFoundException
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
@@ -30,22 +31,25 @@ class MemberGetByIdHandlerTest {
     }
 
     @Test
-    fun `handle should return member when found`() =
+    fun `handle should return member when found and user is authorized`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
+            val memberId = UUID.randomUUID().toString()
+            val userId = memberId // Same user accessing their own data
+
             val member =
                 TestUtils.getMember(
-                    id = UUID.randomUUID().toString(),
+                    id = memberId,
                     name = "Test User",
                     email = "test@example.com",
                     age = 25,
                     gender = "Male",
                 )
 
-            whenever(memberRepository.findById(member.id)).thenReturn(member)
+            whenever(memberRepository.findById(memberId)).thenReturn(member)
 
-            val response = handler.handle(member.id)
+            val response = handler.handle(userId, memberId)
 
             assertEquals(member.id, response.id)
             assertEquals(member.name, response.name)
@@ -53,27 +57,30 @@ class MemberGetByIdHandlerTest {
             assertEquals(member.gender, response.gender)
             assertEquals(member.email, response.email)
 
-            verify(memberRepository).findById(member.id)
+            verify(memberRepository).findById(memberId)
             verifyNoMoreInteractions(memberRepository)
         }
 
     @Test
-    fun `handle should return member with null optional fields`() =
+    fun `handle should return member with null optional fields when user is authorized`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
+            val memberId = UUID.randomUUID().toString()
+            val userId = memberId // Same user accessing their own data
+
             val member =
                 TestUtils.getMember(
-                    id = UUID.randomUUID().toString(),
+                    id = memberId,
                     name = "Test User",
                     email = "test@example.com",
                     age = null,
                     gender = null,
                 )
 
-            whenever(memberRepository.findById(member.id)).thenReturn(member)
+            whenever(memberRepository.findById(memberId)).thenReturn(member)
 
-            val response = handler.handle(member.id)
+            val response = handler.handle(userId, memberId)
 
             assertEquals(member.id, response.id)
             assertEquals(member.name, response.name)
@@ -81,8 +88,24 @@ class MemberGetByIdHandlerTest {
             assertEquals(null, response.gender)
             assertEquals(member.email, response.email)
 
-            verify(memberRepository).findById(member.id)
+            verify(memberRepository).findById(memberId)
             verifyNoMoreInteractions(memberRepository)
+        }
+
+    @Test
+    fun `handle should throw AuthorizationException when user tries to access different member`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val memberId = UUID.randomUUID().toString()
+            val userId = UUID.randomUUID().toString() // Different user
+
+            val ex =
+                assertThrows<AuthorizationException> {
+                    handler.handle(userId, memberId)
+                }
+            assertEquals("You can only access your own member information", ex.message)
+            verifyNoInteractions(memberRepository)
         }
 
     @Test
@@ -90,15 +113,17 @@ class MemberGetByIdHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
-            val id = UUID.randomUUID().toString()
-            whenever(memberRepository.findById(id)).thenReturn(null)
+            val memberId = UUID.randomUUID().toString()
+            val userId = memberId // Same user accessing their own data
+
+            whenever(memberRepository.findById(memberId)).thenReturn(null)
 
             val ex =
                 assertThrows<NotFoundException> {
-                    handler.handle(id)
+                    handler.handle(userId, memberId)
                 }
             assertEquals("Member not found", ex.message)
-            verify(memberRepository).findById(id)
+            verify(memberRepository).findById(memberId)
             verifyNoMoreInteractions(memberRepository)
         }
 
@@ -107,15 +132,17 @@ class MemberGetByIdHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
-            val id = UUID.randomUUID().toString()
-            whenever(memberRepository.findById(id)).thenThrow(RuntimeException("DB error"))
+            val memberId = UUID.randomUUID().toString()
+            val userId = memberId // Same user accessing their own data
+
+            whenever(memberRepository.findById(memberId)).thenThrow(RuntimeException("DB error"))
 
             val ex =
                 assertThrows<RuntimeException> {
-                    handler.handle(id)
+                    handler.handle(userId, memberId)
                 }
             assertEquals("DB error", ex.message)
-            verify(memberRepository).findById(id)
+            verify(memberRepository).findById(memberId)
             verifyNoMoreInteractions(memberRepository)
         }
 }

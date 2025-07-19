@@ -1,6 +1,7 @@
 package com.ohana.domain.member
 
 import com.ohana.data.unitOfWork.*
+import com.ohana.shared.exceptions.AuthorizationException
 import com.ohana.shared.exceptions.NotFoundException
 
 class MemberGetByIdHandler(
@@ -14,8 +15,16 @@ class MemberGetByIdHandler(
         val email: String,
     )
 
-    suspend fun handle(id: String): Response =
+    suspend fun handle(
+        userId: String,
+        id: String,
+    ): Response =
         unitOfWork.execute { context ->
+            // Check that the user is trying to access their own member information
+            if (id != userId) {
+                throw AuthorizationException("You can only access your own member information")
+            }
+
             val member = context.members.findById(id) ?: throw NotFoundException("Member not found")
 
             Response(
