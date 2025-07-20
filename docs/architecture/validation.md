@@ -2,189 +2,122 @@
 
 ## Overview
 
-Ohana uses Bean Validation (JSR-303) annotations for request body validation. This provides a declarative, annotation-based approach to validation that is more maintainable and less error-prone than manual validation.
+Ohana uses manual validation in API request models with `toDomain()` conversion for all request validation. This approach provides:
 
-## Setup
+1. **Flexible validation logic** for complex business rules
+2. **Data transformation** before passing to domain handlers
+3. **Clear separation** between API concerns and domain concerns
 
-### Dependencies
+## Validation Approach
 
-The following dependencies are required for annotation-based validation:
+### API Request Models with Manual Validation
 
-```kotlin
-// Bean Validation (JSR-303)
-implementation("jakarta.validation:jakarta.validation-api:3.0.2")
-implementation("org.hibernate.validator:hibernate-validator:8.0.1.Final")
-implementation("org.glassfish:jakarta.el:4.0.2")
-```
+For all request validation, use separate API request models with manual validation and `toDomain()` conversion.
 
-### Validation Plugin
-
-The `ValidationPlugin` automatically validates request bodies using Bean Validation annotations:
+#### API Request Model Structure
 
 ```kotlin
-class ValidationPlugin {
-    private val validator: Validator = Validation.buildDefaultValidatorFactory().validator
+// src/main/kotlin/com/ohana/api/task/models/TaskUpdateRequest.kt
+data class TaskUpdateRequest(
+    val title: String?,
+    val description: String?,
+    val dueDate: Instant?,
+    val status: String?,
+) {
+    fun toDomain(): TaskUpdateByIdHandler.Request {
+        val errors = mutableListOf<ValidationError>()
 
-    fun validate(obj: Any) {
-        val violations: Set<ConstraintViolation<Any>> = validator.validate(obj)
+        // Validate title
+        if (title == null) {
+            errors.add(ValidationError("title", "Title cannot be blank"))
+        } else if (title.isBlank()) {
+            errors.add(ValidationError("title", "Title cannot be blank"))
+        } else if (title.length > 255) {
+            errors.add(ValidationError("title", "Title must be at most 255 characters long"))
+        }
 
-        if (violations.isNotEmpty()) {
-            val errors = violations.map { violation ->
-                ValidationError(
-                    field = violation.propertyPath.toString(),
-                    message = violation.message
-                )
+        // Validate description
+        if (description == null) {
+            errors.add(ValidationError("description", "Description cannot be blank"))
+        } else if (description.isBlank()) {
+            errors.add(ValidationError("description", "Description cannot be blank"))
+        } else if (description.length > 1000) {
+            errors.add(ValidationError("description", "Description must be at most 1000 characters long"))
+        }
+
+        // Validate due date
+        if (dueDate == null) {
+            errors.add(ValidationError("dueDate", "Due date is required"))
+        }
+
+        // Validate status
+        if (status == null) {
+            errors.add(ValidationError("status", "Status is required"))
+        } else {
+            try {
+                TaskStatus.valueOf(status)
+            } catch (e: IllegalArgumentException) {
+                errors.add(ValidationError("status", "Status must be one of: PENDING, IN_PROGRESS, COMPLETED"))
             }
+        }
+
+        if (errors.isNotEmpty()) {
             throw ValidationException("Validation failed", errors)
         }
+
+        return TaskUpdateByIdHandler.Request(
+            title = title!!,
+            description = description!!,
+            dueDate = dueDate!!,
+            status = TaskStatus.valueOf(status!!),
+        )
     }
 }
 ```
 
-## Usage in Controllers
-
-### Basic Usage
-
-Instead of manual validation, use the `validateAndReceive` extension function:
+#### Usage in Controllers
 
 ```kotlin
-// Before (manual validation)
-post("") {
-    val request = call.receive<TaskCreationHandler.Request>()
-    val validationErrors = request.validate()
-    if (validationErrors.isNotEmpty()) {
-        throw ValidationException("Validation failed", validationErrors)
-    }
-    // ... rest of handler
-}
+put("/{taskId}") {
+    val userId = getUserId(call.principal<JWTPrincipal>())
+    val id = call.parameters["taskId"]
+        ?: throw ValidationException("Task ID is required", listOf(ValidationError("taskId", "Task ID is required")))
 
-// After (annotation-based validation)
-post("") {
-    val request = call.validateAndReceive(TaskCreationHandler.Request::class.java)
-    // ... rest of handler
+    // 1. Accept the new request type
+    val request = call.receive<TaskUpdateRequest>()
+
+    // 2. Call the validate method on the new request class (validation happens in toDomain)
+    // 3. Calls .toDomain() on the new request type to get the TaskUpdateByIdHandler.Request before calling the handler
+    val domainRequest = request.toDomain()
+
+    val response = taskUpdateByIdHandler.handle(userId, id, domainRequest)
+    call.respond(HttpStatusCode.OK, response)
 }
 ```
 
-### Example Controller
+#### Domain Handler Request
 
 ```kotlin
-class TaskController(
-    private val taskCreationHandler: TaskCreationHandler,
-) {
-    fun Route.registerTaskRoutes() {
-        authenticate("auth-jwt") {
-            route("/tasks") {
-                post("") {
-                    val userId = getUserId(call.principal<JWTPrincipal>())
-                    val householdId = call.parameters["householdId"]
-                        ?: throw ValidationException("Household ID is required")
-
-                    // Automatic validation using annotations
-                    val request = call.validateAndReceive(TaskCreationHandler.Request::class.java)
-
-                    val response = taskCreationHandler.handle(userId, householdId, request)
-                    call.respond(HttpStatusCode.Created, response)
-                }
-            }
-        }
-    }
-}
-```
-
-## Request Object Annotations
-
-### Standard Bean Validation Annotations
-
-```kotlin
+// Domain handler expects non-nullable fields after validation
 data class Request(
-    @field:NotBlank(message = "Title is required")
-    @field:Size(min = 1, max = 255, message = "Title must be between 1 and 255 characters")
     val title: String,
-
-    @field:NotBlank(message = "Description is required")
-    @field:Size(max = 1000, message = "Description must be at most 1000 characters")
     val description: String,
-
-    @field:Pattern(regexp = "^[0-9a-fA-F-]{36}$", message = "ID must be a valid GUID")
-    val id: String,
-
-    @field:Min(value = 0, message = "Age must be non-negative")
-    val age: Int?,
-
-    @field:Email(message = "Invalid email format")
-    val email: String,
-)
-```
-
-### Custom Validators
-
-Create custom validation annotations for domain-specific validation:
-
-```kotlin
-@Target(AnnotationTarget.FIELD)
-@Retention(AnnotationRetention.RUNTIME)
-@Constraint(validatedBy = [FutureDateValidator::class])
-annotation class FutureDate(
-    val message: String = "Date must be in the future",
-    val groups: Array<KClass<*>> = [],
-    val payload: Array<KClass<out Payload>> = []
-)
-
-class FutureDateValidator : ConstraintValidator<FutureDate, Instant> {
-    override fun isValid(value: Instant?, context: ConstraintValidatorContext?): Boolean {
-        if (value == null) return true // Let @NotNull handle null validation
-        return value.isAfter(Instant.now())
-    }
-}
-```
-
-### Usage of Custom Validators
-
-```kotlin
-data class TaskRequest(
-    @field:NotBlank(message = "Title is required")
-    val title: String,
-
-    @field:FutureDate(message = "Due date cannot be in the past")
     val dueDate: Instant,
+    val status: TaskStatus,
 )
 ```
 
-## Available Annotations
+## When to Use API Request Models
 
-### String Validation
+API request models with `toDomain()` validation should be used for:
 
-- `@NotBlank` - String must not be null, empty, or whitespace
-- `@NotEmpty` - String must not be null or empty
-- `@Size(min, max)` - String length constraints
-- `@Pattern(regexp)` - Regular expression validation
-- `@Email` - Email format validation
-
-### Numeric Validation
-
-- `@Min(value)` - Minimum value
-- `@Max(value)` - Maximum value
-- `@Positive` - Must be positive
-- `@Negative` - Must be negative
-- `@PositiveOrZero` - Must be positive or zero
-- `@NegativeOrZero` - Must be negative or zero
-
-### Date/Time Validation
-
-- `@Future` - Date must be in the future
-- `@Past` - Date must be in the past
-- `@FutureOrPresent` - Date must be in the future or present
-- `@PastOrPresent` - Date must be in the past or present
-
-### Collection Validation
-
-- `@NotEmpty` - Collection must not be empty
-- `@Size(min, max)` - Collection size constraints
-
-### Null Validation
-
-- `@NotNull` - Field must not be null
-- `@Null` - Field must be null
+- All request validation scenarios
+- Partial updates (nullable fields)
+- Complex validation logic
+- Data transformation before domain processing
+- Separation of API concerns from domain concerns
+- Validation of string representations of enums
+- Custom error messages for specific scenarios
 
 ## Error Handling
 
@@ -193,51 +126,87 @@ Validation errors are automatically caught and returned as HTTP 400 Bad Request 
 ```json
 {
   "error": "Validation failed",
-  "details": [
-    "title: Title is required",
-    "dueDate: Due date cannot be in the past"
-  ]
+  "details": ["title: Title cannot be blank", "dueDate: Due date is required"]
 }
 ```
 
-## Migration from Manual Validation
+## Testing
 
-### Before (Manual Validation)
+### Testing API Request Models
 
 ```kotlin
-data class Request(
-    val title: String,
-    val description: String,
-) {
-    fun validate(): List<ValidationError> {
-        val errors = mutableListOf<ValidationError>()
+@Test
+fun `toDomain should pass when all fields are valid`() = runTest {
+    val request = TaskUpdateRequest(
+        title = "Valid Title",
+        description = "Valid description",
+        dueDate = Instant.now().plusSeconds(3600),
+        status = "PENDING"
+    )
 
-        if (title.isEmpty()) {
-            errors.add(ValidationError("title", "Title is required"))
-        }
-        if (title.length > 255) {
-            errors.add(ValidationError("title", "Title must be at most 255 characters"))
-        }
-        if (description.isEmpty()) {
-            errors.add(ValidationError("description", "Description is required"))
-        }
+    val domainRequest = request.toDomain()
 
-        return errors
+    assertEquals("Valid Title", domainRequest.title)
+    assertEquals("Valid description", domainRequest.description)
+    assertEquals(request.dueDate, domainRequest.dueDate)
+    assertEquals(TaskStatus.PENDING, domainRequest.status)
+}
+
+@Test
+fun `toDomain should throw ValidationException when title is null`() = runTest {
+    val request = TaskUpdateRequest(
+        title = null,
+        description = "Valid description",
+        dueDate = Instant.now().plusSeconds(3600),
+        status = "PENDING"
+    )
+
+    val exception = assertThrows<ValidationException> {
+        request.toDomain()
+    }
+
+    assertEquals("Validation failed", exception.message)
+    assertEquals(1, exception.errors.size)
+    assertEquals("title", exception.errors[0].field)
+    assertEquals("Title cannot be blank", exception.errors[0].message)
+}
+
+@Test
+fun `toDomain should throw ValidationException with multiple errors`() = runTest {
+    val request = TaskUpdateRequest(
+        title = "", // Blank title
+        description = "A".repeat(1001), // Too long description
+        dueDate = null, // Missing due date
+        status = "INVALID_STATUS" // Invalid status
+    )
+
+    val exception = assertThrows<ValidationException> {
+        request.toDomain()
+    }
+
+    assertEquals("Validation failed", exception.message)
+    assertEquals(4, exception.errors.size)
+
+    val errorFields = exception.errors.map { it.field }.toSet()
+    assertEquals(setOf("title", "description", "dueDate", "status"), errorFields)
+}
+
+@Test
+fun `toDomain should accept all valid status values`() = runTest {
+    val validStatuses = listOf("PENDING", "IN_PROGRESS", "COMPLETED")
+
+    validStatuses.forEach { status ->
+        val request = TaskUpdateRequest(
+            title = "Valid Title",
+            description = "Valid description",
+            dueDate = Instant.now().plusSeconds(3600),
+            status = status
+        )
+
+        val domainRequest = request.toDomain()
+        assertEquals(TaskStatus.valueOf(status), domainRequest.status)
     }
 }
-```
-
-### After (Annotation-Based Validation)
-
-```kotlin
-data class Request(
-    @field:NotBlank(message = "Title is required")
-    @field:Size(max = 255, message = "Title must be at most 255 characters")
-    val title: String,
-
-    @field:NotBlank(message = "Description is required")
-    val description: String,
-)
 ```
 
 ## Best Practices
@@ -246,114 +215,106 @@ data class Request(
 
 ```kotlin
 // Good
-@field:NotBlank(message = "User email is required for account creation")
+errors.add(ValidationError("title", "Title cannot be blank"))
 
 // Bad
-@field:NotBlank(message = "Required")
+errors.add(ValidationError("title", "Required"))
 ```
 
-### 2. Group Related Validations
+### 2. Group Related Validations in API Models
 
 ```kotlin
-data class UserRegistrationRequest(
-    // Personal information
-    @field:NotBlank(message = "First name is required")
-    @field:Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters")
-    val firstName: String,
+data class TaskUpdateRequest(
+    // Basic information
+    val title: String?,
+    val description: String?,
 
-    @field:NotBlank(message = "Last name is required")
-    @field:Size(min = 2, max = 50, message = "Last name must be between 2 and 50 characters")
-    val lastName: String,
+    // Scheduling
+    val dueDate: Instant?,
+    val status: String?,
+) {
+    fun toDomain(): TaskUpdateByIdHandler.Request {
+        val errors = mutableListOf<ValidationError>()
 
-    // Contact information
-    @field:NotBlank(message = "Email is required")
-    @field:Email(message = "Invalid email format")
-    val email: String,
+        // Validate basic information
+        if (title == null) {
+            errors.add(ValidationError("title", "Title cannot be blank"))
+        } else if (title.isBlank()) {
+            errors.add(ValidationError("title", "Title cannot be blank"))
+        } else if (title.length > 255) {
+            errors.add(ValidationError("title", "Title must be at most 255 characters long"))
+        }
 
-    // Security
-    @field:NotBlank(message = "Password is required")
-    @field:Size(min = 8, message = "Password must be at least 8 characters long")
-    val password: String,
-)
-```
+        // Validate scheduling
+        if (dueDate == null) {
+            errors.add(ValidationError("dueDate", "Due date is required"))
+        }
 
-### 3. Create Custom Validators for Domain Logic
-
-```kotlin
-@Target(AnnotationTarget.FIELD)
-@Retention(AnnotationRetention.RUNTIME)
-@Constraint(validatedBy = [ValidGUIDValidator::class])
-annotation class ValidGUID(
-    val message: String = "Must be a valid GUID",
-    val groups: Array<KClass<*>> = [],
-    val payload: Array<KClass<out Payload>> = []
-)
-
-class ValidGUIDValidator : ConstraintValidator<ValidGUID, String> {
-    override fun isValid(value: String?, context: ConstraintValidatorContext?): Boolean {
-        if (value == null) return true
-        return Guid.isValid(value)
+        // ... rest of validation
     }
 }
 ```
 
-### 4. Use Validation Groups for Conditional Validation
+### 3. Handle Enum Validation Properly
 
 ```kotlin
-interface CreateGroup
-interface UpdateGroup
-
-data class TaskRequest(
-    @field:NotBlank(message = "Title is required", groups = [CreateGroup::class, UpdateGroup::class])
-    val title: String,
-
-    @field:NotBlank(message = "ID is required", groups = [UpdateGroup::class])
-    val id: String?,
-)
+// Validate status
+if (status == null) {
+    errors.add(ValidationError("status", "Status is required"))
+} else {
+    try {
+        TaskStatus.valueOf(status)
+    } catch (e: IllegalArgumentException) {
+        errors.add(ValidationError("status", "Status must be one of: PENDING, IN_PROGRESS, COMPLETED"))
+    }
+}
 ```
 
-## Testing
-
-### Unit Testing Validators
+### 4. Validate Required vs Optional Fields
 
 ```kotlin
-@Test
-fun `should validate valid request`() {
-    val request = TaskCreationHandler.Request(
-        id = UUID.randomUUID().toString(),
-        title = "Valid Title",
-        description = "Valid description",
-        dueDate = Instant.now().plusSeconds(3600),
-        status = TaskStatus.PENDING
-    )
-
-    val violations = validator.validate(request)
-    assertTrue(violations.isEmpty())
+// Required fields
+if (title == null) {
+    errors.add(ValidationError("title", "Title cannot be blank"))
 }
 
-@Test
-fun `should fail validation with invalid data`() {
-    val request = TaskCreationHandler.Request(
-        id = "",
-        title = "",
-        description = "",
-        dueDate = Instant.now().minusSeconds(3600),
-        status = TaskStatus.PENDING
-    )
-
-    val violations = validator.validate(request)
-    assertFalse(violations.isEmpty())
-    assertEquals(4, violations.size)
+// Optional fields (only validate if provided)
+if (description != null && description.length > 1000) {
+    errors.add(ValidationError("description", "Description must be at most 1000 characters long"))
 }
 ```
 
 ## Performance Considerations
 
-- Bean Validation is generally fast for most use cases
-- Custom validators should be lightweight
+- Manual validation in API models should be lightweight
 - Avoid database calls in validators (use separate business logic validation)
-- Consider caching validator instances for frequently used validators
+- Keep validation logic focused on data format and basic business rules
 
-## Integration with Existing Code
+## File Organization
 
-The annotation-based validation system is designed to work alongside existing manual validation where needed. You can gradually migrate request objects to use annotations while maintaining backward compatibility.
+### API Request Models
+
+```
+src/main/kotlin/com/ohana/api/task/models/
+├── TaskUpdateRequest.kt
+├── TaskCreationRequest.kt
+└── TaskFilterRequest.kt
+```
+
+### Domain Request Models
+
+```
+src/main/kotlin/com/ohana/domain/task/
+├── TaskUpdateByIdHandler.kt (contains Request data class)
+├── TaskCreationHandler.kt (contains Request data class)
+└── TaskGetAllHandler.kt (contains Request data class)
+```
+
+## Migration Guide
+
+When creating new endpoints or updating existing ones:
+
+1. **Create API request model** in `/api/{resource}/models/` directory
+2. **Implement `toDomain()` method** with validation logic
+3. **Update controller** to use `call.receive<ApiRequest>()` and `request.toDomain()`
+4. **Write comprehensive tests** for the `toDomain()` method
