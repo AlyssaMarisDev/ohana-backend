@@ -6,8 +6,6 @@ import com.ohana.data.auth.RefreshTokenRepository
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.auth.utils.JwtManager
 import com.ohana.shared.exceptions.AuthorizationException
-import jakarta.validation.Validation
-import jakarta.validation.Validator
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,7 +21,6 @@ class LogoutHandlerTest {
     private lateinit var context: UnitOfWorkContext
     private lateinit var refreshTokenRepository: RefreshTokenRepository
     private lateinit var handler: LogoutHandler
-    private lateinit var validator: Validator
 
     @BeforeEach
     fun setUp() {
@@ -34,7 +31,6 @@ class LogoutHandlerTest {
             }
         unitOfWork = mock()
         handler = LogoutHandler(unitOfWork)
-        validator = Validation.buildDefaultValidatorFactory().validator
     }
 
     @Test
@@ -133,23 +129,5 @@ class LogoutHandlerTest {
 
             verify(refreshTokenRepository).findByToken(refreshToken)
             verifyNoMoreInteractions(refreshTokenRepository)
-        }
-
-    @Test
-    fun `handle should throw ValidationException when refresh token is empty`() =
-        runTest {
-            val request = LogoutHandler.Request(refreshToken = "")
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assert(messages.contains("refreshToken" to "Refresh token is required"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when refresh token is blank`() =
-        runTest {
-            val request = LogoutHandler.Request(refreshToken = "   ")
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assert(messages.contains("refreshToken" to "Refresh token is required"))
         }
 }

@@ -4,8 +4,6 @@ import com.ohana.data.auth.RefreshToken
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.auth.utils.*
 import com.ohana.shared.exceptions.AuthorizationException
-import jakarta.validation.constraints.Email
-import jakarta.validation.constraints.NotBlank
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -14,10 +12,7 @@ class MemberSignInHandler(
     private val unitOfWork: UnitOfWork,
 ) {
     data class Request(
-        @field:NotBlank(message = "Email is required")
-        @field:Email(message = "Invalid email format")
         val email: String,
-        @field:NotBlank(message = "Password is required")
         val password: String,
     )
 

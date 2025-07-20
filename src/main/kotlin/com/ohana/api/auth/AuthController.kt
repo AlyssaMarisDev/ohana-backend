@@ -1,11 +1,14 @@
 package com.ohana.api.auth
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.ohana.api.auth.models.LogoutRequest
+import com.ohana.api.auth.models.MemberRegistrationRequest
+import com.ohana.api.auth.models.MemberSignInRequest
+import com.ohana.api.auth.models.TokenRefreshRequest
 import com.ohana.domain.auth.LogoutHandler
 import com.ohana.domain.auth.MemberRegistrationHandler
 import com.ohana.domain.auth.MemberSignInHandler
 import com.ohana.domain.auth.TokenRefreshHandler
-import com.ohana.plugins.validateAndReceive
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -24,31 +27,30 @@ class AuthController(
 
     fun Route.registerAuthRoutes() {
         post("/register") {
-            // Use annotation-based validation
-            val member = call.validateAndReceive<MemberRegistrationHandler.Request>()
-
-            val response = memberRegistrationHandler.handle(member)
+            val request = call.receive<MemberRegistrationRequest>()
+            val domainRequest = request.toDomain()
+            val response = memberRegistrationHandler.handle(domainRequest)
             call.respond(HttpStatusCode.Created, response)
         }
 
         post("/login") {
-            // Use annotation-based validation
-            val member = call.validateAndReceive<MemberSignInHandler.Request>()
-            val response = memberSignInHandler.handle(member)
+            val request = call.receive<MemberSignInRequest>()
+            val domainRequest = request.toDomain()
+            val response = memberSignInHandler.handle(domainRequest)
             call.respond(HttpStatusCode.OK, response)
         }
 
         post("/refresh") {
-            // Use annotation-based validation
-            val request = call.validateAndReceive<TokenRefreshHandler.Request>()
-            val response = tokenRefreshHandler.handle(request)
+            val request = call.receive<TokenRefreshRequest>()
+            val domainRequest = request.toDomain()
+            val response = tokenRefreshHandler.handle(domainRequest)
             call.respond(HttpStatusCode.OK, response)
         }
 
         post("/logout") {
-            // Use annotation-based validation
-            val request = call.validateAndReceive<LogoutHandler.Request>()
-            val response = logoutHandler.handle(request)
+            val request = call.receive<LogoutRequest>()
+            val domainRequest = request.toDomain()
+            val response = logoutHandler.handle(domainRequest)
             call.respond(HttpStatusCode.OK, response)
         }
     }

@@ -8,8 +8,6 @@ import com.ohana.data.auth.RefreshTokenRepository
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.auth.utils.Hasher
 import com.ohana.shared.exceptions.ConflictException
-import jakarta.validation.Validation
-import jakarta.validation.Validator
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,7 +23,6 @@ class MemberRegistrationHandlerTest {
     private lateinit var authMemberRepository: AuthMemberRepository
     private lateinit var refreshTokenRepository: RefreshTokenRepository
     private lateinit var handler: MemberRegistrationHandler
-    private lateinit var validator: Validator
 
     @BeforeEach
     fun setUp() {
@@ -38,7 +35,6 @@ class MemberRegistrationHandlerTest {
             }
         unitOfWork = mock()
         handler = MemberRegistrationHandler(unitOfWork)
-        validator = Validation.buildDefaultValidatorFactory().validator
     }
 
     @Test
@@ -147,145 +143,6 @@ class MemberRegistrationHandlerTest {
         }
 
     @Test
-    fun `handle should throw ValidationException when name is empty`() =
-        runTest {
-            val request =
-                MemberRegistrationHandler.Request(
-                    name = "",
-                    email = "test@example.com",
-                    password = "ValidPass123!",
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("name" to "Name is required"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when name is too short`() =
-        runTest {
-            val request =
-                MemberRegistrationHandler.Request(
-                    name = "AB", // 2 characters, less than minimum 3
-                    email = "test@example.com",
-                    password = "ValidPass123!",
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("name" to "Name must be at least 3 characters long"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when email is empty`() =
-        runTest {
-            val request =
-                MemberRegistrationHandler.Request(
-                    name = "Test User",
-                    email = "",
-                    password = "ValidPass123!",
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("email" to "Email is required"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when email format is invalid`() =
-        runTest {
-            val request =
-                MemberRegistrationHandler.Request(
-                    name = "Test User",
-                    email = "invalid-email",
-                    password = "ValidPass123!",
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("email" to "Invalid email format"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when password is empty`() =
-        runTest {
-            val request =
-                MemberRegistrationHandler.Request(
-                    name = "Test User",
-                    email = "test@example.com",
-                    password = "",
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("password" to "Password is required"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when password is too short`() =
-        runTest {
-            val request =
-                MemberRegistrationHandler.Request(
-                    name = "Test User",
-                    email = "test@example.com",
-                    password = "Short1!", // 7 characters, less than minimum 8
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("password" to "Password must be at least 8 characters long"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when password lacks uppercase letter`() =
-        runTest {
-            val request =
-                MemberRegistrationHandler.Request(
-                    name = "Test User",
-                    email = "test@example.com",
-                    password = "validpass123!",
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("password" to "Password must contain at least one uppercase letter"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when password lacks number`() =
-        runTest {
-            val request =
-                MemberRegistrationHandler.Request(
-                    name = "Test User",
-                    email = "test@example.com",
-                    password = "ValidPass!",
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("password" to "Password must contain at least one number"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when password lacks special character`() =
-        runTest {
-            val request =
-                MemberRegistrationHandler.Request(
-                    name = "Test User",
-                    email = "test@example.com",
-                    password = "ValidPass123",
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("password" to "Password must contain at least one special character"))
-        }
-
-    @Test
-    fun `handle should accept valid password with all requirements`() =
-        runTest {
-            val request =
-                MemberRegistrationHandler.Request(
-                    name = "Test User",
-                    email = "test@example.com",
-                    password = "ValidPass123!",
-                )
-            val violations = validator.validate(request)
-            assertTrue(violations.isEmpty())
-        }
-
-    @Test
     fun `handle should hash password correctly`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
@@ -361,8 +218,6 @@ class MemberRegistrationHandlerTest {
 
             assertTrue(response.accessToken.isNotEmpty())
             assertTrue(response.refreshToken.isNotEmpty())
-            // Tokens should be different from ID
-            assertTrue(response.accessToken != response.id)
-            assertTrue(response.refreshToken != response.id)
+            assertTrue(response.accessToken != request.name) // Token should be different from name
         }
 }

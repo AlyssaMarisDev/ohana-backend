@@ -5,10 +5,6 @@ import com.ohana.data.auth.RefreshToken
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.auth.utils.*
 import com.ohana.shared.exceptions.ConflictException
-import jakarta.validation.constraints.Email
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.Pattern
-import jakarta.validation.constraints.Size
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -17,26 +13,8 @@ class MemberRegistrationHandler(
     private val unitOfWork: UnitOfWork,
 ) {
     data class Request(
-        @field:NotBlank(message = "Name is required")
-        @field:Size(min = 3, message = "Name must be at least 3 characters long")
         val name: String,
-        @field:NotBlank(message = "Email is required")
-        @field:Email(message = "Invalid email format")
         val email: String,
-        @field:NotBlank(message = "Password is required")
-        @field:Size(min = 8, message = "Password must be at least 8 characters long")
-        @field:Pattern(
-            regexp = ".*[A-Z].*",
-            message = "Password must contain at least one uppercase letter",
-        )
-        @field:Pattern(
-            regexp = ".*[0-9].*",
-            message = "Password must contain at least one number",
-        )
-        @field:Pattern(
-            regexp = ".*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\|,.<>\\/?].*",
-            message = "Password must contain at least one special character",
-        )
         val password: String,
     )
 
