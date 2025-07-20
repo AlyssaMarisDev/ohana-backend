@@ -1,5 +1,7 @@
 package com.ohana.api.task
 
+import com.ohana.api.task.models.TaskCreationRequest
+import com.ohana.api.task.models.TaskGetAllRequest
 import com.ohana.api.task.models.TaskUpdateRequest
 import com.ohana.api.utils.getUserId
 import com.ohana.domain.task.TaskCreationHandler
@@ -7,7 +9,6 @@ import com.ohana.domain.task.TaskDeleteByIdHandler
 import com.ohana.domain.task.TaskGetAllHandler
 import com.ohana.domain.task.TaskGetByIdHandler
 import com.ohana.domain.task.TaskUpdateByIdHandler
-import com.ohana.plugins.validateAndReceive
 import com.ohana.shared.exceptions.ValidationError
 import com.ohana.shared.exceptions.ValidationException
 import io.ktor.http.*
@@ -36,10 +37,14 @@ class TaskController(
                                 listOf(ValidationError("householdId", "Household ID is required")),
                             )
 
-                    // Use annotation-based validation
-                    val request = call.validateAndReceive<TaskCreationHandler.Request>()
+                    // 1. Accept the new request type
+                    val request = call.receive<TaskCreationRequest>()
 
-                    val response = taskCreationHandler.handle(userId, householdId, request)
+                    // 2. Call the validate method on the new request class (validation happens in toDomain)
+                    // 3. Calls .toDomain() on the new request type to get the TaskCreationHandler.Request before calling the handler
+                    val domainRequest = request.toDomain()
+
+                    val response = taskCreationHandler.handle(userId, householdId, domainRequest)
 
                     call.respond(HttpStatusCode.Created, response)
                 }
@@ -62,10 +67,11 @@ class TaskController(
                             ?.map { it.trim() }
                             ?.filter { it.isNotEmpty() }
                             ?: emptyList()
-
                     val userId = getUserId(call.principal<JWTPrincipal>())
+                    val request = TaskGetAllRequest(householdIds)
+                    val domainRequest = request.toDomain()
 
-                    val response = taskGetAllHandler.handle(userId, householdIds)
+                    val response = taskGetAllHandler.handle(userId, domainRequest)
 
                     call.respond(HttpStatusCode.OK, response)
                 }

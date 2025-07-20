@@ -9,6 +9,10 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
 }
 
+kotlin {
+    jvmToolchain(11)
+}
+
 group = "com.ohana"
 version = "0.0.1"
 

@@ -77,7 +77,7 @@ class TaskGetAllHandlerTest {
 
             whenever(taskRepository.findByHouseholdIds(listOf(householdId))).thenReturn(tasks)
 
-            val response = handler.handle(userId, listOf(householdId))
+            val response = handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
 
             verify(taskRepository).findByHouseholdIds(listOf(householdId))
 
@@ -116,7 +116,7 @@ class TaskGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
-            handler.handle(userId, listOf(householdId))
+            handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
 
             verify(householdMemberValidator).validate(context, householdId, userId)
         }
@@ -128,7 +128,7 @@ class TaskGetAllHandlerTest {
 
             whenever(taskRepository.findByHouseholdIds(listOf(householdId))).thenReturn(emptyList())
 
-            val response = handler.handle(userId, listOf(householdId))
+            val response = handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
 
             verify(taskRepository).findByHouseholdIds(listOf(householdId))
 
@@ -149,7 +149,7 @@ class TaskGetAllHandlerTest {
 
             val ex =
                 assertThrows<com.ohana.shared.exceptions.AuthorizationException> {
-                    handler.handle(userId, listOf(householdId))
+                    handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
                 }
 
             assertEquals("User is not a member of the household", ex.message)
@@ -166,7 +166,7 @@ class TaskGetAllHandlerTest {
 
             val ex =
                 assertThrows<RuntimeException> {
-                    handler.handle(userId, listOf(householdId))
+                    handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
                 }
 
             assertEquals("Database connection error", ex.message)
@@ -203,7 +203,7 @@ class TaskGetAllHandlerTest {
 
             whenever(taskRepository.findByHouseholdIds(listOf(householdId))).thenReturn(tasks)
 
-            val response = handler.handle(userId, listOf(householdId))
+            val response = handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
 
             assertEquals(3, response.size)
             assertEquals(TaskStatus.PENDING, response[0].status)
@@ -237,7 +237,7 @@ class TaskGetAllHandlerTest {
 
             whenever(taskRepository.findByHouseholdIds(listOf(householdId))).thenReturn(tasks)
 
-            val response = handler.handle(userId, listOf(householdId))
+            val response = handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
 
             assertEquals(3, response.size)
             assertEquals(tasks[0].createdBy, response[0].createdBy)
@@ -272,7 +272,7 @@ class TaskGetAllHandlerTest {
 
             whenever(taskRepository.findByHouseholdIds(listOf(householdId, householdId2))).thenReturn(allTasks)
 
-            val response = handler.handle(userId, listOf(householdId, householdId2))
+            val response = handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId, householdId2)))
 
             assertEquals(2, response.size)
             assertEquals(householdId, response[0].householdId)
@@ -294,7 +294,7 @@ class TaskGetAllHandlerTest {
 
             val ex =
                 assertThrows<com.ohana.shared.exceptions.AuthorizationException> {
-                    handler.handle(userId, listOf(householdId, householdId2))
+                    handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId, householdId2)))
                 }
 
             assertEquals("User is not a member of household 2", ex.message)
@@ -308,7 +308,7 @@ class TaskGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
-            val response = handler.handle(userId, emptyList())
+            val response = handler.handle(userId, TaskGetAllHandler.Request(emptyList()))
 
             assertTrue(response.isEmpty())
             verify(taskRepository).findByHouseholdIds(emptyList())
@@ -343,7 +343,7 @@ class TaskGetAllHandlerTest {
             whenever(householdRepository.findByMemberId(userId)).thenReturn(userHouseholds)
             whenever(taskRepository.findByHouseholdIds(listOf(householdId, householdId2))).thenReturn(tasks)
 
-            val response = handler.handle(userId, emptyList())
+            val response = handler.handle(userId, TaskGetAllHandler.Request(emptyList()))
 
             assertEquals(2, response.size)
             verify(householdRepository).findByMemberId(userId)
@@ -358,41 +358,11 @@ class TaskGetAllHandlerTest {
 
             whenever(householdRepository.findByMemberId(userId)).thenReturn(emptyList())
 
-            val response = handler.handle(userId, emptyList())
+            val response = handler.handle(userId, TaskGetAllHandler.Request(emptyList()))
 
             assertTrue(response.isEmpty())
             verify(householdRepository).findByMemberId(userId)
             verify(taskRepository).findByHouseholdIds(emptyList())
             verify(householdMemberValidator, never()).validate(any(), any(), any())
-        }
-
-    @Test
-    fun `handle should work with null household IDs`() =
-        runTest {
-            TestUtils.mockUnitOfWork(unitOfWork, context)
-
-            val userHouseholds =
-                listOf(
-                    TestUtils.getHousehold(id = householdId, name = "Household 1"),
-                )
-
-            val tasks =
-                listOf(
-                    TestUtils.getTask(
-                        title = "Task from Household 1",
-                        createdBy = userId,
-                        householdId = householdId,
-                    ),
-                )
-
-            whenever(householdRepository.findByMemberId(userId)).thenReturn(userHouseholds)
-            whenever(taskRepository.findByHouseholdIds(listOf(householdId))).thenReturn(tasks)
-
-            val response = handler.handle(userId, emptyList())
-
-            assertEquals(1, response.size)
-            assertEquals(householdId, response[0].householdId)
-            verify(householdRepository).findByMemberId(userId)
-            verify(taskRepository).findByHouseholdIds(listOf(householdId))
         }
 }

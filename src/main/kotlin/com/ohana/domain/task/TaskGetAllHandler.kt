@@ -8,6 +8,10 @@ class TaskGetAllHandler(
     private val unitOfWork: UnitOfWork,
     private val householdMemberValidator: HouseholdMemberValidator,
 ) {
+    data class Request(
+        val householdIds: List<String>,
+    )
+
     data class Response(
         val id: String,
         val title: String,
@@ -20,10 +24,10 @@ class TaskGetAllHandler(
 
     suspend fun handle(
         userId: String,
-        householdIds: List<String>,
+        request: Request,
     ): List<Response> =
         unitOfWork.execute { context ->
-            val effectiveHouseholdIds = getEffectiveHouseholdIds(context, householdIds, userId)
+            val effectiveHouseholdIds = getEffectiveHouseholdIds(context, request.householdIds, userId)
 
             // Fetch tasks for all households in a single database query
             context.tasks.findByHouseholdIds(effectiveHouseholdIds).map { task ->
