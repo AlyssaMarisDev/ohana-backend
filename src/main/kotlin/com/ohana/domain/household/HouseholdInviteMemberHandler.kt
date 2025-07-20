@@ -5,16 +5,12 @@ import com.ohana.data.unitOfWork.*
 import com.ohana.shared.enums.HouseholdMemberRole
 import com.ohana.shared.exceptions.AuthorizationException
 import com.ohana.shared.exceptions.ConflictException
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.Pattern
 import java.util.UUID
 
 class HouseholdInviteMemberHandler(
     private val unitOfWork: UnitOfWork,
 ) {
     data class Request(
-        @field:NotBlank(message = "Member ID is required")
-        @field:Pattern(regexp = "^[0-9a-fA-F-]{36}$", message = "Member ID must be a valid GUID")
         val memberId: String,
         val role: HouseholdMemberRole,
     )

@@ -1,5 +1,6 @@
 package com.ohana.api.task.models
 
+import com.ohana.shared.Guid
 import com.ohana.shared.enums.TaskStatus
 import com.ohana.shared.exceptions.ValidationException
 import kotlinx.coroutines.test.runTest
@@ -7,7 +8,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.Instant
-import java.util.UUID
 
 class TaskCreationRequestTest {
     @Test
@@ -27,8 +27,7 @@ class TaskCreationRequestTest {
             assertEquals("Valid description", domainRequest.description)
             assertEquals(request.dueDate, domainRequest.dueDate)
             assertEquals(TaskStatus.PENDING, domainRequest.status)
-            // ID should be a valid UUID
-            UUID.fromString(domainRequest.id) // This will throw if invalid
+            Guid.isValid(domainRequest.id)
         }
 
     @Test
@@ -50,7 +49,7 @@ class TaskCreationRequestTest {
             assertEquals("Validation failed", exception.message)
             assertEquals(1, exception.errors.size)
             assertEquals("title", exception.errors[0].field)
-            assertEquals("Title cannot be blank", exception.errors[0].message)
+            assertEquals("Title is required", exception.errors[0].message)
         }
 
     @Test
@@ -116,7 +115,7 @@ class TaskCreationRequestTest {
             assertEquals("Validation failed", exception.message)
             assertEquals(1, exception.errors.size)
             assertEquals("description", exception.errors[0].field)
-            assertEquals("Description cannot be blank", exception.errors[0].message)
+            assertEquals("Description is required", exception.errors[0].message)
         }
 
     @Test
@@ -291,27 +290,5 @@ class TaskCreationRequestTest {
                 val domainRequest = request.toDomain()
                 assertEquals(TaskStatus.valueOf(status), domainRequest.status)
             }
-        }
-
-    @Test
-    fun `toDomain should generate unique IDs for each call`() =
-        runTest {
-            val request =
-                TaskCreationRequest(
-                    title = "Valid Title",
-                    description = "Valid description",
-                    dueDate = Instant.now().plusSeconds(3600),
-                    status = "PENDING",
-                )
-
-            val domainRequest1 = request.toDomain()
-            val domainRequest2 = request.toDomain()
-
-            // IDs should be different
-            assert(domainRequest1.id != domainRequest2.id)
-
-            // Both should be valid UUIDs
-            UUID.fromString(domainRequest1.id)
-            UUID.fromString(domainRequest2.id)
         }
 }

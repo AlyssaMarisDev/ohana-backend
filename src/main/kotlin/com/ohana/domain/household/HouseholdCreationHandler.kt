@@ -3,9 +3,6 @@ package com.ohana.domain.household
 import com.ohana.data.household.*
 import com.ohana.data.unitOfWork.*
 import com.ohana.shared.enums.HouseholdMemberRole
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.Pattern
-import jakarta.validation.constraints.Size
 import java.time.Instant
 import java.util.UUID
 
@@ -13,14 +10,8 @@ class HouseholdCreationHandler(
     private val unitOfWork: UnitOfWork,
 ) {
     data class Request(
-        @field:NotBlank(message = "Household ID is required")
-        @field:Pattern(regexp = "^[0-9a-fA-F-]{36}$", message = "Household ID must be a valid GUID")
         val id: String,
-        @field:NotBlank(message = "Household name is required")
-        @field:Size(min = 1, max = 255, message = "Household name must be between 1 and 255 characters long")
         val name: String,
-        @field:NotBlank(message = "Household description is required")
-        @field:Size(max = 1000, message = "Household description must be at most 1000 characters long")
         val description: String,
     )
 

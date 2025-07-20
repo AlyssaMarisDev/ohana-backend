@@ -48,7 +48,7 @@ class TaskUpdateRequestTest {
             assertEquals("Validation failed", exception.message)
             assertEquals(1, exception.errors.size)
             assertEquals("title", exception.errors[0].field)
-            assertEquals("Title cannot be blank", exception.errors[0].message)
+            assertEquals("Title is required", exception.errors[0].message)
         }
 
     @Test
@@ -70,7 +70,7 @@ class TaskUpdateRequestTest {
             assertEquals("Validation failed", exception.message)
             assertEquals(1, exception.errors.size)
             assertEquals("description", exception.errors[0].field)
-            assertEquals("Description cannot be blank", exception.errors[0].message)
+            assertEquals("Description is required", exception.errors[0].message)
         }
 
     @Test

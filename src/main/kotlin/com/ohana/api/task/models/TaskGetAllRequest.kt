@@ -11,7 +11,6 @@ data class TaskGetAllRequest(
     fun toDomain(): TaskGetAllHandler.Request {
         val errors = mutableListOf<ValidationError>()
 
-        // Validate household IDs if provided
         householdIds.forEachIndexed { index, id ->
             if (!Guid.isValid(id)) {
                 errors.add(ValidationError("householdIds[$index]", "Household ID must be a valid GUID"))

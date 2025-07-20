@@ -15,30 +15,26 @@ data class TaskUpdateRequest(
     fun toDomain(): TaskUpdateByIdHandler.Request {
         val errors = mutableListOf<ValidationError>()
 
-        // Validate title
         if (title == null) {
-            errors.add(ValidationError("title", "Title cannot be blank"))
+            errors.add(ValidationError("title", "Title is required"))
         } else if (title.isBlank()) {
             errors.add(ValidationError("title", "Title cannot be blank"))
         } else if (title.length > 255) {
             errors.add(ValidationError("title", "Title must be at most 255 characters long"))
         }
 
-        // Validate description
         if (description == null) {
-            errors.add(ValidationError("description", "Description cannot be blank"))
+            errors.add(ValidationError("description", "Description is required"))
         } else if (description.isBlank()) {
             errors.add(ValidationError("description", "Description cannot be blank"))
         } else if (description.length > 1000) {
             errors.add(ValidationError("description", "Description must be at most 1000 characters long"))
         }
 
-        // Validate due date
         if (dueDate == null) {
             errors.add(ValidationError("dueDate", "Due date is required"))
         }
 
-        // Validate status
         if (status == null) {
             errors.add(ValidationError("status", "Status is required"))
         } else {

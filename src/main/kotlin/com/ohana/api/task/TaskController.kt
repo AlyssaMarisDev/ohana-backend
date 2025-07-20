@@ -37,11 +37,7 @@ class TaskController(
                                 listOf(ValidationError("householdId", "Household ID is required")),
                             )
 
-                    // 1. Accept the new request type
                     val request = call.receive<TaskCreationRequest>()
-
-                    // 2. Call the validate method on the new request class (validation happens in toDomain)
-                    // 3. Calls .toDomain() on the new request type to get the TaskCreationHandler.Request before calling the handler
                     val domainRequest = request.toDomain()
 
                     val response = taskCreationHandler.handle(userId, householdId, domainRequest)

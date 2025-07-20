@@ -16,4 +16,6 @@ object Guid {
 
         return true
     }
+
+    fun generate(): String = UUID.randomUUID().toString()
 }

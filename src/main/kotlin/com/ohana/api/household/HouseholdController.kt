@@ -1,12 +1,13 @@
 package com.ohana.api.household
 
+import com.ohana.api.household.models.HouseholdCreationRequest
+import com.ohana.api.household.models.HouseholdInviteMemberRequest
 import com.ohana.api.utils.getUserId
 import com.ohana.domain.household.HouseholdAcceptInviteHandler
 import com.ohana.domain.household.HouseholdCreationHandler
 import com.ohana.domain.household.HouseholdGetAllHandler
 import com.ohana.domain.household.HouseholdGetByIdHandler
 import com.ohana.domain.household.HouseholdInviteMemberHandler
-import com.ohana.plugins.validateAndReceive
 import com.ohana.shared.exceptions.ValidationError
 import com.ohana.shared.exceptions.ValidationException
 import io.ktor.http.*
@@ -27,12 +28,12 @@ class HouseholdController(
         authenticate("auth-jwt") {
             route("/households") {
                 post("") {
-                    // Use annotation-based validation
-                    val request = call.validateAndReceive<HouseholdCreationHandler.Request>()
+                    val request = call.receive<HouseholdCreationRequest>()
+                    val domainRequest = request.toDomain()
 
                     val userId = getUserId(call.principal<JWTPrincipal>())
 
-                    val response = householdCreationHandler.handle(userId, request)
+                    val response = householdCreationHandler.handle(userId, domainRequest)
 
                     call.respond(HttpStatusCode.Created, response)
                 }
@@ -66,10 +67,10 @@ class HouseholdController(
                                 listOf(ValidationError("householdId", "Household ID is required")),
                             )
 
-                    // Use annotation-based validation
-                    val request = call.validateAndReceive<HouseholdInviteMemberHandler.Request>()
+                    val request = call.receive<HouseholdInviteMemberRequest>()
+                    val domainRequest = request.toDomain()
 
-                    householdInviteMemberHandler.handle(userId, id, request)
+                    householdInviteMemberHandler.handle(userId, id, domainRequest)
                     call.respond(HttpStatusCode.OK)
                 }
 

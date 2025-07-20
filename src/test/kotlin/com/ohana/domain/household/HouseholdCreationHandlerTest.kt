@@ -4,8 +4,6 @@ import com.ohana.TestUtils
 import com.ohana.data.household.HouseholdRepository
 import com.ohana.data.unitOfWork.*
 import com.ohana.shared.enums.HouseholdMemberRole
-import jakarta.validation.Validation
-import jakarta.validation.Validator
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -14,14 +12,12 @@ import org.mockito.kotlin.*
 import java.time.Instant
 import java.util.UUID
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class HouseholdCreationHandlerTest {
     private lateinit var unitOfWork: UnitOfWork
     private lateinit var context: UnitOfWorkContext
     private lateinit var householdRepository: HouseholdRepository
     private lateinit var handler: HouseholdCreationHandler
-    private lateinit var validator: Validator
 
     @BeforeEach
     fun setUp() {
@@ -32,7 +28,6 @@ class HouseholdCreationHandlerTest {
             }
         unitOfWork = mock()
         handler = HouseholdCreationHandler(unitOfWork)
-        validator = Validation.buildDefaultValidatorFactory().validator
     }
 
     @Test
@@ -175,106 +170,6 @@ class HouseholdCreationHandlerTest {
             assertEquals(householdId, response.id)
             assertEquals(longName, response.name)
             assertEquals(longDescription, response.description)
-        }
-
-    @Test
-    fun `handle should throw ValidationException when id is empty`() =
-        runTest {
-            val request =
-                HouseholdCreationHandler.Request(
-                    id = "",
-                    name = "Test Household",
-                    description = "Test description",
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("id" to "Household ID is required"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when id is not valid GUID`() =
-        runTest {
-            val request =
-                HouseholdCreationHandler.Request(
-                    id = "invalid-guid",
-                    name = "Test Household",
-                    description = "Test description",
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("id" to "Household ID must be a valid GUID"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when name is empty`() =
-        runTest {
-            val request =
-                HouseholdCreationHandler.Request(
-                    id = UUID.randomUUID().toString(),
-                    name = "",
-                    description = "Test description",
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("name" to "Household name is required"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when name is too long`() =
-        runTest {
-            val request =
-                HouseholdCreationHandler.Request(
-                    id = UUID.randomUUID().toString(),
-                    name = "A".repeat(256), // 256 characters, exceeds 255 limit
-                    description = "Test description",
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("name" to "Household name must be between 1 and 255 characters long"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when description is empty`() =
-        runTest {
-            val request =
-                HouseholdCreationHandler.Request(
-                    id = UUID.randomUUID().toString(),
-                    name = "Test Household",
-                    description = "",
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("description" to "Household description is required"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when description is too long`() =
-        runTest {
-            val request =
-                HouseholdCreationHandler.Request(
-                    id = UUID.randomUUID().toString(),
-                    name = "Test Household",
-                    description = "A".repeat(1001), // 1001 characters, exceeds 1000 limit
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("description" to "Household description must be at most 1000 characters long"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException with multiple errors`() =
-        runTest {
-            val request =
-                HouseholdCreationHandler.Request(
-                    id = "",
-                    name = "",
-                    description = "",
-                )
-            val violations = validator.validate(request)
-            val fields = violations.map { it.propertyPath.toString() }.toSet()
-            assertTrue(fields.contains("id"))
-            assertTrue(fields.contains("name"))
-            assertTrue(fields.contains("description"))
         }
 
     @Test
