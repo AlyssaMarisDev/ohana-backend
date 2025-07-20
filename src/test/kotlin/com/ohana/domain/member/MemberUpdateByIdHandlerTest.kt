@@ -5,8 +5,6 @@ import com.ohana.data.member.MemberRepository
 import com.ohana.data.unitOfWork.*
 import com.ohana.shared.exceptions.AuthorizationException
 import com.ohana.shared.exceptions.NotFoundException
-import jakarta.validation.Validation
-import jakarta.validation.Validator
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -14,14 +12,12 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.*
 import java.util.UUID
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class MemberUpdateByIdHandlerTest {
     private lateinit var unitOfWork: UnitOfWork
     private lateinit var context: UnitOfWorkContext
     private lateinit var memberRepository: MemberRepository
     private lateinit var handler: MemberUpdateByIdHandler
-    private lateinit var validator: Validator
 
     @BeforeEach
     fun setUp() {
@@ -32,7 +28,6 @@ class MemberUpdateByIdHandlerTest {
             }
         unitOfWork = mock()
         handler = MemberUpdateByIdHandler(unitOfWork)
-        validator = Validation.buildDefaultValidatorFactory().validator
     }
 
     @Test
@@ -217,60 +212,6 @@ class MemberUpdateByIdHandlerTest {
             verify(memberRepository).findById(memberId)
             verify(memberRepository).update(any())
             verifyNoMoreInteractions(memberRepository)
-        }
-
-    @Test
-    fun `handle should throw ValidationException when name is empty`() =
-        runTest {
-            val request =
-                MemberUpdateByIdHandler.Request(
-                    name = "",
-                    age = 30,
-                    gender = "Female",
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("name" to "Name is required"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when name is too long`() =
-        runTest {
-            val request =
-                MemberUpdateByIdHandler.Request(
-                    name = "A".repeat(256), // 256 characters, exceeds 255 limit
-                    age = 30,
-                    gender = "Female",
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("name" to "Name must be between 1 and 255 characters long"))
-        }
-
-    @Test
-    fun `handle should accept valid name length`() =
-        runTest {
-            val request =
-                MemberUpdateByIdHandler.Request(
-                    name = "A".repeat(255), // Maximum length
-                    age = 30,
-                    gender = "Female",
-                )
-            val violations = validator.validate(request)
-            assertTrue(violations.isEmpty())
-        }
-
-    @Test
-    fun `handle should accept minimum valid name length`() =
-        runTest {
-            val request =
-                MemberUpdateByIdHandler.Request(
-                    name = "A", // Minimum length
-                    age = 30,
-                    gender = "Female",
-                )
-            val violations = validator.validate(request)
-            assertTrue(violations.isEmpty())
         }
 
     @Test

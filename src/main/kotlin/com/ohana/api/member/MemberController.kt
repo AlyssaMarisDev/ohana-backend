@@ -1,10 +1,10 @@
 package com.ohana.api.member
 
+import com.ohana.api.member.models.MemberUpdateRequest
 import com.ohana.api.utils.getUserId
 import com.ohana.domain.member.MemberGetAllHandler
 import com.ohana.domain.member.MemberGetByIdHandler
 import com.ohana.domain.member.MemberUpdateByIdHandler
-import com.ohana.plugins.validateAndReceive
 import com.ohana.shared.exceptions.ValidationError
 import com.ohana.shared.exceptions.ValidationException
 import io.ktor.http.*
@@ -47,11 +47,11 @@ class MemberController(
                                 listOf(ValidationError("memberId", "Member ID is required")),
                             )
 
-                    // Use annotation-based validation
-                    val request = call.validateAndReceive<MemberUpdateByIdHandler.Request>()
+                    val request = call.receive<MemberUpdateRequest>()
+                    val domainRequest = request.toDomain()
 
                     val userId = getUserId(call.principal())
-                    val response = memberUpdateByIdHandler.handle(userId, id, request)
+                    val response = memberUpdateByIdHandler.handle(userId, id, domainRequest)
                     call.respond(HttpStatusCode.OK, response)
                 }
             }
