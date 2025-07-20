@@ -36,17 +36,13 @@ class TaskUpdateByIdHandler(
     suspend fun handle(
         userId: String,
         id: String,
-        householdId: String,
         request: Request,
     ): Response =
         unitOfWork.execute { context ->
-            householdMemberValidator.validate(context, householdId, userId)
-
             val existingTask = context.tasks.findById(id) ?: throw NotFoundException("Task not found")
 
-            if (existingTask.householdId != householdId) {
-                throw NotFoundException("Task not found in this household")
-            }
+            // Validate that the user is a member of the household that the task belongs to
+            householdMemberValidator.validate(context, existingTask.householdId, userId)
 
             val updatedTask =
                 context.tasks.update(

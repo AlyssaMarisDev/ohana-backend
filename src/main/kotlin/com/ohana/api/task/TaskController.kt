@@ -71,12 +71,6 @@ class TaskController(
 
                 put("/{taskId}") {
                     val userId = getUserId(call.principal<JWTPrincipal>())
-                    val householdId =
-                        call.parameters["householdId"]
-                            ?: throw ValidationException(
-                                "Household ID is required",
-                                listOf(ValidationError("householdId", "Household ID is required")),
-                            )
                     val id =
                         call.parameters["taskId"]
                             ?: throw ValidationException("Task ID is required", listOf(ValidationError("taskId", "Task ID is required")))
@@ -84,7 +78,7 @@ class TaskController(
                     // Use annotation-based validation
                     val request = call.validateAndReceive<TaskUpdateByIdHandler.Request>()
 
-                    val response = taskUpdateByIdHandler.handle(userId, id, householdId, request)
+                    val response = taskUpdateByIdHandler.handle(userId, id, request)
 
                     call.respond(HttpStatusCode.OK, response)
                 }

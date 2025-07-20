@@ -78,7 +78,7 @@ class TaskUpdateByIdHandlerTest {
             whenever(taskRepository.findById(taskId)).thenReturn(existingTask)
             whenever(taskRepository.update(any())).thenReturn(updatedTask)
 
-            val response = handler.handle(userId, taskId, householdId, request)
+            val response = handler.handle(userId, taskId, request)
 
             assertEquals(taskId, response.id)
             assertEquals("Updated Title", response.title)
@@ -119,6 +119,18 @@ class TaskUpdateByIdHandlerTest {
                     status = TaskStatus.IN_PROGRESS,
                 )
 
+            val existingTask =
+                TestUtils.getTask(
+                    id = taskId,
+                    title = "Original Title",
+                    description = "Original Description",
+                    dueDate = Instant.now().plusSeconds(3600),
+                    status = TaskStatus.PENDING,
+                    createdBy = userId,
+                    householdId = householdId,
+                )
+
+            whenever(taskRepository.findById(taskId)).thenReturn(existingTask)
             whenever(
                 householdMemberValidator.validate(context, householdId, userId),
             ).thenThrow(
@@ -128,12 +140,12 @@ class TaskUpdateByIdHandlerTest {
 
             val ex =
                 assertThrows<com.ohana.shared.exceptions.AuthorizationException> {
-                    handler.handle(userId, taskId, householdId, request)
+                    handler.handle(userId, taskId, request)
                 }
 
             assertEquals("User is not a member of the household", ex.message)
+            verify(taskRepository).findById(taskId)
             verify(householdMemberValidator).validate(context, householdId, userId)
-            verify(taskRepository, never()).findById(any())
             verify(taskRepository, never()).update(any())
         }
 
@@ -158,23 +170,22 @@ class TaskUpdateByIdHandlerTest {
 
             val ex =
                 assertThrows<NotFoundException> {
-                    handler.handle(userId, taskId, householdId, request)
+                    handler.handle(userId, taskId, request)
                 }
 
             assertEquals("Task not found", ex.message)
-            verify(householdMemberValidator).validate(context, householdId, userId)
             verify(taskRepository).findById(taskId)
+            verify(householdMemberValidator, never()).validate(any(), any(), any())
             verify(taskRepository, never()).update(any())
         }
 
     @Test
-    fun `handle should throw NotFoundException when task belongs to different household`() =
+    fun `handle should throw AuthorizationException when user is not member of task's household`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val taskId = UUID.randomUUID().toString()
             val householdId = UUID.randomUUID().toString()
-            val differentHouseholdId = UUID.randomUUID().toString()
             val userId = UUID.randomUUID().toString()
 
             val existingTask =
@@ -185,7 +196,7 @@ class TaskUpdateByIdHandlerTest {
                     dueDate = Instant.now().plusSeconds(3600),
                     status = TaskStatus.PENDING,
                     createdBy = userId,
-                    householdId = differentHouseholdId, // Different household
+                    householdId = householdId,
                 )
 
             val request =
@@ -197,15 +208,21 @@ class TaskUpdateByIdHandlerTest {
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(existingTask)
+            whenever(
+                householdMemberValidator.validate(context, householdId, userId),
+            ).thenThrow(
+                com.ohana.shared.exceptions
+                    .AuthorizationException("User is not a member of the household"),
+            )
 
             val ex =
-                assertThrows<NotFoundException> {
-                    handler.handle(userId, taskId, householdId, request)
+                assertThrows<com.ohana.shared.exceptions.AuthorizationException> {
+                    handler.handle(userId, taskId, request)
                 }
 
-            assertEquals("Task not found in this household", ex.message)
-            verify(householdMemberValidator).validate(context, householdId, userId)
+            assertEquals("User is not a member of the household", ex.message)
             verify(taskRepository).findById(taskId)
+            verify(householdMemberValidator).validate(context, householdId, userId)
             verify(taskRepository, never()).update(any())
         }
 
@@ -232,12 +249,12 @@ class TaskUpdateByIdHandlerTest {
 
             val ex =
                 assertThrows<RuntimeException> {
-                    handler.handle(userId, taskId, householdId, request)
+                    handler.handle(userId, taskId, request)
                 }
 
             assertEquals("DB error", ex.message)
-            verify(householdMemberValidator).validate(context, householdId, userId)
             verify(taskRepository).findById(taskId)
+            verify(householdMemberValidator).validate(context, householdId, userId)
             verify(taskRepository).update(any())
         }
 
@@ -382,7 +399,7 @@ class TaskUpdateByIdHandlerTest {
             whenever(taskRepository.findById(taskId)).thenReturn(existingTask)
             whenever(taskRepository.update(any())).thenReturn(updatedTask)
 
-            val response = handler.handle(userId, taskId, householdId, request)
+            val response = handler.handle(userId, taskId, request)
 
             assertEquals(originalCreatorId, response.createdBy)
             assertEquals(householdId, response.householdId)
