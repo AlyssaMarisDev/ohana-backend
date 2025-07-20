@@ -28,7 +28,6 @@ fun Application.module() {
     configureSerialization()
     configureCORS()
     configureRateLimit(config.rateLimit)
-    configureValidation()
     configureRouting()
     configureCallLogging()
     configureExceptionHandling()
