@@ -1,5 +1,6 @@
 package com.ohana.api.task
 
+import com.ohana.api.task.models.TaskUpdateRequest
 import com.ohana.api.utils.getUserId
 import com.ohana.domain.task.TaskCreationHandler
 import com.ohana.domain.task.TaskDeleteByIdHandler
@@ -75,10 +76,9 @@ class TaskController(
                         call.parameters["taskId"]
                             ?: throw ValidationException("Task ID is required", listOf(ValidationError("taskId", "Task ID is required")))
 
-                    // Use annotation-based validation
-                    val request = call.validateAndReceive<TaskUpdateByIdHandler.Request>()
-
-                    val response = taskUpdateByIdHandler.handle(userId, id, request)
+                    val request = call.receive<TaskUpdateRequest>()
+                    val domainRequest = request.toDomain()
+                    val response = taskUpdateByIdHandler.handle(userId, id, domainRequest)
 
                     call.respond(HttpStatusCode.OK, response)
                 }

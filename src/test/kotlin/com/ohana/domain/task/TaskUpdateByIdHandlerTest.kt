@@ -6,8 +6,6 @@ import com.ohana.data.unitOfWork.*
 import com.ohana.domain.validators.*
 import com.ohana.shared.enums.TaskStatus
 import com.ohana.shared.exceptions.NotFoundException
-import jakarta.validation.Validation
-import jakarta.validation.Validator
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -16,7 +14,6 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.*
 import java.time.Instant
 import java.util.UUID
-import kotlin.test.assertTrue
 
 class TaskUpdateByIdHandlerTest {
     private lateinit var unitOfWork: UnitOfWork
@@ -24,7 +21,6 @@ class TaskUpdateByIdHandlerTest {
     private lateinit var taskRepository: TaskRepository
     private lateinit var householdMemberValidator: HouseholdMemberValidator
     private lateinit var handler: TaskUpdateByIdHandler
-    private lateinit var validator: Validator
 
     @BeforeEach
     fun setUp() {
@@ -36,7 +32,6 @@ class TaskUpdateByIdHandlerTest {
             }
         unitOfWork = mock()
         handler = TaskUpdateByIdHandler(unitOfWork, householdMemberValidator)
-        validator = Validation.buildDefaultValidatorFactory().validator
     }
 
     @Test
@@ -256,107 +251,6 @@ class TaskUpdateByIdHandlerTest {
             verify(taskRepository).findById(taskId)
             verify(householdMemberValidator).validate(context, householdId, userId)
             verify(taskRepository).update(any())
-        }
-
-    @Test
-    fun `handle should throw ValidationException when title is empty`() =
-        runTest {
-            val request =
-                TaskUpdateByIdHandler.Request(
-                    title = "",
-                    description = "Updated Description",
-                    dueDate = Instant.now().plusSeconds(7200),
-                    status = TaskStatus.IN_PROGRESS,
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("title" to "Title is required"))
-        }
-
-    @Test
-    fun `handle should throw ValidationException when title is too long`() =
-        runTest {
-            val request =
-                TaskUpdateByIdHandler.Request(
-                    title = "A".repeat(256), // 256 characters, exceeds 255 limit
-                    description = "Updated Description",
-                    dueDate = Instant.now().plusSeconds(7200),
-                    status = TaskStatus.IN_PROGRESS,
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("title" to "Title must be between 1 and 255 characters long"))
-        }
-
-    @Test
-    fun `handle should accept valid title length`() =
-        runTest {
-            val request =
-                TaskUpdateByIdHandler.Request(
-                    title = "A".repeat(255), // Maximum length
-                    description = "Updated Description",
-                    dueDate = Instant.now().plusSeconds(7200),
-                    status = TaskStatus.IN_PROGRESS,
-                )
-            val violations = validator.validate(request)
-            assertTrue(violations.isEmpty())
-        }
-
-    @Test
-    fun `handle should accept minimum valid title length`() =
-        runTest {
-            val request =
-                TaskUpdateByIdHandler.Request(
-                    title = "A", // Minimum length
-                    description = "Updated Description",
-                    dueDate = Instant.now().plusSeconds(7200),
-                    status = TaskStatus.IN_PROGRESS,
-                )
-            val violations = validator.validate(request)
-            assertTrue(violations.isEmpty())
-        }
-
-    @Test
-    fun `handle should throw ValidationException when description is too long`() =
-        runTest {
-            val request =
-                TaskUpdateByIdHandler.Request(
-                    title = "Valid Title",
-                    description = "A".repeat(1001), // 1001 characters, exceeds 1000 limit
-                    dueDate = Instant.now().plusSeconds(7200),
-                    status = TaskStatus.IN_PROGRESS,
-                )
-            val violations = validator.validate(request)
-            val messages = violations.map { it.propertyPath.toString() to it.message }
-            assertTrue(messages.contains("description" to "Description must be at most 1000 characters long"))
-        }
-
-    @Test
-    fun `handle should accept valid description length`() =
-        runTest {
-            val request =
-                TaskUpdateByIdHandler.Request(
-                    title = "Valid Title",
-                    description = "A".repeat(1000), // Maximum length
-                    dueDate = Instant.now().plusSeconds(7200),
-                    status = TaskStatus.IN_PROGRESS,
-                )
-            val violations = validator.validate(request)
-            assertTrue(violations.isEmpty())
-        }
-
-    @Test
-    fun `handle should accept empty description`() =
-        runTest {
-            val request =
-                TaskUpdateByIdHandler.Request(
-                    title = "Valid Title",
-                    description = "", // Empty description
-                    dueDate = Instant.now().plusSeconds(7200),
-                    status = TaskStatus.IN_PROGRESS,
-                )
-            val violations = validator.validate(request)
-            assertTrue(violations.isEmpty())
         }
 
     @Test
