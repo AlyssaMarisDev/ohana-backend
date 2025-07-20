@@ -1,13 +1,13 @@
 package com.ohana.api.auth
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.ohana.api.auth.models.LoginRequest
 import com.ohana.api.auth.models.LogoutRequest
-import com.ohana.api.auth.models.MemberRegistrationRequest
-import com.ohana.api.auth.models.MemberSignInRequest
+import com.ohana.api.auth.models.RegistrationRequest
 import com.ohana.api.auth.models.TokenRefreshRequest
+import com.ohana.domain.auth.LoginHandler
 import com.ohana.domain.auth.LogoutHandler
-import com.ohana.domain.auth.MemberRegistrationHandler
-import com.ohana.domain.auth.MemberSignInHandler
+import com.ohana.domain.auth.RegistrationHandler
 import com.ohana.domain.auth.TokenRefreshHandler
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -17,8 +17,8 @@ import io.ktor.server.routing.*
 import org.slf4j.LoggerFactory
 
 class AuthController(
-    private val memberRegistrationHandler: MemberRegistrationHandler,
-    private val memberSignInHandler: MemberSignInHandler,
+    private val registrationHandler: RegistrationHandler,
+    private val loginHandler: LoginHandler,
     private val tokenRefreshHandler: TokenRefreshHandler,
     private val logoutHandler: LogoutHandler,
 ) {
@@ -27,16 +27,16 @@ class AuthController(
 
     fun Route.registerAuthRoutes() {
         post("/register") {
-            val request = call.receive<MemberRegistrationRequest>()
+            val request = call.receive<RegistrationRequest>()
             val domainRequest = request.toDomain()
-            val response = memberRegistrationHandler.handle(domainRequest)
+            val response = registrationHandler.handle(domainRequest)
             call.respond(HttpStatusCode.Created, response)
         }
 
         post("/login") {
-            val request = call.receive<MemberSignInRequest>()
+            val request = call.receive<LoginRequest>()
             val domainRequest = request.toDomain()
-            val response = memberSignInHandler.handle(domainRequest)
+            val response = loginHandler.handle(domainRequest)
             call.respond(HttpStatusCode.OK, response)
         }
 

@@ -17,12 +17,12 @@ import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class MemberRegistrationHandlerTest {
+class RegistrationHandlerTest {
     private lateinit var unitOfWork: UnitOfWork
     private lateinit var context: UnitOfWorkContext
     private lateinit var authMemberRepository: AuthMemberRepository
     private lateinit var refreshTokenRepository: RefreshTokenRepository
-    private lateinit var handler: MemberRegistrationHandler
+    private lateinit var handler: RegistrationHandler
 
     @BeforeEach
     fun setUp() {
@@ -34,7 +34,7 @@ class MemberRegistrationHandlerTest {
                 on { refreshTokens } doReturn refreshTokenRepository
             }
         unitOfWork = mock()
-        handler = MemberRegistrationHandler(unitOfWork)
+        handler = RegistrationHandler(unitOfWork)
     }
 
     @Test
@@ -43,7 +43,7 @@ class MemberRegistrationHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val request =
-                MemberRegistrationHandler.Request(
+                RegistrationHandler.Request(
                     name = "Test User",
                     email = "test@example.com",
                     password = "ValidPass123!",
@@ -91,7 +91,7 @@ class MemberRegistrationHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val request =
-                MemberRegistrationHandler.Request(
+                RegistrationHandler.Request(
                     name = "Test User",
                     email = "existing@example.com",
                     password = "ValidPass123!",
@@ -123,7 +123,7 @@ class MemberRegistrationHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val request =
-                MemberRegistrationHandler.Request(
+                RegistrationHandler.Request(
                     name = "Test User",
                     email = "test@example.com",
                     password = "ValidPass123!",
@@ -148,7 +148,7 @@ class MemberRegistrationHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val request =
-                MemberRegistrationHandler.Request(
+                RegistrationHandler.Request(
                     name = "Test User",
                     email = "test@example.com",
                     password = "ValidPass123!",
@@ -178,7 +178,7 @@ class MemberRegistrationHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val request =
-                MemberRegistrationHandler.Request(
+                RegistrationHandler.Request(
                     name = "Test User",
                     email = "test@example.com",
                     password = "ValidPass123!",
@@ -202,7 +202,7 @@ class MemberRegistrationHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val request =
-                MemberRegistrationHandler.Request(
+                RegistrationHandler.Request(
                     name = "Test User",
                     email = "test@example.com",
                     password = "ValidPass123!",

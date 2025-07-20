@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertEquals
 
-class MemberRegistrationRequestTest {
+class RegistrationRequestTest {
     @Test
     fun `toDomain should pass when all fields are valid`() =
         runTest {
             val request =
-                MemberRegistrationRequest(
+                RegistrationRequest(
                     name = "John Doe",
                     email = "john.doe@example.com",
                     password = "SecurePass123!",
@@ -28,7 +28,7 @@ class MemberRegistrationRequestTest {
     fun `toDomain should throw ValidationException when name is null`() =
         runTest {
             val request =
-                MemberRegistrationRequest(
+                RegistrationRequest(
                     name = null,
                     email = "john.doe@example.com",
                     password = "SecurePass123!",
@@ -49,7 +49,7 @@ class MemberRegistrationRequestTest {
     fun `toDomain should throw ValidationException when name is blank`() =
         runTest {
             val request =
-                MemberRegistrationRequest(
+                RegistrationRequest(
                     name = "",
                     email = "john.doe@example.com",
                     password = "SecurePass123!",
@@ -70,7 +70,7 @@ class MemberRegistrationRequestTest {
     fun `toDomain should throw ValidationException when name is too short`() =
         runTest {
             val request =
-                MemberRegistrationRequest(
+                RegistrationRequest(
                     name = "Jo", // 2 characters, less than 3
                     email = "john.doe@example.com",
                     password = "SecurePass123!",
@@ -91,7 +91,7 @@ class MemberRegistrationRequestTest {
     fun `toDomain should throw ValidationException when email is null`() =
         runTest {
             val request =
-                MemberRegistrationRequest(
+                RegistrationRequest(
                     name = "John Doe",
                     email = null,
                     password = "SecurePass123!",
@@ -112,7 +112,7 @@ class MemberRegistrationRequestTest {
     fun `toDomain should throw ValidationException when email is blank`() =
         runTest {
             val request =
-                MemberRegistrationRequest(
+                RegistrationRequest(
                     name = "John Doe",
                     email = "",
                     password = "SecurePass123!",
@@ -133,7 +133,7 @@ class MemberRegistrationRequestTest {
     fun `toDomain should throw ValidationException when email format is invalid`() =
         runTest {
             val request =
-                MemberRegistrationRequest(
+                RegistrationRequest(
                     name = "John Doe",
                     email = "invalid-email",
                     password = "SecurePass123!",
@@ -154,7 +154,7 @@ class MemberRegistrationRequestTest {
     fun `toDomain should throw ValidationException when password is null`() =
         runTest {
             val request =
-                MemberRegistrationRequest(
+                RegistrationRequest(
                     name = "John Doe",
                     email = "john.doe@example.com",
                     password = null,
@@ -175,7 +175,7 @@ class MemberRegistrationRequestTest {
     fun `toDomain should throw ValidationException when password is blank`() =
         runTest {
             val request =
-                MemberRegistrationRequest(
+                RegistrationRequest(
                     name = "John Doe",
                     email = "john.doe@example.com",
                     password = "",
@@ -196,7 +196,7 @@ class MemberRegistrationRequestTest {
     fun `toDomain should throw ValidationException when password is too short`() =
         runTest {
             val request =
-                MemberRegistrationRequest(
+                RegistrationRequest(
                     name = "John Doe",
                     email = "john.doe@example.com",
                     password = "Pass1!", // 6 characters, less than 8
@@ -217,7 +217,7 @@ class MemberRegistrationRequestTest {
     fun `toDomain should throw ValidationException when password lacks uppercase letter`() =
         runTest {
             val request =
-                MemberRegistrationRequest(
+                RegistrationRequest(
                     name = "John Doe",
                     email = "john.doe@example.com",
                     password = "securepass123!",
@@ -238,7 +238,7 @@ class MemberRegistrationRequestTest {
     fun `toDomain should throw ValidationException when password lacks number`() =
         runTest {
             val request =
-                MemberRegistrationRequest(
+                RegistrationRequest(
                     name = "John Doe",
                     email = "john.doe@example.com",
                     password = "SecurePass!",
@@ -259,7 +259,7 @@ class MemberRegistrationRequestTest {
     fun `toDomain should throw ValidationException when password lacks special character`() =
         runTest {
             val request =
-                MemberRegistrationRequest(
+                RegistrationRequest(
                     name = "John Doe",
                     email = "john.doe@example.com",
                     password = "SecurePass123",
@@ -280,7 +280,7 @@ class MemberRegistrationRequestTest {
     fun `toDomain should throw ValidationException with multiple errors`() =
         runTest {
             val request =
-                MemberRegistrationRequest(
+                RegistrationRequest(
                     name = "", // Blank name
                     email = "invalid-email", // Invalid email
                     password = "weak", // Weak password
@@ -302,7 +302,7 @@ class MemberRegistrationRequestTest {
     fun `toDomain should accept name with exactly 3 characters`() =
         runTest {
             val request =
-                MemberRegistrationRequest(
+                RegistrationRequest(
                     name = "Joe", // Exactly 3 characters
                     email = "joe@example.com",
                     password = "SecurePass123!",
@@ -328,7 +328,7 @@ class MemberRegistrationRequestTest {
 
             validEmails.forEach { email ->
                 val request =
-                    MemberRegistrationRequest(
+                    RegistrationRequest(
                         name = "John Doe",
                         email = email,
                         password = "SecurePass123!",
@@ -352,7 +352,7 @@ class MemberRegistrationRequestTest {
 
             validPasswords.forEach { password ->
                 val request =
-                    MemberRegistrationRequest(
+                    RegistrationRequest(
                         name = "John Doe",
                         email = "john.doe@example.com",
                         password = password,

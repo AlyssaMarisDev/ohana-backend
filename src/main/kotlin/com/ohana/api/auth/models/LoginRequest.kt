@@ -1,14 +1,14 @@
 package com.ohana.api.auth.models
 
-import com.ohana.domain.auth.MemberSignInHandler
+import com.ohana.domain.auth.LoginHandler
 import com.ohana.shared.exceptions.ValidationError
 import com.ohana.shared.exceptions.ValidationException
 
-data class MemberSignInRequest(
+data class LoginRequest(
     val email: String?,
     val password: String?,
 ) {
-    fun toDomain(): MemberSignInHandler.Request {
+    fun toDomain(): LoginHandler.Request {
         val errors = mutableListOf<ValidationError>()
 
         if (email == null) {
@@ -29,7 +29,7 @@ data class MemberSignInRequest(
             throw ValidationException("Validation failed", errors)
         }
 
-        return MemberSignInHandler.Request(
+        return LoginHandler.Request(
             email = email!!,
             password = password!!,
         )

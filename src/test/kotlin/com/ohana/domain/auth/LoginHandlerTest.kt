@@ -16,12 +16,12 @@ import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class MemberSignInHandlerTest {
+class LoginHandlerTest {
     private lateinit var unitOfWork: UnitOfWork
     private lateinit var context: UnitOfWorkContext
     private lateinit var authMemberRepository: AuthMemberRepository
     private lateinit var refreshTokenRepository: RefreshTokenRepository
-    private lateinit var handler: MemberSignInHandler
+    private lateinit var handler: LoginHandler
 
     @BeforeEach
     fun setUp() {
@@ -33,7 +33,7 @@ class MemberSignInHandlerTest {
                 on { refreshTokens } doReturn refreshTokenRepository
             }
         unitOfWork = mock()
-        handler = MemberSignInHandler(unitOfWork)
+        handler = LoginHandler(unitOfWork)
     }
 
     @Test
@@ -47,7 +47,7 @@ class MemberSignInHandlerTest {
             val hashedPassword = Hasher.hashPassword(password, salt)
 
             val request =
-                MemberSignInHandler.Request(
+                LoginHandler.Request(
                     email = email,
                     password = password,
                 )
@@ -79,7 +79,7 @@ class MemberSignInHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val request =
-                MemberSignInHandler.Request(
+                LoginHandler.Request(
                     email = "nonexistent@example.com",
                     password = "ValidPass123!",
                 )
@@ -107,7 +107,7 @@ class MemberSignInHandlerTest {
             val hashedPassword = Hasher.hashPassword(correctPassword, salt)
 
             val request =
-                MemberSignInHandler.Request(
+                LoginHandler.Request(
                     email = email,
                     password = wrongPassword,
                 )
@@ -138,7 +138,7 @@ class MemberSignInHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             val request =
-                MemberSignInHandler.Request(
+                LoginHandler.Request(
                     email = "test@example.com",
                     password = "ValidPass123!",
                 )
@@ -165,7 +165,7 @@ class MemberSignInHandlerTest {
             val hashedPassword = Hasher.hashPassword(password, salt)
 
             val request =
-                MemberSignInHandler.Request(
+                LoginHandler.Request(
                     email = email,
                     password = password,
                 )
@@ -202,7 +202,7 @@ class MemberSignInHandlerTest {
             val hashedPassword = Hasher.hashPassword(password, salt)
 
             val request =
-                MemberSignInHandler.Request(
+                LoginHandler.Request(
                     email = email,
                     password = password,
                 )

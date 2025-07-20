@@ -8,7 +8,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-class MemberSignInHandler(
+class LoginHandler(
     private val unitOfWork: UnitOfWork,
 ) {
     data class Request(

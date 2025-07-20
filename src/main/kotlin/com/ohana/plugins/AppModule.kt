@@ -40,8 +40,8 @@ val appModule =
         single { HouseholdMemberValidator() }
 
         // Auth handlers
-        single { MemberRegistrationHandler(get()) }
-        single { MemberSignInHandler(get()) }
+        single { RegistrationHandler(get()) }
+        single { LoginHandler(get()) }
         single { TokenRefreshHandler(get()) }
         single { LogoutHandler(get()) }
 

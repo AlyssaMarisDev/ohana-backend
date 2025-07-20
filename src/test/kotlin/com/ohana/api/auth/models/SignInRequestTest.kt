@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertEquals
 
-class MemberSignInRequestTest {
+class LoginRequestTest {
     @Test
     fun `toDomain should pass when all fields are valid`() =
         runTest {
             val request =
-                MemberSignInRequest(
+                LoginRequest(
                     email = "john.doe@example.com",
                     password = "SecurePass123!",
                 )
@@ -26,7 +26,7 @@ class MemberSignInRequestTest {
     fun `toDomain should throw ValidationException when email is null`() =
         runTest {
             val request =
-                MemberSignInRequest(
+                LoginRequest(
                     email = null,
                     password = "SecurePass123!",
                 )
@@ -46,7 +46,7 @@ class MemberSignInRequestTest {
     fun `toDomain should throw ValidationException when email is blank`() =
         runTest {
             val request =
-                MemberSignInRequest(
+                LoginRequest(
                     email = "",
                     password = "SecurePass123!",
                 )
@@ -66,7 +66,7 @@ class MemberSignInRequestTest {
     fun `toDomain should throw ValidationException when email format is invalid`() =
         runTest {
             val request =
-                MemberSignInRequest(
+                LoginRequest(
                     email = "invalid-email",
                     password = "SecurePass123!",
                 )
@@ -86,7 +86,7 @@ class MemberSignInRequestTest {
     fun `toDomain should throw ValidationException when password is null`() =
         runTest {
             val request =
-                MemberSignInRequest(
+                LoginRequest(
                     email = "john.doe@example.com",
                     password = null,
                 )
@@ -106,7 +106,7 @@ class MemberSignInRequestTest {
     fun `toDomain should throw ValidationException when password is blank`() =
         runTest {
             val request =
-                MemberSignInRequest(
+                LoginRequest(
                     email = "john.doe@example.com",
                     password = "",
                 )
@@ -126,7 +126,7 @@ class MemberSignInRequestTest {
     fun `toDomain should throw ValidationException with multiple errors`() =
         runTest {
             val request =
-                MemberSignInRequest(
+                LoginRequest(
                     email = "invalid-email", // Invalid email
                     password = "", // Blank password
                 )
@@ -156,7 +156,7 @@ class MemberSignInRequestTest {
 
             validEmails.forEach { email ->
                 val request =
-                    MemberSignInRequest(
+                    LoginRequest(
                         email = email,
                         password = "SecurePass123!",
                     )
@@ -179,7 +179,7 @@ class MemberSignInRequestTest {
 
             validPasswords.forEach { password ->
                 val request =
-                    MemberSignInRequest(
+                    LoginRequest(
                         email = "john.doe@example.com",
                         password = password,
                     )

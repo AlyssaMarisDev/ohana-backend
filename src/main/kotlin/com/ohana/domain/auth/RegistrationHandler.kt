@@ -9,7 +9,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-class MemberRegistrationHandler(
+class RegistrationHandler(
     private val unitOfWork: UnitOfWork,
 ) {
     data class Request(
