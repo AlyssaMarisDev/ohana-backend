@@ -16,6 +16,7 @@ class TaskCreationHandler(
         val description: String,
         val dueDate: Instant,
         val status: TaskStatus,
+        val householdId: String,
     )
 
     data class Response(
@@ -30,11 +31,10 @@ class TaskCreationHandler(
 
     suspend fun handle(
         userId: String,
-        householdId: String,
         request: Request,
     ): Response =
         unitOfWork.execute { context ->
-            householdMemberValidator.validate(context, householdId, userId)
+            householdMemberValidator.validate(context, request.householdId, userId)
 
             val task =
                 context.tasks.create(
@@ -45,7 +45,7 @@ class TaskCreationHandler(
                         dueDate = request.dueDate,
                         status = request.status,
                         createdBy = userId,
-                        householdId = householdId,
+                        householdId = request.householdId,
                     ),
                 )
 

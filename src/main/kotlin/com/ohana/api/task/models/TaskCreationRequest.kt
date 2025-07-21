@@ -13,6 +13,7 @@ data class TaskCreationRequest(
     val description: String?,
     val dueDate: Instant?,
     val status: String?,
+    val householdId: String?,
 ) {
     fun toDomain(): TaskCreationHandler.Request {
         val errors = mutableListOf<ValidationError>()
@@ -57,6 +58,14 @@ data class TaskCreationRequest(
             }
         }
 
+        if (householdId == null) {
+            errors.add(ValidationError("householdId", "Household ID is required"))
+        } else if (householdId.isBlank()) {
+            errors.add(ValidationError("householdId", "Household ID cannot be blank"))
+        } else if (!Guid.isValid(householdId)) {
+            errors.add(ValidationError("householdId", "Household ID must be a valid GUID"))
+        }
+
         if (errors.isNotEmpty()) {
             throw ValidationException("Validation failed", errors)
         }
@@ -67,6 +76,7 @@ data class TaskCreationRequest(
             description = description!!,
             dueDate = dueDate!!,
             status = TaskStatus.valueOf(status!!),
+            householdId = householdId!!,
         )
     }
 }

@@ -30,17 +30,11 @@ class TaskController(
             route("/tasks") {
                 post("") {
                     val userId = getUserId(call.principal<JWTPrincipal>())
-                    val householdId =
-                        call.parameters["householdId"]
-                            ?: throw ValidationException(
-                                "Household ID is required",
-                                listOf(ValidationError("householdId", "Household ID is required")),
-                            )
 
                     val request = call.receive<TaskCreationRequest>()
                     val domainRequest = request.toDomain()
 
-                    val response = taskCreationHandler.handle(userId, householdId, domainRequest)
+                    val response = taskCreationHandler.handle(userId, domainRequest)
 
                     call.respond(HttpStatusCode.Created, response)
                 }

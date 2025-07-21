@@ -51,6 +51,7 @@ class TaskCreationHandlerTest {
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(1000),
                     status = TaskStatus.PENDING,
+                    householdId = householdId,
                 )
 
             val task =
@@ -66,7 +67,7 @@ class TaskCreationHandlerTest {
 
             whenever(taskRepository.create(any())).thenReturn(task)
 
-            val response = handler.handle(userId, householdId, request)
+            val response = handler.handle(userId, request)
 
             verify(householdMemberValidator).validate(context, householdId, userId)
             verify(taskRepository).create(task)
@@ -94,6 +95,7 @@ class TaskCreationHandlerTest {
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(1000),
                     status = TaskStatus.PENDING,
+                    householdId = householdId,
                 )
 
             whenever(
@@ -102,7 +104,7 @@ class TaskCreationHandlerTest {
 
             val ex =
                 assertThrows<AuthorizationException> {
-                    handler.handle(userId, householdId, request)
+                    handler.handle(userId, request)
                 }
             assertEquals("User is not a member of the household", ex.message)
         }
@@ -121,13 +123,14 @@ class TaskCreationHandlerTest {
                     description = "Test Description",
                     dueDate = Instant.now().plusSeconds(1000),
                     status = TaskStatus.PENDING,
+                    householdId = householdId,
                 )
 
             whenever(taskRepository.create(any())).thenThrow(RuntimeException("DB error"))
 
             val ex =
                 assertThrows<RuntimeException> {
-                    handler.handle(userId, householdId, request)
+                    handler.handle(userId, request)
                 }
             assertEquals("DB error", ex.message)
         }

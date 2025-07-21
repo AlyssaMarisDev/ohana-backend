@@ -19,6 +19,7 @@ class TaskCreationRequestTest {
                     description = "Valid description",
                     dueDate = Instant.now().plusSeconds(3600),
                     status = "PENDING",
+                    householdId = Guid.generate(),
                 )
 
             val domainRequest = request.toDomain()
@@ -27,6 +28,7 @@ class TaskCreationRequestTest {
             assertEquals("Valid description", domainRequest.description)
             assertEquals(request.dueDate, domainRequest.dueDate)
             assertEquals(TaskStatus.PENDING, domainRequest.status)
+            assertEquals(request.householdId, domainRequest.householdId)
             Guid.isValid(domainRequest.id)
         }
 
@@ -39,6 +41,7 @@ class TaskCreationRequestTest {
                     description = "Valid description",
                     dueDate = Instant.now().plusSeconds(3600),
                     status = "PENDING",
+                    householdId = Guid.generate(),
                 )
 
             val exception =
@@ -61,6 +64,7 @@ class TaskCreationRequestTest {
                     description = "Valid description",
                     dueDate = Instant.now().plusSeconds(3600),
                     status = "PENDING",
+                    householdId = Guid.generate(),
                 )
 
             val exception =
@@ -83,6 +87,7 @@ class TaskCreationRequestTest {
                     description = "Valid description",
                     dueDate = Instant.now().plusSeconds(3600),
                     status = "PENDING",
+                    householdId = Guid.generate(),
                 )
 
             val exception =
@@ -105,6 +110,7 @@ class TaskCreationRequestTest {
                     description = null,
                     dueDate = Instant.now().plusSeconds(3600),
                     status = "PENDING",
+                    householdId = Guid.generate(),
                 )
 
             val exception =
@@ -127,6 +133,7 @@ class TaskCreationRequestTest {
                     description = "",
                     dueDate = Instant.now().plusSeconds(3600),
                     status = "PENDING",
+                    householdId = Guid.generate(),
                 )
 
             val exception =
@@ -149,6 +156,7 @@ class TaskCreationRequestTest {
                     description = "A".repeat(1001), // 1001 characters, exceeds 1000 limit
                     dueDate = Instant.now().plusSeconds(3600),
                     status = "PENDING",
+                    householdId = Guid.generate(),
                 )
 
             val exception =
@@ -171,6 +179,7 @@ class TaskCreationRequestTest {
                     description = "Valid description",
                     dueDate = null,
                     status = "PENDING",
+                    householdId = Guid.generate(),
                 )
 
             val exception =
@@ -193,6 +202,7 @@ class TaskCreationRequestTest {
                     description = "Valid description",
                     dueDate = Instant.now().minusSeconds(3600), // 1 hour ago
                     status = "PENDING",
+                    householdId = Guid.generate(),
                 )
 
             val exception =
@@ -215,6 +225,7 @@ class TaskCreationRequestTest {
                     description = "Valid description",
                     dueDate = Instant.now().plusSeconds(3600),
                     status = null,
+                    householdId = Guid.generate(),
                 )
 
             val exception =
@@ -237,6 +248,7 @@ class TaskCreationRequestTest {
                     description = "Valid description",
                     dueDate = Instant.now().plusSeconds(3600),
                     status = "INVALID_STATUS",
+                    householdId = Guid.generate(),
                 )
 
             val exception =
@@ -251,14 +263,15 @@ class TaskCreationRequestTest {
         }
 
     @Test
-    fun `toDomain should throw ValidationException with multiple errors`() =
+    fun `toDomain should throw ValidationException when householdId is null`() =
         runTest {
             val request =
                 TaskCreationRequest(
-                    title = "", // Blank title
-                    description = "A".repeat(1001), // Too long description
-                    dueDate = null, // Missing due date
-                    status = "INVALID_STATUS", // Invalid status
+                    title = "Valid Title",
+                    description = "Valid description",
+                    dueDate = Instant.now().plusSeconds(3600),
+                    status = "PENDING",
+                    householdId = null,
                 )
 
             val exception =
@@ -267,10 +280,79 @@ class TaskCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(4, exception.errors.size)
+            assertEquals(1, exception.errors.size)
+            assertEquals("householdId", exception.errors[0].field)
+            assertEquals("Household ID is required", exception.errors[0].message)
+        }
+
+    @Test
+    fun `toDomain should throw ValidationException when householdId is blank`() =
+        runTest {
+            val request =
+                TaskCreationRequest(
+                    title = "Valid Title",
+                    description = "Valid description",
+                    dueDate = Instant.now().plusSeconds(3600),
+                    status = "PENDING",
+                    householdId = "",
+                )
+
+            val exception =
+                assertThrows<ValidationException> {
+                    request.toDomain()
+                }
+
+            assertEquals("Validation failed", exception.message)
+            assertEquals(1, exception.errors.size)
+            assertEquals("householdId", exception.errors[0].field)
+            assertEquals("Household ID cannot be blank", exception.errors[0].message)
+        }
+
+    @Test
+    fun `toDomain should throw ValidationException when householdId is invalid GUID`() =
+        runTest {
+            val request =
+                TaskCreationRequest(
+                    title = "Valid Title",
+                    description = "Valid description",
+                    dueDate = Instant.now().plusSeconds(3600),
+                    status = "PENDING",
+                    householdId = "invalid-guid",
+                )
+
+            val exception =
+                assertThrows<ValidationException> {
+                    request.toDomain()
+                }
+
+            assertEquals("Validation failed", exception.message)
+            assertEquals(1, exception.errors.size)
+            assertEquals("householdId", exception.errors[0].field)
+            assertEquals("Household ID must be a valid GUID", exception.errors[0].message)
+        }
+
+    @Test
+    fun `toDomain should throw ValidationException with multiple errors`() =
+        runTest {
+            val request =
+                TaskCreationRequest(
+                    title = "", // Blank title
+                    description = "A".repeat(1001), // Too long description
+                    dueDate = null, // Missing due date
+                    status = "INVALID_STATUS", // Invalid status
+                    householdId = null, // Missing household ID
+                )
+
+            val exception =
+                assertThrows<ValidationException> {
+                    request.toDomain()
+                }
+
+            assertEquals("Validation failed", exception.message)
+            assertEquals(5, exception.errors.size)
 
             val errorFields = exception.errors.map { it.field }.toSet()
-            assertEquals(setOf("title", "description", "dueDate", "status"), errorFields)
+            assertEquals(setOf("title", "description", "dueDate", "status", "householdId"), errorFields)
         }
 
     @Test
@@ -285,6 +367,7 @@ class TaskCreationRequestTest {
                         description = "Valid description",
                         dueDate = Instant.now().plusSeconds(3600),
                         status = status,
+                        householdId = Guid.generate(),
                     )
 
                 val domainRequest = request.toDomain()
