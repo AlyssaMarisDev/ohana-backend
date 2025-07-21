@@ -83,7 +83,7 @@ data class RateLimitConfig(
     companion object {
         fun fromEnvironment(): RateLimitConfig =
             RateLimitConfig(
-                requestsPerMinute = System.getenv("RATE_LIMIT_REQUESTS_PER_MINUTE")?.toIntOrNull() ?: 60,
+                requestsPerMinute = System.getenv("RATE_LIMIT_REQUESTS_PER_MINUTE")?.toIntOrNull() ?: 200,
                 burstCapacity = System.getenv("RATE_LIMIT_BURST_CAPACITY")?.toIntOrNull() ?: 10,
             )
     }

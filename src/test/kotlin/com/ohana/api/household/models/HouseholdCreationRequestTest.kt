@@ -172,7 +172,7 @@ class HouseholdCreationRequestTest {
         }
 
     @Test
-    fun `toDomain should throw ValidationException when description is blank`() =
+    fun `toDomain should pass when description is empty`() =
         runTest {
             val request =
                 HouseholdCreationRequest(
@@ -181,15 +181,11 @@ class HouseholdCreationRequestTest {
                     description = "",
                 )
 
-            val exception =
-                assertThrows<ValidationException> {
-                    request.toDomain()
-                }
+            val domainRequest = request.toDomain()
 
-            assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("description", exception.errors[0].field)
-            assertEquals("Household description cannot be blank", exception.errors[0].message)
+            assertEquals("550e8400-e29b-41d4-a716-446655440000", domainRequest.id)
+            assertEquals("Test Household", domainRequest.name)
+            assertEquals("", domainRequest.description)
         }
 
     @Test
@@ -220,7 +216,7 @@ class HouseholdCreationRequestTest {
                 HouseholdCreationRequest(
                     id = "", // Blank id
                     name = "", // Blank name
-                    description = "", // Blank description
+                    description = null, // Missing description
                 )
 
             val exception =

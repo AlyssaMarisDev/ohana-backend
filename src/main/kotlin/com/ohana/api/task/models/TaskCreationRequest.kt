@@ -36,8 +36,6 @@ data class TaskCreationRequest(
 
         if (description == null) {
             errors.add(ValidationError("description", "Description is required"))
-        } else if (description.isBlank()) {
-            errors.add(ValidationError("description", "Description cannot be blank"))
         } else if (description.length > 1000) {
             errors.add(ValidationError("description", "Description must be at most 1000 characters long"))
         }

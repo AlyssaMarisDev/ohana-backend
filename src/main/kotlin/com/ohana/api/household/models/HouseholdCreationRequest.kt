@@ -31,8 +31,6 @@ data class HouseholdCreationRequest(
 
         if (description == null) {
             errors.add(ValidationError("description", "Household description is required"))
-        } else if (description.isBlank()) {
-            errors.add(ValidationError("description", "Household description cannot be blank"))
         } else if (description.length > 1000) {
             errors.add(ValidationError("description", "Household description must be at most 1000 characters long"))
         }

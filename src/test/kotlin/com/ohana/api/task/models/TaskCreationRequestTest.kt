@@ -125,7 +125,7 @@ class TaskCreationRequestTest {
         }
 
     @Test
-    fun `toDomain should throw ValidationException when description is blank`() =
+    fun `toDomain should pass when description is empty`() =
         runTest {
             val request =
                 TaskCreationRequest(
@@ -136,15 +136,14 @@ class TaskCreationRequestTest {
                     householdId = Guid.generate(),
                 )
 
-            val exception =
-                assertThrows<ValidationException> {
-                    request.toDomain()
-                }
+            val domainRequest = request.toDomain()
 
-            assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("description", exception.errors[0].field)
-            assertEquals("Description cannot be blank", exception.errors[0].message)
+            assertEquals("Valid Title", domainRequest.title)
+            assertEquals("", domainRequest.description)
+            assertEquals(request.dueDate, domainRequest.dueDate)
+            assertEquals(TaskStatus.PENDING, domainRequest.status)
+            assertEquals(request.householdId, domainRequest.householdId)
+            Guid.isValid(domainRequest.id)
         }
 
     @Test
