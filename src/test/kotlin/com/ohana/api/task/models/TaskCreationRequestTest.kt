@@ -194,7 +194,7 @@ class TaskCreationRequestTest {
         }
 
     @Test
-    fun `toDomain should throw ValidationException when due date is in the past`() =
+    fun `toDomain should pass when due date is in the past`() =
         runTest {
             val request =
                 TaskCreationRequest(
@@ -205,15 +205,14 @@ class TaskCreationRequestTest {
                     householdId = Guid.generate(),
                 )
 
-            val exception =
-                assertThrows<ValidationException> {
-                    request.toDomain()
-                }
+            val domainRequest = request.toDomain()
 
-            assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("dueDate", exception.errors[0].field)
-            assertEquals("Due date cannot be in the past", exception.errors[0].message)
+            assertEquals("Valid Title", domainRequest.title)
+            assertEquals("Valid description", domainRequest.description)
+            assertEquals(request.dueDate, domainRequest.dueDate)
+            assertEquals(TaskStatus.PENDING, domainRequest.status)
+            assertEquals(request.householdId, domainRequest.householdId)
+            Guid.isValid(domainRequest.id)
         }
 
     @Test

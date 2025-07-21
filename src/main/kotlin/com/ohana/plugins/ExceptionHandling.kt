@@ -31,7 +31,7 @@ fun Application.configureExceptionHandling() {
         }
 
         exception<ValidationException> { call, cause ->
-            logger.info("Validation error: ${cause.message}")
+            logger.info("Validation error: ${cause.message}, ${cause.errors}")
             call.respond(
                 HttpStatusCode.BadRequest,
                 mapOf(

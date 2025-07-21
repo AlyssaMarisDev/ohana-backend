@@ -44,8 +44,6 @@ data class TaskCreationRequest(
 
         if (dueDate == null) {
             errors.add(ValidationError("dueDate", "Due date is required"))
-        } else if (dueDate.isBefore(Instant.now())) {
-            errors.add(ValidationError("dueDate", "Due date cannot be in the past"))
         }
 
         if (status == null) {
