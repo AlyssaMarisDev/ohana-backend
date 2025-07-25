@@ -28,13 +28,7 @@ class TaskUpdateByIdHandler(
         val status: TaskStatus?,
         val createdBy: String,
         val householdId: String,
-        val tags: List<TaskTagResponse>,
-    )
-
-    data class TaskTagResponse(
-        val id: String,
-        val name: String,
-        val color: String,
+        val tags: List<String>,
     )
 
     suspend fun handle(
@@ -68,14 +62,7 @@ class TaskUpdateByIdHandler(
                 status = updatedTask.status,
                 createdBy = updatedTask.createdBy,
                 householdId = updatedTask.householdId,
-                tags =
-                    tags.map {
-                        TaskTagResponse(
-                            id = it.id,
-                            name = it.name,
-                            color = it.color,
-                        )
-                    },
+                tags = tags.map { it.id },
             )
         }
 }

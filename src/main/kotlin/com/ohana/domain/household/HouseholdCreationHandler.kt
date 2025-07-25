@@ -45,6 +45,7 @@ class HouseholdCreationHandler(
                     memberId = userId,
                     role = HouseholdMemberRole.ADMIN,
                     isActive = true,
+                    isDefault = true,
                     invitedBy = userId,
                     joinedAt = Instant.now(),
                 ),

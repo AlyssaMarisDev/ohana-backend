@@ -88,7 +88,7 @@ class HouseholdCreationHandlerTest {
                         member.memberId == userId &&
                         member.role == HouseholdMemberRole.ADMIN &&
                         member.isActive &&
-                        member.invitedBy == userId &&
+                        member.isDefault &&
                         member.joinedAt != null
                 },
             )

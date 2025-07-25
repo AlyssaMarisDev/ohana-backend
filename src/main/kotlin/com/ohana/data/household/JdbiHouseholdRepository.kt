@@ -92,7 +92,7 @@ class JdbiHouseholdRepository(
         memberId: String,
     ): HouseholdMember? {
         val selectQuery = """
-            SELECT id, household_id, member_id, role, is_active, invited_by, joined_at
+            SELECT id, household_id, member_id, role, is_active, is_default, invited_by, joined_at
             FROM household_members
             WHERE household_id = :householdId AND member_id = :memberId
         """
@@ -111,7 +111,7 @@ class JdbiHouseholdRepository(
 
     override fun findMembersByHouseholdId(householdId: String): List<HouseholdMember> {
         val selectQuery = """
-            SELECT id, household_id, member_id, role, is_active, invited_by, joined_at
+            SELECT id, household_id, member_id, role, is_active, is_default, invited_by, joined_at
             FROM household_members
             WHERE household_id = :householdId
         """
@@ -127,8 +127,8 @@ class JdbiHouseholdRepository(
 
     override fun createMember(member: HouseholdMember): HouseholdMember {
         val insertQuery = """
-            INSERT INTO household_members (id, household_id, member_id, role, is_active, invited_by, joined_at)
-            VALUES (:id, :householdId, :memberId, :role, :isActive, :invitedBy, :joinedAt)
+            INSERT INTO household_members (id, household_id, member_id, role, is_active, is_default, invited_by, joined_at)
+            VALUES (:id, :householdId, :memberId, :role, :isActive, :isDefault, :invitedBy, :joinedAt)
         """
 
         val insertedRows =
@@ -141,6 +141,7 @@ class JdbiHouseholdRepository(
                     "memberId" to member.memberId,
                     "role" to member.role.name,
                     "isActive" to member.isActive,
+                    "isDefault" to member.isDefault,
                     "invitedBy" to member.invitedBy,
                     "joinedAt" to member.joinedAt,
                 ),
@@ -156,6 +157,7 @@ class JdbiHouseholdRepository(
         val updateQuery = """
             UPDATE household_members
             SET is_active = :isActive,
+                is_default = :isDefault,
                 joined_at = :joinedAt
             WHERE household_id = :householdId AND member_id = :memberId
         """
@@ -168,6 +170,7 @@ class JdbiHouseholdRepository(
                     "householdId" to member.householdId,
                     "memberId" to member.memberId,
                     "isActive" to member.isActive,
+                    "isDefault" to member.isDefault,
                     "joinedAt" to member.joinedAt,
                 ),
             )
@@ -176,6 +179,62 @@ class JdbiHouseholdRepository(
 
         return findMemberById(member.householdId, member.memberId)
             ?: throw NotFoundException("Household member not found after update")
+    }
+
+    override fun findDefaultHouseholdByMemberId(memberId: String): HouseholdMember? {
+        val selectQuery = """
+            SELECT id, household_id, member_id, role, is_active, is_default, invited_by, joined_at
+            FROM household_members
+            WHERE member_id = :memberId AND is_default = true
+        """
+
+        return DatabaseUtils
+            .get(
+                handle,
+                selectQuery,
+                mapOf("memberId" to memberId),
+                HouseholdMember::class,
+            ).firstOrNull()
+    }
+
+    override fun setDefaultHousehold(
+        memberId: String,
+        householdId: String,
+    ): HouseholdMember {
+        // First, clear any existing default household for this member
+        val clearDefaultQuery = """
+            UPDATE household_members
+            SET is_default = false
+            WHERE member_id = :memberId AND is_default = true
+        """
+
+        DatabaseUtils.update(
+            handle,
+            clearDefaultQuery,
+            mapOf("memberId" to memberId),
+        )
+
+        // Then set the new default household
+        val setDefaultQuery = """
+            UPDATE household_members
+            SET is_default = true
+            WHERE member_id = :memberId AND household_id = :householdId
+        """
+
+        val updatedRows =
+            DatabaseUtils.update(
+                handle,
+                setDefaultQuery,
+                mapOf(
+                    "memberId" to memberId,
+                    "householdId" to householdId,
+                ),
+            )
+
+        if (updatedRows == 0) throw DbException("Failed to set default household")
+
+        return findMemberById(householdId, memberId)
+            ?: throw NotFoundException("Household member not found after setting default")
     }
 
     private class HouseholdRowMapper : RowMapper<Household> {
@@ -204,6 +263,7 @@ class JdbiHouseholdRepository(
                     com.ohana.shared.enums.HouseholdMemberRole
                         .valueOf(rs.getString("role").uppercase()),
                 isActive = rs.getBoolean("is_active"),
+                isDefault = rs.getBoolean("is_default"),
                 invitedBy = rs.getString("invited_by"),
                 joinedAt = rs.getTimestamp("joined_at")?.toInstant(),
             )

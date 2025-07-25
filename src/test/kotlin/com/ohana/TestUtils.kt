@@ -57,6 +57,7 @@ class TestUtils {
             memberId: String = UUID.randomUUID().toString(),
             role: HouseholdMemberRole = HouseholdMemberRole.MEMBER,
             isActive: Boolean = true,
+            isDefault: Boolean = false,
             invitedBy: String? = UUID.randomUUID().toString(),
             joinedAt: Instant? = Instant.now(),
         ): HouseholdMember =
@@ -66,6 +67,7 @@ class TestUtils {
                 memberId = memberId,
                 role = role,
                 isActive = isActive,
+                isDefault = isDefault,
                 invitedBy = invitedBy,
                 joinedAt = joinedAt,
             )

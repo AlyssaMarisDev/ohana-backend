@@ -9,6 +9,7 @@ data class HouseholdMember(
     val memberId: String,
     val role: HouseholdMemberRole,
     val isActive: Boolean = false,
+    val isDefault: Boolean = false,
     val invitedBy: String? = null,
     val joinedAt: Instant? = null,
 )

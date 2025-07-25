@@ -30,13 +30,7 @@ class TaskCreationHandler(
         val status: TaskStatus,
         val createdBy: String,
         val householdId: String,
-        val tags: List<TaskTagResponse>,
-    )
-
-    data class TaskTagResponse(
-        val id: String,
-        val name: String,
-        val color: String,
+        val tags: List<String>,
     )
 
     suspend fun handle(
@@ -69,14 +63,7 @@ class TaskCreationHandler(
                 status = task.status,
                 createdBy = task.createdBy,
                 householdId = task.householdId,
-                tags =
-                    tags.map {
-                        TaskTagResponse(
-                            id = it.id,
-                            name = it.name,
-                            color = it.color,
-                        )
-                    },
+                tags = tags.map { it.id },
             )
         }
 }

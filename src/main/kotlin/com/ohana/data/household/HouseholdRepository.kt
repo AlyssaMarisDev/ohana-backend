@@ -19,4 +19,11 @@ interface HouseholdRepository {
     fun createMember(member: HouseholdMember): HouseholdMember
 
     fun updateMember(member: HouseholdMember): HouseholdMember
+
+    fun findDefaultHouseholdByMemberId(memberId: String): HouseholdMember?
+
+    fun setDefaultHousehold(
+        memberId: String,
+        householdId: String,
+    ): HouseholdMember
 }

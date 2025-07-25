@@ -323,4 +323,46 @@ class TaskGetByIdHandlerTest {
 
             assertEquals(currentTime, response.dueDate)
         }
+
+    @Test
+    fun `handle should return tag IDs when task has tags`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val taskId = UUID.randomUUID().toString()
+            val householdId = UUID.randomUUID().toString()
+            val userId = UUID.randomUUID().toString()
+            val tagId1 = UUID.randomUUID().toString()
+            val tagId2 = UUID.randomUUID().toString()
+
+            val task =
+                TestUtils.getTask(
+                    id = taskId,
+                    title = "Test Task",
+                    description = "Test Description",
+                    dueDate = Instant.now().plusSeconds(3600),
+                    status = com.ohana.shared.enums.TaskStatus.PENDING,
+                    createdBy = userId,
+                    householdId = householdId,
+                )
+
+            val tags =
+                listOf(
+                    TestUtils.getTag(id = tagId1, name = "Work", color = "#FF0000"),
+                    TestUtils.getTag(id = tagId2, name = "Urgent", color = "#00FF00"),
+                )
+
+            whenever(taskRepository.findById(taskId)).thenReturn(task)
+            whenever(taskTagManager.getTaskTags(context, taskId)).thenReturn(tags)
+
+            val response = handler.handle(userId, taskId)
+
+            assertEquals(2, response.tags.size)
+            assertEquals(tagId1, response.tags[0])
+            assertEquals(tagId2, response.tags[1])
+
+            verify(householdMemberValidator).validate(context, householdId, userId)
+            verify(taskRepository).findById(taskId)
+            verify(taskTagManager).getTaskTags(context, taskId)
+        }
 }
