@@ -74,6 +74,46 @@ class GetTagsHandlerTest {
         }
 
     @Test
+    fun `handle should return default tags when householdId is null`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val userId = UUID.randomUUID().toString()
+
+            val expectedDefaultTags =
+                listOf(
+                    TestUtils.getTag(
+                        id = UUID.randomUUID().toString(),
+                        name = "chores",
+                        color = "#10B981",
+                        householdId = null,
+                        isDefault = true,
+                    ),
+                    TestUtils.getTag(
+                        id = UUID.randomUUID().toString(),
+                        name = "shopping",
+                        color = "#F59E0B",
+                        householdId = null,
+                        isDefault = true,
+                    ),
+                )
+
+            whenever(tagRepository.findDefaultTags()).thenReturn(expectedDefaultTags)
+
+            val response = handler.handle(userId, null)
+
+            assertEquals(2, response.tags.size)
+            assertEquals("chores", response.tags[0].name)
+            assertEquals("#10B981", response.tags[0].color)
+            assertEquals("shopping", response.tags[1].name)
+            assertEquals("#F59E0B", response.tags[1].color)
+
+            verify(validator, never()).validate(any(), any(), any())
+            verify(tagRepository).findDefaultTags()
+            verify(tagRepository, never()).findByHouseholdIdWithDefaults(any())
+        }
+
+    @Test
     fun `handle should return empty list when no tags exist`() =
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
@@ -89,6 +129,24 @@ class GetTagsHandlerTest {
 
             verify(validator).validate(context, householdId, userId)
             verify(tagRepository).findByHouseholdIdWithDefaults(householdId)
+        }
+
+    @Test
+    fun `handle should return empty list when no default tags exist`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val userId = UUID.randomUUID().toString()
+
+            whenever(tagRepository.findDefaultTags()).thenReturn(emptyList())
+
+            val response = handler.handle(userId, null)
+
+            assertEquals(0, response.tags.size)
+
+            verify(validator, never()).validate(any(), any(), any())
+            verify(tagRepository).findDefaultTags()
+            verify(tagRepository, never()).findByHouseholdIdWithDefaults(any())
         }
 
     @Test
@@ -131,5 +189,25 @@ class GetTagsHandlerTest {
             assertEquals("Database error", ex.message)
             verify(validator).validate(context, householdId, userId)
             verify(tagRepository).findByHouseholdIdWithDefaults(householdId)
+        }
+
+    @Test
+    fun `handle should propagate repository exception when getting default tags`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val userId = UUID.randomUUID().toString()
+
+            whenever(tagRepository.findDefaultTags())
+                .thenThrow(RuntimeException("Database error"))
+
+            val ex =
+                assertThrows<RuntimeException> {
+                    handler.handle(userId, null)
+                }
+
+            assertEquals("Database error", ex.message)
+            verify(validator, never()).validate(any(), any(), any())
+            verify(tagRepository).findDefaultTags()
         }
 }

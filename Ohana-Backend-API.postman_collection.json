@@ -243,7 +243,7 @@
           "response": []
         },
         {
-          "name": "Get Household Tags",
+          "name": "Get Tags",
           "request": {
             "method": "GET",
             "header": [
@@ -253,17 +253,18 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/households/tags?householdId={{householdId}}",
+              "raw": "{{baseUrl}}/tags?householdId={{householdId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["households", "tags"],
+              "path": ["tags"],
               "query": [
                 {
                   "key": "householdId",
-                  "value": "{{householdId}}"
+                  "value": "{{householdId}}",
+                  "description": "Optional. If provided, returns household-specific tags plus default tags. If not provided, returns only default tags."
                 }
               ]
             },
-            "description": "Get all tags available for a specific household."
+            "description": "Get tags. If householdId is provided, returns household-specific tags plus default tags. If householdId is not provided, returns only default tags."
           },
           "response": []
         }

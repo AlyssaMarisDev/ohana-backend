@@ -2,8 +2,6 @@ package com.ohana.api.tags
 
 import com.ohana.api.utils.getUserId
 import com.ohana.domain.tags.GetTagsHandler
-import com.ohana.shared.exceptions.ValidationError
-import com.ohana.shared.exceptions.ValidationException
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.auth.*
@@ -22,12 +20,7 @@ class TagsController(
             route("/tags") {
                 get {
                     val userId = getUserId(call.principal<JWTPrincipal>())
-                    val householdId =
-                        call.request.queryParameters["householdId"]
-                            ?: throw ValidationException(
-                                "householdId is required",
-                                listOf(ValidationError("householdId", "householdId is required")),
-                            )
+                    val householdId = call.request.queryParameters["householdId"]
 
                     val response = getTagsHandler.handle(userId, householdId)
                     call.respond(HttpStatusCode.OK, response)

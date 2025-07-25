@@ -19,14 +19,20 @@ class GetTagsHandler(
 
     suspend fun handle(
         userId: String,
-        householdId: String,
+        householdId: String? = null,
     ): Response =
         unitOfWork.execute { context ->
-            // Validate that user is a member of the household
-            validator.validate(context, householdId, userId)
+            val tags =
+                if (householdId != null) {
+                    // Validate that user is a member of the household
+                    validator.validate(context, householdId, userId)
 
-            // Get tags for the household
-            val tags = context.tags.findByHouseholdIdWithDefaults(householdId)
+                    // Get tags for the household (including defaults)
+                    context.tags.findByHouseholdIdWithDefaults(householdId)
+                } else {
+                    // Return only default tags when no household ID is provided
+                    context.tags.findDefaultTags()
+                }
 
             // Convert to response format
             Response(
