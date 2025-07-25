@@ -6,6 +6,8 @@ import com.ohana.data.auth.JdbiRefreshTokenRepository
 import com.ohana.data.auth.RefreshTokenRepository
 import com.ohana.data.household.HouseholdRepository
 import com.ohana.data.household.JdbiHouseholdRepository
+import com.ohana.data.household.JdbiTagRepository
+import com.ohana.data.household.TagRepository
 import com.ohana.data.member.JdbiMemberRepository
 import com.ohana.data.member.MemberRepository
 import com.ohana.data.task.JdbiTaskRepository
@@ -35,6 +37,7 @@ class JdbiUnitOfWorkContext(
     override val tasks: TaskRepository = JdbiTaskRepository(handle)
     override val members: MemberRepository = JdbiMemberRepository(handle)
     override val households: HouseholdRepository = JdbiHouseholdRepository(handle)
+    override val tags: TagRepository = JdbiTagRepository(handle)
     override val authMembers: AuthMemberRepository = JdbiAuthMemberRepository(handle)
     override val refreshTokens: RefreshTokenRepository = JdbiRefreshTokenRepository(handle)
 }

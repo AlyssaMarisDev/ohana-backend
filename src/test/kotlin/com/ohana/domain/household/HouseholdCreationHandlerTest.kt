@@ -2,6 +2,7 @@ package com.ohana.domain.household
 
 import com.ohana.TestUtils
 import com.ohana.data.household.HouseholdRepository
+import com.ohana.data.household.TagRepository
 import com.ohana.data.unitOfWork.*
 import com.ohana.shared.enums.HouseholdMemberRole
 import kotlinx.coroutines.test.runTest
@@ -17,14 +18,17 @@ class HouseholdCreationHandlerTest {
     private lateinit var unitOfWork: UnitOfWork
     private lateinit var context: UnitOfWorkContext
     private lateinit var householdRepository: HouseholdRepository
+    private lateinit var tagRepository: TagRepository
     private lateinit var handler: HouseholdCreationHandler
 
     @BeforeEach
     fun setUp() {
         householdRepository = mock()
+        tagRepository = mock()
         context =
             mock {
                 on { households } doReturn householdRepository
+                on { tags } doReturn tagRepository
             }
         unitOfWork = mock()
         handler = HouseholdCreationHandler(unitOfWork)
@@ -362,6 +366,75 @@ class HouseholdCreationHandlerTest {
                     member.joinedAt != null &&
                         member.joinedAt!! >= beforeCall &&
                         member.joinedAt!! <= afterCall
+                },
+            )
+        }
+
+    @Test
+    fun `handle should create default tags for household`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val userId = UUID.randomUUID().toString()
+            val householdId = UUID.randomUUID().toString()
+            val request =
+                HouseholdCreationHandler.Request(
+                    id = householdId,
+                    name = "Test Household",
+                    description = "Test description",
+                )
+
+            val expectedHousehold =
+                TestUtils.getHousehold(
+                    id = householdId,
+                    name = request.name,
+                    description = request.description,
+                    createdBy = userId,
+                )
+
+            val expectedMember =
+                TestUtils.getHouseholdMember(
+                    id = UUID.randomUUID().toString(),
+                    householdId = householdId,
+                    memberId = userId,
+                    role = HouseholdMemberRole.ADMIN,
+                )
+
+            whenever(householdRepository.create(any())).thenReturn(expectedHousehold)
+            whenever(householdRepository.createMember(any())).thenReturn(expectedMember)
+            whenever(tagRepository.create(any())).thenAnswer { invocation ->
+                invocation.getArgument(0)
+            }
+
+            handler.handle(userId, request)
+
+            // Verify that 5 default tags are created
+            verify(tagRepository, times(5)).create(any())
+
+            // Verify specific tags are created
+            verify(tagRepository).create(
+                argThat { tag ->
+                    tag.name == "metas" && tag.color == "#3B82F6" && tag.householdId == householdId
+                },
+            )
+            verify(tagRepository).create(
+                argThat { tag ->
+                    tag.name == "adult" && tag.color == "#EF4444" && tag.householdId == householdId
+                },
+            )
+            verify(tagRepository).create(
+                argThat { tag ->
+                    tag.name == "work" && tag.color == "#10B981" && tag.householdId == householdId
+                },
+            )
+            verify(tagRepository).create(
+                argThat { tag ->
+                    tag.name == "kids" && tag.color == "#F59E0B" && tag.householdId == householdId
+                },
+            )
+            verify(tagRepository).create(
+                argThat { tag ->
+                    tag.name == "chores" && tag.color == "#8B5CF6" && tag.householdId == householdId
                 },
             )
         }

@@ -63,11 +63,12 @@ val appModule =
         single { HouseholdGetAllHandler(get()) }
         single { HouseholdGetByIdHandler(get(), get()) }
         single { HouseholdInviteMemberHandler(get()) }
+        single { TagGetByHouseholdIdHandler(get(), get()) }
 
         // Controllers
         single { AuthController(get(), get(), get(), get()) }
         single { HealthController() }
-        single { HouseholdController(get(), get(), get(), get(), get()) }
+        single { HouseholdController(get(), get(), get(), get(), get(), get()) }
         single { MemberController(get(), get(), get()) }
         single { TaskController(get(), get(), get(), get(), get()) }
     }

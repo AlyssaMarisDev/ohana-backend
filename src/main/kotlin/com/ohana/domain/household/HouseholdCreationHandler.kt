@@ -50,6 +50,9 @@ class HouseholdCreationHandler(
                 ),
             )
 
+            // Create default tags for the household
+            createDefaultTags(context, request.id)
+
             // Return response
             Response(
                 id = household.id,
@@ -57,4 +60,57 @@ class HouseholdCreationHandler(
                 description = household.description,
             )
         }
+
+    private fun createDefaultTags(
+        context: UnitOfWorkContext,
+        householdId: String,
+    ) {
+        val defaultTags =
+            listOf(
+                Tag(
+                    id = UUID.randomUUID().toString(),
+                    name = "metas",
+                    color = "#3B82F6", // Blue
+                    householdId = householdId,
+                    createdAt = Instant.now(),
+                    updatedAt = Instant.now(),
+                ),
+                Tag(
+                    id = UUID.randomUUID().toString(),
+                    name = "adult",
+                    color = "#EF4444", // Red
+                    householdId = householdId,
+                    createdAt = Instant.now(),
+                    updatedAt = Instant.now(),
+                ),
+                Tag(
+                    id = UUID.randomUUID().toString(),
+                    name = "work",
+                    color = "#10B981", // Green
+                    householdId = householdId,
+                    createdAt = Instant.now(),
+                    updatedAt = Instant.now(),
+                ),
+                Tag(
+                    id = UUID.randomUUID().toString(),
+                    name = "kids",
+                    color = "#F59E0B", // Amber
+                    householdId = householdId,
+                    createdAt = Instant.now(),
+                    updatedAt = Instant.now(),
+                ),
+                Tag(
+                    id = UUID.randomUUID().toString(),
+                    name = "chores",
+                    color = "#8B5CF6", // Purple
+                    householdId = householdId,
+                    createdAt = Instant.now(),
+                    updatedAt = Instant.now(),
+                ),
+            )
+
+        defaultTags.forEach { tag ->
+            context.tags.create(tag)
+        }
+    }
 }

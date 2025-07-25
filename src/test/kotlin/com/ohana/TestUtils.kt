@@ -2,6 +2,7 @@ package com.ohana
 
 import com.ohana.data.household.Household
 import com.ohana.data.household.HouseholdMember
+import com.ohana.data.household.Tag
 import com.ohana.data.member.Member
 import com.ohana.data.task.Task
 import com.ohana.data.unitOfWork.*
@@ -67,5 +68,14 @@ class TestUtils {
                 invitedBy = invitedBy,
                 joinedAt = joinedAt,
             )
+
+        fun getTag(
+            id: String = UUID.randomUUID().toString(),
+            name: String = "Test Tag",
+            color: String = "#3B82F6",
+            householdId: String = UUID.randomUUID().toString(),
+            createdAt: Instant = Instant.now(),
+            updatedAt: Instant = Instant.now(),
+        ): Tag = Tag(id, name, color, householdId, createdAt, updatedAt)
     }
 }

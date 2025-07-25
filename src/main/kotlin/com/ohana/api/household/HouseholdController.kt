@@ -8,6 +8,7 @@ import com.ohana.domain.household.HouseholdCreationHandler
 import com.ohana.domain.household.HouseholdGetAllHandler
 import com.ohana.domain.household.HouseholdGetByIdHandler
 import com.ohana.domain.household.HouseholdInviteMemberHandler
+import com.ohana.domain.household.TagGetByHouseholdIdHandler
 import com.ohana.shared.exceptions.ValidationError
 import com.ohana.shared.exceptions.ValidationException
 import io.ktor.http.*
@@ -23,6 +24,7 @@ class HouseholdController(
     private val householdGetAllHandler: HouseholdGetAllHandler,
     private val householdInviteMemberHandler: HouseholdInviteMemberHandler,
     private val householdAcceptInviteHandler: HouseholdAcceptInviteHandler,
+    private val tagGetByHouseholdIdHandler: TagGetByHouseholdIdHandler,
 ) {
     fun Route.registerHouseholdRoutes() {
         authenticate("auth-jwt") {
@@ -85,6 +87,19 @@ class HouseholdController(
 
                     householdAcceptInviteHandler.handle(userId, id)
                     call.respond(HttpStatusCode.OK)
+                }
+
+                get("/{householdId}/tags") {
+                    val userId = getUserId(call.principal<JWTPrincipal>())
+                    val id =
+                        call.parameters["householdId"]
+                            ?: throw ValidationException(
+                                "Household ID is required",
+                                listOf(ValidationError("householdId", "Household ID is required")),
+                            )
+
+                    val response = tagGetByHouseholdIdHandler.handle(userId, id)
+                    call.respond(HttpStatusCode.OK, response)
                 }
             }
         }

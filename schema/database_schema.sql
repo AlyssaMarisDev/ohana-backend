@@ -61,6 +61,21 @@ CREATE TABLE `household_members` (
   CONSTRAINT `fk_household_members_invited_by` FOREIGN KEY (`invited_by`) REFERENCES `members` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Junction table for household membership';
 
+-- Tags table - stores tags that households can use for tasks
+CREATE TABLE `tags` (
+  `id` char(36) NOT NULL COMMENT 'UUID for tag identification',
+  `name` varchar(100) NOT NULL COMMENT 'Name of the tag',
+  `color` varchar(7) DEFAULT '#3B82F6' COMMENT 'Color of the tag in hex format',
+  `household_id` char(36) NOT NULL COMMENT 'ID of the household this tag belongs to',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Record creation timestamp',
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Record update timestamp',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_household_tag_name` (`household_id`, `name`),
+  KEY `idx_household_id` (`household_id`),
+  KEY `idx_name` (`name`),
+  CONSTRAINT `fk_tags_household_id` FOREIGN KEY (`household_id`) REFERENCES `households` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores tags that households can use for tasks';
+
 -- Tasks table - stores task information
 CREATE TABLE `tasks` (
   `id` char(36) NOT NULL COMMENT 'UUID for task identification',
@@ -128,5 +143,6 @@ SHOW TABLES;
 DESCRIBE members;
 DESCRIBE households;
 DESCRIBE household_members;
+DESCRIBE tags;
 DESCRIBE tasks;
 DESCRIBE refresh_tokens;
