@@ -38,9 +38,9 @@ class HouseholdInviteMemberRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("memberId", exception.errors[0].field)
-            assertEquals("Member ID is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("memberId", exception.errors!![0].field)
+            assertEquals("Member ID is required", exception.errors!![0].message)
         }
 
     @Test
@@ -58,9 +58,9 @@ class HouseholdInviteMemberRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("memberId", exception.errors[0].field)
-            assertEquals("Member ID cannot be blank", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("memberId", exception.errors!![0].field)
+            assertEquals("Member ID cannot be blank", exception.errors!![0].message)
         }
 
     @Test
@@ -78,9 +78,9 @@ class HouseholdInviteMemberRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("memberId", exception.errors[0].field)
-            assertEquals("Member ID must be a valid GUID", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("memberId", exception.errors!![0].field)
+            assertEquals("Member ID must be a valid GUID", exception.errors!![0].message)
         }
 
     @Test
@@ -98,9 +98,9 @@ class HouseholdInviteMemberRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("role", exception.errors[0].field)
-            assertEquals("Role is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("role", exception.errors!![0].field)
+            assertEquals("Role is required", exception.errors!![0].message)
         }
 
     @Test
@@ -118,9 +118,9 @@ class HouseholdInviteMemberRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("role", exception.errors[0].field)
-            assertEquals("Role must be one of: ADMIN, MEMBER", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("role", exception.errors!![0].field)
+            assertEquals("Role must be one of: ADMIN, MEMBER", exception.errors!![0].message)
         }
 
     @Test
@@ -138,9 +138,9 @@ class HouseholdInviteMemberRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(2, exception.errors.size)
+            assertEquals(2, exception.errors!!.size)
 
-            val errorFields = exception.errors.map { it.field }.toSet()
+            val errorFields = exception.errors!!.map { it.field }.toSet()
             assertEquals(setOf("memberId", "role"), errorFields)
         }
 

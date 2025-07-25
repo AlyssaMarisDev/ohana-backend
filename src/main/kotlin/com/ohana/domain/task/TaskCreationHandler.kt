@@ -9,6 +9,7 @@ import java.time.Instant
 class TaskCreationHandler(
     private val unitOfWork: UnitOfWork,
     private val householdMemberValidator: HouseholdMemberValidator,
+    private val taskTagManager: TaskTagManager,
 ) {
     data class Request(
         val id: String,
@@ -17,6 +18,7 @@ class TaskCreationHandler(
         val dueDate: Instant,
         val status: TaskStatus,
         val householdId: String,
+        val tagIds: List<String>,
     )
 
     data class Response(
@@ -27,6 +29,13 @@ class TaskCreationHandler(
         val status: TaskStatus,
         val createdBy: String,
         val householdId: String,
+        val tags: List<TaskTagResponse>,
+    )
+
+    data class TaskTagResponse(
+        val id: String,
+        val name: String,
+        val color: String,
     )
 
     suspend fun handle(
@@ -49,6 +58,8 @@ class TaskCreationHandler(
                     ),
                 )
 
+            val tags = taskTagManager.assignTagsToTask(context, task.id, request.tagIds)
+
             Response(
                 id = task.id,
                 title = task.title,
@@ -57,6 +68,14 @@ class TaskCreationHandler(
                 status = task.status,
                 createdBy = task.createdBy,
                 householdId = task.householdId,
+                tags =
+                    tags.map {
+                        TaskTagResponse(
+                            id = it.id,
+                            name = it.name,
+                            color = it.color,
+                        )
+                    },
             )
         }
 }

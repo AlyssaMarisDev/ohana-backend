@@ -34,9 +34,9 @@ class LogoutRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("refreshToken", exception.errors[0].field)
-            assertEquals("Refresh token is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("refreshToken", exception.errors!![0].field)
+            assertEquals("Refresh token is required", exception.errors!![0].message)
         }
 
     @Test
@@ -53,9 +53,9 @@ class LogoutRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("refreshToken", exception.errors[0].field)
-            assertEquals("Refresh token cannot be blank", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("refreshToken", exception.errors!![0].field)
+            assertEquals("Refresh token cannot be blank", exception.errors!![0].message)
         }
 
     @Test

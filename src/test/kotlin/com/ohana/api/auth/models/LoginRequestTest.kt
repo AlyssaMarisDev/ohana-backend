@@ -37,9 +37,9 @@ class LoginRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("email", exception.errors[0].field)
-            assertEquals("Email is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("email", exception.errors!![0].field)
+            assertEquals("Email is required", exception.errors!![0].message)
         }
 
     @Test
@@ -57,9 +57,9 @@ class LoginRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("email", exception.errors[0].field)
-            assertEquals("Email cannot be blank", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("email", exception.errors!![0].field)
+            assertEquals("Email cannot be blank", exception.errors!![0].message)
         }
 
     @Test
@@ -77,9 +77,9 @@ class LoginRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("email", exception.errors[0].field)
-            assertEquals("Invalid email format", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("email", exception.errors!![0].field)
+            assertEquals("Invalid email format", exception.errors!![0].message)
         }
 
     @Test
@@ -97,9 +97,9 @@ class LoginRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("password", exception.errors[0].field)
-            assertEquals("Password is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("password", exception.errors!![0].field)
+            assertEquals("Password is required", exception.errors!![0].message)
         }
 
     @Test
@@ -117,9 +117,9 @@ class LoginRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("password", exception.errors[0].field)
-            assertEquals("Password cannot be blank", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("password", exception.errors!![0].field)
+            assertEquals("Password cannot be blank", exception.errors!![0].message)
         }
 
     @Test
@@ -137,9 +137,9 @@ class LoginRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(2, exception.errors.size)
+            assertEquals(2, exception.errors!!.size)
 
-            val errorFields = exception.errors.map { it.field }.toSet()
+            val errorFields = exception.errors!!.map { it.field }.toSet()
             assertEquals(setOf("email", "password"), errorFields)
         }
 

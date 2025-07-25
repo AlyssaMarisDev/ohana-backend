@@ -36,7 +36,7 @@ fun Application.configureExceptionHandling() {
                 HttpStatusCode.BadRequest,
                 mapOf(
                     "error" to "Validation failed",
-                    "details" to cause.errors.map { "${it.field}: ${it.message}" },
+                    "details" to cause.errors?.map { "${it.field}: ${it.message}" },
                 ),
             )
         }

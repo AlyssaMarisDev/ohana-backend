@@ -3,6 +3,8 @@ package com.ohana.data.household
 interface TagRepository {
     fun findById(id: String): Tag?
 
+    fun findByIds(ids: List<String>): List<Tag>
+
     fun findByHouseholdId(householdId: String): List<Tag>
 
     fun create(tag: Tag): Tag

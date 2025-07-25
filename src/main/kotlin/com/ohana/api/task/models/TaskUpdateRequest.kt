@@ -1,6 +1,7 @@
 package com.ohana.api.task.models
 
 import com.ohana.domain.task.TaskUpdateByIdHandler
+import com.ohana.shared.Guid
 import com.ohana.shared.enums.TaskStatus
 import com.ohana.shared.exceptions.ValidationError
 import com.ohana.shared.exceptions.ValidationException
@@ -11,6 +12,7 @@ data class TaskUpdateRequest(
     val description: String?,
     val dueDate: Instant?,
     val status: String?,
+    val tagIds: List<String>? = emptyList(),
 ) {
     fun toDomain(): TaskUpdateByIdHandler.Request {
         val errors = mutableListOf<ValidationError>()
@@ -43,6 +45,15 @@ data class TaskUpdateRequest(
             }
         }
 
+        // Validate tag IDs
+        tagIds?.forEach { tagId ->
+            if (tagId.isBlank()) {
+                errors.add(ValidationError("tagIds", "Tag ID cannot be blank"))
+            } else if (!Guid.isValid(tagId)) {
+                errors.add(ValidationError("tagIds", "Tag ID must be a valid GUID"))
+            }
+        }
+
         if (errors.isNotEmpty()) {
             throw ValidationException("Validation failed", errors)
         }
@@ -52,6 +63,7 @@ data class TaskUpdateRequest(
             description = description!!,
             dueDate = dueDate!!,
             status = TaskStatus.valueOf(status!!),
+            tagIds = tagIds ?: emptyList(),
         )
     }
 }

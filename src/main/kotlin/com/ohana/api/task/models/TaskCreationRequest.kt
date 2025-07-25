@@ -14,6 +14,7 @@ data class TaskCreationRequest(
     val dueDate: Instant?,
     val status: String?,
     val householdId: String?,
+    val tagIds: List<String>? = emptyList(),
 ) {
     fun toDomain(): TaskCreationHandler.Request {
         val errors = mutableListOf<ValidationError>()
@@ -62,6 +63,14 @@ data class TaskCreationRequest(
             errors.add(ValidationError("householdId", "Household ID must be a valid GUID"))
         }
 
+        tagIds?.forEach { tagId ->
+            if (tagId.isBlank()) {
+                errors.add(ValidationError("tagIds", "Tag ID cannot be blank"))
+            } else if (!Guid.isValid(tagId)) {
+                errors.add(ValidationError("tagIds", "Tag ID must be a valid GUID"))
+            }
+        }
+
         if (errors.isNotEmpty()) {
             throw ValidationException("Validation failed", errors)
         }
@@ -73,6 +82,7 @@ data class TaskCreationRequest(
             dueDate = dueDate!!,
             status = TaskStatus.valueOf(status!!),
             householdId = householdId!!,
+            tagIds = tagIds ?: emptyList(),
         )
     }
 }

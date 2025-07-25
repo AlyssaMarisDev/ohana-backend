@@ -40,9 +40,9 @@ class RegistrationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("name", exception.errors[0].field)
-            assertEquals("Name is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("name", exception.errors!![0].field)
+            assertEquals("Name is required", exception.errors!![0].message)
         }
 
     @Test
@@ -61,9 +61,9 @@ class RegistrationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("name", exception.errors[0].field)
-            assertEquals("Name cannot be blank", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("name", exception.errors!![0].field)
+            assertEquals("Name cannot be blank", exception.errors!![0].message)
         }
 
     @Test
@@ -82,9 +82,9 @@ class RegistrationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("name", exception.errors[0].field)
-            assertEquals("Name must be at least 3 characters long", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("name", exception.errors!![0].field)
+            assertEquals("Name must be at least 3 characters long", exception.errors!![0].message)
         }
 
     @Test
@@ -103,9 +103,9 @@ class RegistrationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("email", exception.errors[0].field)
-            assertEquals("Email is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("email", exception.errors!![0].field)
+            assertEquals("Email is required", exception.errors!![0].message)
         }
 
     @Test
@@ -124,9 +124,9 @@ class RegistrationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("email", exception.errors[0].field)
-            assertEquals("Email cannot be blank", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("email", exception.errors!![0].field)
+            assertEquals("Email cannot be blank", exception.errors!![0].message)
         }
 
     @Test
@@ -145,9 +145,9 @@ class RegistrationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("email", exception.errors[0].field)
-            assertEquals("Invalid email format", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("email", exception.errors!![0].field)
+            assertEquals("Invalid email format", exception.errors!![0].message)
         }
 
     @Test
@@ -166,9 +166,9 @@ class RegistrationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("password", exception.errors[0].field)
-            assertEquals("Password is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("password", exception.errors!![0].field)
+            assertEquals("Password is required", exception.errors!![0].message)
         }
 
     @Test
@@ -187,9 +187,9 @@ class RegistrationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("password", exception.errors[0].field)
-            assertEquals("Password cannot be blank", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("password", exception.errors!![0].field)
+            assertEquals("Password cannot be blank", exception.errors!![0].message)
         }
 
     @Test
@@ -208,9 +208,9 @@ class RegistrationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("password", exception.errors[0].field)
-            assertEquals("Password must be at least 8 characters long", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("password", exception.errors!![0].field)
+            assertEquals("Password must be at least 8 characters long", exception.errors!![0].message)
         }
 
     @Test
@@ -229,9 +229,9 @@ class RegistrationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("password", exception.errors[0].field)
-            assertEquals("Password must contain at least one uppercase letter", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("password", exception.errors!![0].field)
+            assertEquals("Password must contain at least one uppercase letter", exception.errors!![0].message)
         }
 
     @Test
@@ -250,9 +250,9 @@ class RegistrationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("password", exception.errors[0].field)
-            assertEquals("Password must contain at least one number", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("password", exception.errors!![0].field)
+            assertEquals("Password must contain at least one number", exception.errors!![0].message)
         }
 
     @Test
@@ -271,9 +271,9 @@ class RegistrationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("password", exception.errors[0].field)
-            assertEquals("Password must contain at least one special character", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("password", exception.errors!![0].field)
+            assertEquals("Password must contain at least one special character", exception.errors!![0].message)
         }
 
     @Test
@@ -292,9 +292,9 @@ class RegistrationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(3, exception.errors.size)
+            assertEquals(3, exception.errors!!.size)
 
-            val errorFields = exception.errors.map { it.field }.toSet()
+            val errorFields = exception.errors!!.map { it.field }.toSet()
             assertEquals(setOf("name", "email", "password"), errorFields)
         }
 

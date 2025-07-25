@@ -11,7 +11,9 @@ import com.ohana.data.household.TagRepository
 import com.ohana.data.member.JdbiMemberRepository
 import com.ohana.data.member.MemberRepository
 import com.ohana.data.task.JdbiTaskRepository
+import com.ohana.data.task.JdbiTaskTagRepository
 import com.ohana.data.task.TaskRepository
+import com.ohana.data.task.TaskTagRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jdbi.v3.core.Handle
@@ -35,6 +37,7 @@ class JdbiUnitOfWorkContext(
     private val handle: Handle,
 ) : UnitOfWorkContext {
     override val tasks: TaskRepository = JdbiTaskRepository(handle)
+    override val taskTags: TaskTagRepository = JdbiTaskTagRepository(handle)
     override val members: MemberRepository = JdbiMemberRepository(handle)
     override val households: HouseholdRepository = JdbiHouseholdRepository(handle)
     override val tags: TagRepository = JdbiTagRepository(handle)

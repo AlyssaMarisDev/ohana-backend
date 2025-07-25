@@ -3,6 +3,7 @@ package com.ohana.domain.task
 import com.ohana.TestUtils
 import com.ohana.data.task.TaskRepository
 import com.ohana.data.unitOfWork.*
+import com.ohana.domain.task.TaskTagManager
 import com.ohana.domain.validators.*
 import com.ohana.shared.enums.TaskStatus
 import com.ohana.shared.exceptions.NotFoundException
@@ -20,18 +21,20 @@ class TaskUpdateByIdHandlerTest {
     private lateinit var context: UnitOfWorkContext
     private lateinit var taskRepository: TaskRepository
     private lateinit var householdMemberValidator: HouseholdMemberValidator
+    private lateinit var taskTagManager: TaskTagManager
     private lateinit var handler: TaskUpdateByIdHandler
 
     @BeforeEach
     fun setUp() {
         taskRepository = mock()
         householdMemberValidator = mock()
+        taskTagManager = mock()
         context =
             mock {
                 on { tasks } doReturn taskRepository
             }
         unitOfWork = mock()
-        handler = TaskUpdateByIdHandler(unitOfWork, householdMemberValidator)
+        handler = TaskUpdateByIdHandler(unitOfWork, householdMemberValidator, taskTagManager)
     }
 
     @Test
@@ -60,6 +63,7 @@ class TaskUpdateByIdHandlerTest {
                     description = "Updated Description",
                     dueDate = Instant.now().plusSeconds(7200),
                     status = TaskStatus.IN_PROGRESS,
+                    tagIds = emptyList(),
                 )
 
             val updatedTask =
@@ -72,6 +76,7 @@ class TaskUpdateByIdHandlerTest {
 
             whenever(taskRepository.findById(taskId)).thenReturn(existingTask)
             whenever(taskRepository.update(any())).thenReturn(updatedTask)
+            whenever(taskTagManager.assignTagsToTask(context, updatedTask.id, request.tagIds)).thenReturn(emptyList())
 
             val response = handler.handle(userId, taskId, request)
 
@@ -82,6 +87,7 @@ class TaskUpdateByIdHandlerTest {
             assertEquals(TaskStatus.IN_PROGRESS, response.status)
             assertEquals(userId, response.createdBy)
             assertEquals(householdId, response.householdId)
+            assertEquals(0, response.tags.size)
 
             verify(householdMemberValidator).validate(context, householdId, userId)
             verify(taskRepository).findById(taskId)
@@ -94,6 +100,7 @@ class TaskUpdateByIdHandlerTest {
                         task.status == TaskStatus.IN_PROGRESS
                 },
             )
+            verify(taskTagManager).assignTagsToTask(context, updatedTask.id, request.tagIds)
             verifyNoMoreInteractions(taskRepository)
         }
 
@@ -112,6 +119,7 @@ class TaskUpdateByIdHandlerTest {
                     description = "Updated Description",
                     dueDate = Instant.now().plusSeconds(7200),
                     status = TaskStatus.IN_PROGRESS,
+                    tagIds = emptyList(),
                 )
 
             val existingTask =
@@ -159,6 +167,7 @@ class TaskUpdateByIdHandlerTest {
                     description = "Updated Description",
                     dueDate = Instant.now().plusSeconds(7200),
                     status = TaskStatus.IN_PROGRESS,
+                    tagIds = emptyList(),
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(null)
@@ -200,6 +209,7 @@ class TaskUpdateByIdHandlerTest {
                     description = "Updated Description",
                     dueDate = Instant.now().plusSeconds(7200),
                     status = TaskStatus.IN_PROGRESS,
+                    tagIds = emptyList(),
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(existingTask)
@@ -237,6 +247,7 @@ class TaskUpdateByIdHandlerTest {
                     description = "Updated Description",
                     dueDate = Instant.now().plusSeconds(7200),
                     status = TaskStatus.IN_PROGRESS,
+                    tagIds = emptyList(),
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(existingTask)
@@ -280,6 +291,7 @@ class TaskUpdateByIdHandlerTest {
                     description = "Updated Description",
                     dueDate = Instant.now().plusSeconds(7200),
                     status = TaskStatus.IN_PROGRESS,
+                    tagIds = emptyList(),
                 )
 
             val updatedTask =
@@ -292,6 +304,7 @@ class TaskUpdateByIdHandlerTest {
 
             whenever(taskRepository.findById(taskId)).thenReturn(existingTask)
             whenever(taskRepository.update(any())).thenReturn(updatedTask)
+            whenever(taskTagManager.assignTagsToTask(context, updatedTask.id, request.tagIds)).thenReturn(emptyList())
 
             val response = handler.handle(userId, taskId, request)
 

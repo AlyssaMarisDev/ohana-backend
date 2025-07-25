@@ -50,9 +50,9 @@ class TaskCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("title", exception.errors[0].field)
-            assertEquals("Title is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("title", exception.errors!![0].field)
+            assertEquals("Title is required", exception.errors!![0].message)
         }
 
     @Test
@@ -73,9 +73,9 @@ class TaskCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("title", exception.errors[0].field)
-            assertEquals("Title cannot be blank", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("title", exception.errors!![0].field)
+            assertEquals("Title cannot be blank", exception.errors!![0].message)
         }
 
     @Test
@@ -96,9 +96,9 @@ class TaskCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("title", exception.errors[0].field)
-            assertEquals("Title must be at most 255 characters long", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("title", exception.errors!![0].field)
+            assertEquals("Title must be at most 255 characters long", exception.errors!![0].message)
         }
 
     @Test
@@ -119,9 +119,9 @@ class TaskCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("description", exception.errors[0].field)
-            assertEquals("Description is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("description", exception.errors!![0].field)
+            assertEquals("Description is required", exception.errors!![0].message)
         }
 
     @Test
@@ -164,9 +164,9 @@ class TaskCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("description", exception.errors[0].field)
-            assertEquals("Description must be at most 1000 characters long", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("description", exception.errors!![0].field)
+            assertEquals("Description must be at most 1000 characters long", exception.errors!![0].message)
         }
 
     @Test
@@ -187,9 +187,9 @@ class TaskCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("dueDate", exception.errors[0].field)
-            assertEquals("Due date is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("dueDate", exception.errors!![0].field)
+            assertEquals("Due date is required", exception.errors!![0].message)
         }
 
     @Test
@@ -232,9 +232,9 @@ class TaskCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("status", exception.errors[0].field)
-            assertEquals("Status is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("status", exception.errors!![0].field)
+            assertEquals("Status is required", exception.errors!![0].message)
         }
 
     @Test
@@ -255,9 +255,9 @@ class TaskCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("status", exception.errors[0].field)
-            assertEquals("Status must be one of: PENDING, IN_PROGRESS, COMPLETED", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("status", exception.errors!![0].field)
+            assertEquals("Status must be one of: PENDING, IN_PROGRESS, COMPLETED", exception.errors!![0].message)
         }
 
     @Test
@@ -278,9 +278,9 @@ class TaskCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("householdId", exception.errors[0].field)
-            assertEquals("Household ID is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("householdId", exception.errors!![0].field)
+            assertEquals("Household ID is required", exception.errors!![0].message)
         }
 
     @Test
@@ -301,9 +301,9 @@ class TaskCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("householdId", exception.errors[0].field)
-            assertEquals("Household ID cannot be blank", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("householdId", exception.errors!![0].field)
+            assertEquals("Household ID cannot be blank", exception.errors!![0].message)
         }
 
     @Test
@@ -324,9 +324,9 @@ class TaskCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("householdId", exception.errors[0].field)
-            assertEquals("Household ID must be a valid GUID", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("householdId", exception.errors!![0].field)
+            assertEquals("Household ID must be a valid GUID", exception.errors!![0].message)
         }
 
     @Test
@@ -347,9 +347,9 @@ class TaskCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(5, exception.errors.size)
+            assertEquals(5, exception.errors!!.size)
 
-            val errorFields = exception.errors.map { it.field }.toSet()
+            val errorFields = exception.errors!!.map { it.field }.toSet()
             assertEquals(setOf("title", "description", "dueDate", "status", "householdId"), errorFields)
         }
 

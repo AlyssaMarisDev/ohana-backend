@@ -77,5 +77,14 @@ class TestUtils {
             createdAt: Instant = Instant.now(),
             updatedAt: Instant = Instant.now(),
         ): Tag = Tag(id, name, color, householdId, createdAt, updatedAt)
+
+        fun getTaskTag(
+            id: String = UUID.randomUUID().toString(),
+            taskId: String = UUID.randomUUID().toString(),
+            tagId: String = UUID.randomUUID().toString(),
+            createdAt: Instant = Instant.now(),
+        ): com.ohana.data.task.TaskTag =
+            com.ohana.data.task
+                .TaskTag(id, taskId, tagId, createdAt)
     }
 }

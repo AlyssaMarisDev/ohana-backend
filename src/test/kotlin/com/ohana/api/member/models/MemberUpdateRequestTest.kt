@@ -57,9 +57,9 @@ class MemberUpdateRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("name", exception.errors[0].field)
-            assertEquals("Name is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("name", exception.errors!![0].field)
+            assertEquals("Name is required", exception.errors!![0].message)
         }
 
     @Test
@@ -78,9 +78,9 @@ class MemberUpdateRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("name", exception.errors[0].field)
-            assertEquals("Name cannot be blank", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("name", exception.errors!![0].field)
+            assertEquals("Name cannot be blank", exception.errors!![0].message)
         }
 
     @Test
@@ -99,9 +99,9 @@ class MemberUpdateRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("name", exception.errors[0].field)
-            assertEquals("Name must be at most 255 characters long", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("name", exception.errors!![0].field)
+            assertEquals("Name must be at most 255 characters long", exception.errors!![0].message)
         }
 
     @Test
@@ -120,9 +120,9 @@ class MemberUpdateRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("age", exception.errors[0].field)
-            assertEquals("Age must be a positive number", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("age", exception.errors!![0].field)
+            assertEquals("Age must be a positive number", exception.errors!![0].message)
         }
 
     @Test
@@ -141,9 +141,9 @@ class MemberUpdateRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("gender", exception.errors[0].field)
-            assertEquals("Gender cannot be blank if provided", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("gender", exception.errors!![0].field)
+            assertEquals("Gender cannot be blank if provided", exception.errors!![0].message)
         }
 
     @Test
@@ -162,9 +162,9 @@ class MemberUpdateRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(3, exception.errors.size)
+            assertEquals(3, exception.errors!!.size)
 
-            val errorFields = exception.errors.map { it.field }.toSet()
+            val errorFields = exception.errors!!.map { it.field }.toSet()
             assertEquals(setOf("name", "age", "gender"), errorFields)
         }
 

@@ -46,9 +46,9 @@ class TaskUpdateRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("title", exception.errors[0].field)
-            assertEquals("Title is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("title", exception.errors!![0].field)
+            assertEquals("Title is required", exception.errors!![0].message)
         }
 
     @Test
@@ -68,9 +68,9 @@ class TaskUpdateRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("description", exception.errors[0].field)
-            assertEquals("Description is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("description", exception.errors!![0].field)
+            assertEquals("Description is required", exception.errors!![0].message)
         }
 
     @Test
@@ -90,9 +90,9 @@ class TaskUpdateRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("title", exception.errors[0].field)
-            assertEquals("Title cannot be blank", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("title", exception.errors!![0].field)
+            assertEquals("Title cannot be blank", exception.errors!![0].message)
         }
 
     @Test
@@ -112,9 +112,9 @@ class TaskUpdateRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("title", exception.errors[0].field)
-            assertEquals("Title must be at most 255 characters long", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("title", exception.errors!![0].field)
+            assertEquals("Title must be at most 255 characters long", exception.errors!![0].message)
         }
 
     @Test
@@ -134,9 +134,9 @@ class TaskUpdateRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("description", exception.errors[0].field)
-            assertEquals("Description must be at most 1000 characters long", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("description", exception.errors!![0].field)
+            assertEquals("Description must be at most 1000 characters long", exception.errors!![0].message)
         }
 
     @Test
@@ -156,9 +156,9 @@ class TaskUpdateRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("status", exception.errors[0].field)
-            assertEquals("Status must be one of: PENDING, IN_PROGRESS, COMPLETED", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("status", exception.errors!![0].field)
+            assertEquals("Status must be one of: PENDING, IN_PROGRESS, COMPLETED", exception.errors!![0].message)
         }
 
     @Test
@@ -178,9 +178,9 @@ class TaskUpdateRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(4, exception.errors.size)
+            assertEquals(4, exception.errors!!.size)
 
-            val errorFields = exception.errors.map { it.field }.toSet()
+            val errorFields = exception.errors!!.map { it.field }.toSet()
             assertEquals(setOf("title", "description", "dueDate", "status"), errorFields)
         }
 

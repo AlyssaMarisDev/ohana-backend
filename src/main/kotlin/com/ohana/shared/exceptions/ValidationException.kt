@@ -7,7 +7,7 @@ data class ValidationError(
 
 class ValidationException(
     message: String,
-    val errors: List<ValidationError>,
+    val errors: List<ValidationError>? = null,
     cause: Throwable? = null,
 ) : RuntimeException(message, cause),
     KnownError

@@ -4,6 +4,7 @@ import com.ohana.TestUtils
 import com.ohana.data.member.MemberRepository
 import com.ohana.data.task.TaskRepository
 import com.ohana.data.unitOfWork.*
+import com.ohana.domain.task.TaskTagManager
 import com.ohana.domain.validators.HouseholdMemberValidator
 import com.ohana.shared.enums.TaskStatus
 import com.ohana.shared.exceptions.AuthorizationException
@@ -23,19 +24,21 @@ class TaskCreationHandlerTest {
     private lateinit var memberRepository: MemberRepository
     private lateinit var handler: TaskCreationHandler
     private lateinit var householdMemberValidator: HouseholdMemberValidator
+    private lateinit var taskTagManager: TaskTagManager
 
     @BeforeEach
     fun setUp() {
         taskRepository = mock()
         memberRepository = mock()
         householdMemberValidator = mock()
+        taskTagManager = mock()
         context =
             mock {
                 on { tasks } doReturn taskRepository
                 on { members } doReturn memberRepository
             }
         unitOfWork = mock()
-        handler = TaskCreationHandler(unitOfWork, householdMemberValidator)
+        handler = TaskCreationHandler(unitOfWork, householdMemberValidator, taskTagManager)
     }
 
     @Test
@@ -52,6 +55,7 @@ class TaskCreationHandlerTest {
                     dueDate = Instant.now().plusSeconds(1000),
                     status = TaskStatus.PENDING,
                     householdId = householdId,
+                    tagIds = emptyList(),
                 )
 
             val task =
@@ -66,11 +70,13 @@ class TaskCreationHandlerTest {
                 )
 
             whenever(taskRepository.create(any())).thenReturn(task)
+            whenever(taskTagManager.assignTagsToTask(context, task.id, request.tagIds)).thenReturn(emptyList())
 
             val response = handler.handle(userId, request)
 
             verify(householdMemberValidator).validate(context, householdId, userId)
             verify(taskRepository).create(task)
+            verify(taskTagManager).assignTagsToTask(context, task.id, request.tagIds)
 
             assertEquals(task.id, response.id)
             assertEquals(task.title, response.title)
@@ -79,6 +85,7 @@ class TaskCreationHandlerTest {
             assertEquals(task.status, response.status)
             assertEquals(task.createdBy, response.createdBy)
             assertEquals(task.householdId, response.householdId)
+            assertEquals(0, response.tags.size)
         }
 
     @Test
@@ -96,6 +103,7 @@ class TaskCreationHandlerTest {
                     dueDate = Instant.now().plusSeconds(1000),
                     status = TaskStatus.PENDING,
                     householdId = householdId,
+                    tagIds = emptyList(),
                 )
 
             whenever(
@@ -124,6 +132,7 @@ class TaskCreationHandlerTest {
                     dueDate = Instant.now().plusSeconds(1000),
                     status = TaskStatus.PENDING,
                     householdId = householdId,
+                    tagIds = emptyList(),
                 )
 
             whenever(taskRepository.create(any())).thenThrow(RuntimeException("DB error"))

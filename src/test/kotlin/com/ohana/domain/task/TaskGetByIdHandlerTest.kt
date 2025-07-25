@@ -3,6 +3,7 @@ package com.ohana.domain.task
 import com.ohana.TestUtils
 import com.ohana.data.task.TaskRepository
 import com.ohana.data.unitOfWork.*
+import com.ohana.domain.task.TaskTagManager
 import com.ohana.domain.validators.HouseholdMemberValidator
 import com.ohana.shared.exceptions.NotFoundException
 import kotlinx.coroutines.test.runTest
@@ -20,17 +21,19 @@ class TaskGetByIdHandlerTest {
     private lateinit var taskRepository: TaskRepository
     private lateinit var handler: TaskGetByIdHandler
     private lateinit var householdMemberValidator: HouseholdMemberValidator
+    private lateinit var taskTagManager: TaskTagManager
 
     @BeforeEach
     fun setUp() {
         taskRepository = mock()
         householdMemberValidator = mock()
+        taskTagManager = mock()
         context =
             mock {
                 on { tasks } doReturn taskRepository
             }
         unitOfWork = mock()
-        handler = TaskGetByIdHandler(unitOfWork, householdMemberValidator)
+        handler = TaskGetByIdHandler(unitOfWork, householdMemberValidator, taskTagManager)
     }
 
     @Test
@@ -54,6 +57,7 @@ class TaskGetByIdHandlerTest {
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
+            whenever(taskTagManager.getTaskTags(context, taskId)).thenReturn(emptyList())
 
             val response = handler.handle(userId, taskId)
 
@@ -64,9 +68,11 @@ class TaskGetByIdHandlerTest {
             assertEquals(task.status, response.status)
             assertEquals(task.createdBy, response.createdBy)
             assertEquals(task.householdId, response.householdId)
+            assertEquals(0, response.tags.size)
 
             verify(householdMemberValidator).validate(context, householdId, userId)
             verify(taskRepository).findById(taskId)
+            verify(taskTagManager).getTaskTags(context, taskId)
             verifyNoMoreInteractions(taskRepository)
         }
 
@@ -91,6 +97,7 @@ class TaskGetByIdHandlerTest {
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
+            whenever(taskTagManager.getTaskTags(context, taskId)).thenReturn(emptyList())
 
             val response = handler.handle(userId, taskId)
 
@@ -118,6 +125,7 @@ class TaskGetByIdHandlerTest {
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
+            whenever(taskTagManager.getTaskTags(context, taskId)).thenReturn(emptyList())
 
             val response = handler.handle(userId, taskId)
 
@@ -223,6 +231,7 @@ class TaskGetByIdHandlerTest {
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
+            whenever(taskTagManager.getTaskTags(context, taskId)).thenReturn(emptyList())
 
             val response = handler.handle(userId, taskId)
 
@@ -251,6 +260,7 @@ class TaskGetByIdHandlerTest {
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
+            whenever(taskTagManager.getTaskTags(context, taskId)).thenReturn(emptyList())
 
             val response = handler.handle(userId, taskId)
 
@@ -278,6 +288,7 @@ class TaskGetByIdHandlerTest {
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
+            whenever(taskTagManager.getTaskTags(context, taskId)).thenReturn(emptyList())
 
             val response = handler.handle(userId, taskId)
 
@@ -306,6 +317,7 @@ class TaskGetByIdHandlerTest {
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
+            whenever(taskTagManager.getTaskTags(context, taskId)).thenReturn(emptyList())
 
             val response = handler.handle(userId, taskId)
 

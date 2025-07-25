@@ -97,6 +97,20 @@ CREATE TABLE `tasks` (
   CONSTRAINT `fk_tasks_household_id` FOREIGN KEY (`household_id`) REFERENCES `households` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores task information';
 
+-- Task tags junction table - manages task-tag relationships
+CREATE TABLE `task_tags` (
+  `id` char(36) NOT NULL COMMENT 'UUID for task tag record',
+  `task_id` char(36) NOT NULL COMMENT 'Reference to task',
+  `tag_id` char(36) NOT NULL COMMENT 'Reference to tag',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Record creation timestamp',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_task_tag` (`task_id`, `tag_id`),
+  KEY `idx_task_id` (`task_id`),
+  KEY `idx_tag_id` (`tag_id`),
+  CONSTRAINT `fk_task_tags_task_id` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_task_tags_tag_id` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Junction table for task-tag relationships';
+
 -- Refresh tokens table - stores refresh tokens for authentication
 CREATE TABLE `refresh_tokens` (
   `id` char(36) NOT NULL COMMENT 'UUID for refresh token record',
@@ -145,4 +159,5 @@ DESCRIBE households;
 DESCRIBE household_members;
 DESCRIBE tags;
 DESCRIBE tasks;
+DESCRIBE task_tags;
 DESCRIBE refresh_tokens;

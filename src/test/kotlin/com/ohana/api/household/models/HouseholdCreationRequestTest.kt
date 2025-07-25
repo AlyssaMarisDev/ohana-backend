@@ -40,9 +40,9 @@ class HouseholdCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("id", exception.errors[0].field)
-            assertEquals("Household ID is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("id", exception.errors!![0].field)
+            assertEquals("Household ID is required", exception.errors!![0].message)
         }
 
     @Test
@@ -61,9 +61,9 @@ class HouseholdCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("id", exception.errors[0].field)
-            assertEquals("Household ID cannot be blank", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("id", exception.errors!![0].field)
+            assertEquals("Household ID cannot be blank", exception.errors!![0].message)
         }
 
     @Test
@@ -82,9 +82,9 @@ class HouseholdCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("id", exception.errors[0].field)
-            assertEquals("Household ID must be a valid GUID", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("id", exception.errors!![0].field)
+            assertEquals("Household ID must be a valid GUID", exception.errors!![0].message)
         }
 
     @Test
@@ -103,9 +103,9 @@ class HouseholdCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("name", exception.errors[0].field)
-            assertEquals("Household name is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("name", exception.errors!![0].field)
+            assertEquals("Household name is required", exception.errors!![0].message)
         }
 
     @Test
@@ -124,9 +124,9 @@ class HouseholdCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("name", exception.errors[0].field)
-            assertEquals("Household name cannot be blank", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("name", exception.errors!![0].field)
+            assertEquals("Household name cannot be blank", exception.errors!![0].message)
         }
 
     @Test
@@ -145,9 +145,9 @@ class HouseholdCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("name", exception.errors[0].field)
-            assertEquals("Household name must be at most 255 characters long", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("name", exception.errors!![0].field)
+            assertEquals("Household name must be at most 255 characters long", exception.errors!![0].message)
         }
 
     @Test
@@ -166,9 +166,9 @@ class HouseholdCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("description", exception.errors[0].field)
-            assertEquals("Household description is required", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("description", exception.errors!![0].field)
+            assertEquals("Household description is required", exception.errors!![0].message)
         }
 
     @Test
@@ -204,9 +204,9 @@ class HouseholdCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("description", exception.errors[0].field)
-            assertEquals("Household description must be at most 1000 characters long", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("description", exception.errors!![0].field)
+            assertEquals("Household description must be at most 1000 characters long", exception.errors!![0].message)
         }
 
     @Test
@@ -225,9 +225,9 @@ class HouseholdCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(3, exception.errors.size)
+            assertEquals(3, exception.errors!!.size)
 
-            val errorFields = exception.errors.map { it.field }.toSet()
+            val errorFields = exception.errors!!.map { it.field }.toSet()
             assertEquals(setOf("id", "name", "description"), errorFields)
         }
 

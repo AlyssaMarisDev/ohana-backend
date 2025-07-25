@@ -25,6 +25,23 @@ class JdbiTagRepository(
             .findFirst()
             .orElse(null)
 
+    override fun findByIds(ids: List<String>): List<Tag> {
+        if (ids.isEmpty()) {
+            return emptyList()
+        }
+
+        return handle
+            .createQuery(
+                """
+            SELECT id, name, color, household_id, created_at, updated_at
+            FROM tags
+            WHERE id IN (<ids>)
+            """,
+            ).bindList("ids", ids)
+            .mapTo(Tag::class.java)
+            .list()
+    }
+
     override fun findByHouseholdId(householdId: String): List<Tag> =
         handle
             .createQuery(

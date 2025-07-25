@@ -7,6 +7,7 @@ import com.ohana.shared.enums.TaskStatus
 class TaskGetAllHandler(
     private val unitOfWork: UnitOfWork,
     private val householdMemberValidator: HouseholdMemberValidator,
+    private val taskTagManager: TaskTagManager,
 ) {
     data class Request(
         val householdIds: List<String>,
@@ -20,6 +21,13 @@ class TaskGetAllHandler(
         val status: TaskStatus,
         val createdBy: String,
         val householdId: String,
+        val tags: List<TaskTagResponse>,
+    )
+
+    data class TaskTagResponse(
+        val id: String,
+        val name: String,
+        val color: String,
     )
 
     suspend fun handle(
@@ -29,8 +37,12 @@ class TaskGetAllHandler(
         unitOfWork.execute { context ->
             val effectiveHouseholdIds = getEffectiveHouseholdIds(context, request.householdIds, userId)
 
-            // Fetch tasks for all households in a single database query
-            context.tasks.findByHouseholdIds(effectiveHouseholdIds).map { task ->
+            val tasks = context.tasks.findByHouseholdIds(effectiveHouseholdIds)
+            val taskIds = tasks.map { it.id }
+
+            val tags = taskTagManager.getTasksTags(context, taskIds)
+
+            tasks.map { task ->
                 Response(
                     id = task.id,
                     title = task.title,
@@ -39,6 +51,14 @@ class TaskGetAllHandler(
                     status = task.status,
                     createdBy = task.createdBy,
                     householdId = task.householdId,
+                    tags =
+                        tags[task.id]?.map {
+                            TaskTagResponse(
+                                id = it.id,
+                                name = it.name,
+                                color = it.color,
+                            )
+                        } ?: emptyList(),
                 )
             }
         }
@@ -49,10 +69,8 @@ class TaskGetAllHandler(
         userId: String,
     ): List<String> {
         if (householdIds.isEmpty()) {
-            // If no household IDs provided, get all households the user has access to
             return context.households.findByMemberId(userId).map { it.id }
         } else {
-            // Validate that the user has access to all specified households
             householdIds.forEach { householdId ->
                 householdMemberValidator.validate(context, householdId, userId)
             }

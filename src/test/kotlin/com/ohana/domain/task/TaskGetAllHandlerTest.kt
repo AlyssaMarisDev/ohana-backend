@@ -4,6 +4,7 @@ import com.ohana.TestUtils
 import com.ohana.data.household.HouseholdRepository
 import com.ohana.data.task.TaskRepository
 import com.ohana.data.unitOfWork.*
+import com.ohana.domain.task.TaskTagManager
 import com.ohana.domain.validators.HouseholdMemberValidator
 import com.ohana.shared.enums.TaskStatus
 import kotlinx.coroutines.test.runTest
@@ -22,6 +23,7 @@ class TaskGetAllHandlerTest {
     private lateinit var taskRepository: TaskRepository
     private lateinit var householdRepository: HouseholdRepository
     private lateinit var householdMemberValidator: HouseholdMemberValidator
+    private lateinit var taskTagManager: TaskTagManager
     private lateinit var handler: TaskGetAllHandler
 
     private val userId = UUID.randomUUID().toString()
@@ -33,13 +35,14 @@ class TaskGetAllHandlerTest {
         taskRepository = mock()
         householdRepository = mock()
         householdMemberValidator = mock()
+        taskTagManager = mock()
         context =
             mock {
                 on { tasks } doReturn taskRepository
                 on { households } doReturn householdRepository
             }
         unitOfWork = mock()
-        handler = TaskGetAllHandler(unitOfWork, householdMemberValidator)
+        handler = TaskGetAllHandler(unitOfWork, householdMemberValidator, taskTagManager)
     }
 
     @Test
@@ -76,6 +79,7 @@ class TaskGetAllHandlerTest {
                 )
 
             whenever(taskRepository.findByHouseholdIds(listOf(householdId))).thenReturn(tasks)
+            whenever(taskTagManager.getTasksTags(context, tasks.map { it.id })).thenReturn(emptyMap())
 
             val response = handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
 
@@ -127,6 +131,7 @@ class TaskGetAllHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
             whenever(taskRepository.findByHouseholdIds(listOf(householdId))).thenReturn(emptyList())
+            whenever(taskTagManager.getTasksTags(context, emptyList())).thenReturn(emptyMap())
 
             val response = handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
 

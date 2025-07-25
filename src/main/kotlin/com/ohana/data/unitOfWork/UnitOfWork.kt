@@ -6,6 +6,7 @@ import com.ohana.data.household.HouseholdRepository
 import com.ohana.data.household.TagRepository
 import com.ohana.data.member.MemberRepository
 import com.ohana.data.task.TaskRepository
+import com.ohana.data.task.TaskTagRepository
 
 // Unit of Work interface
 interface UnitOfWork {
@@ -15,6 +16,7 @@ interface UnitOfWork {
 // Unit of Work context interface
 interface UnitOfWorkContext {
     val tasks: TaskRepository
+    val taskTags: TaskTagRepository
     val members: MemberRepository
     val households: HouseholdRepository
     val tags: TagRepository

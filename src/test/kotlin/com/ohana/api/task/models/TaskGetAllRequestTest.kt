@@ -36,9 +36,9 @@ class TaskGetAllRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("householdIds[1]", exception.errors[0].field)
-            assertEquals("Household ID must be a valid GUID", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("householdIds[1]", exception.errors!![0].field)
+            assertEquals("Household ID must be a valid GUID", exception.errors!![0].message)
         }
 
     @Test
@@ -52,9 +52,9 @@ class TaskGetAllRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("householdIds[1]", exception.errors[0].field)
-            assertEquals("Household ID must be a valid GUID", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("householdIds[1]", exception.errors!![0].field)
+            assertEquals("Household ID must be a valid GUID", exception.errors!![0].message)
         }
 
     @Test
@@ -68,12 +68,12 @@ class TaskGetAllRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(2, exception.errors.size)
+            assertEquals(2, exception.errors!!.size)
 
-            val errorFields = exception.errors.map { it.field }.toSet()
+            val errorFields = exception.errors!!.map { it.field }.toSet()
             assertEquals(setOf("householdIds[0]", "householdIds[1]"), errorFields)
 
-            exception.errors.forEach { error ->
+            exception.errors!!.forEach { error ->
                 assertEquals("Household ID must be a valid GUID", error.message)
             }
         }
@@ -98,8 +98,8 @@ class TaskGetAllRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors.size)
-            assertEquals("householdIds[1]", exception.errors[0].field)
-            assertEquals("Household ID must be a valid GUID", exception.errors[0].message)
+            assertEquals(1, exception.errors!!.size)
+            assertEquals("householdIds[1]", exception.errors!![0].field)
+            assertEquals("Household ID must be a valid GUID", exception.errors!![0].message)
         }
 }

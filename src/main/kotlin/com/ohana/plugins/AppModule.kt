@@ -38,6 +38,7 @@ val appModule =
 
         // Shared
         single { HouseholdMemberValidator() }
+        single { TaskTagManager() }
 
         // Auth handlers
         single { RegistrationHandler(get()) }
@@ -51,11 +52,11 @@ val appModule =
         single { MemberUpdateByIdHandler(get()) }
 
         // Tasks handlers - now only need UnitOfWork
-        single { TaskCreationHandler(get(), get()) }
+        single { TaskCreationHandler(get(), get(), get()) }
         single { TaskDeleteByIdHandler(get(), get()) }
-        single { TaskGetAllHandler(get(), get()) }
-        single { TaskGetByIdHandler(get(), get()) }
-        single { TaskUpdateByIdHandler(get(), get()) }
+        single { TaskGetAllHandler(get(), get(), get()) }
+        single { TaskGetByIdHandler(get(), get(), get()) }
+        single { TaskUpdateByIdHandler(get(), get(), get()) }
 
         // Household handlers
         single { HouseholdAcceptInviteHandler(get()) }

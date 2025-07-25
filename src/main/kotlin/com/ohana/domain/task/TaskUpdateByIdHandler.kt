@@ -9,12 +9,14 @@ import java.time.Instant
 class TaskUpdateByIdHandler(
     private val unitOfWork: UnitOfWork,
     private val householdMemberValidator: HouseholdMemberValidator,
+    private val taskTagManager: TaskTagManager,
 ) {
     data class Request(
         val title: String,
         val description: String,
         val dueDate: Instant,
         val status: TaskStatus,
+        val tagIds: List<String>,
     )
 
     data class Response(
@@ -25,6 +27,13 @@ class TaskUpdateByIdHandler(
         val status: TaskStatus?,
         val createdBy: String,
         val householdId: String,
+        val tags: List<TaskTagResponse>,
+    )
+
+    data class TaskTagResponse(
+        val id: String,
+        val name: String,
+        val color: String,
     )
 
     suspend fun handle(
@@ -48,6 +57,8 @@ class TaskUpdateByIdHandler(
                     ),
                 )
 
+            val tags = taskTagManager.assignTagsToTask(context, updatedTask.id, request.tagIds)
+
             Response(
                 id = updatedTask.id,
                 title = updatedTask.title,
@@ -56,6 +67,14 @@ class TaskUpdateByIdHandler(
                 status = updatedTask.status,
                 createdBy = updatedTask.createdBy,
                 householdId = updatedTask.householdId,
+                tags =
+                    tags.map {
+                        TaskTagResponse(
+                            id = it.id,
+                            name = it.name,
+                            color = it.color,
+                        )
+                    },
             )
         }
 }
