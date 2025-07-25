@@ -3,10 +3,10 @@ package com.ohana.data.unitOfWork
 import com.ohana.data.auth.AuthMemberRepository
 import com.ohana.data.auth.RefreshTokenRepository
 import com.ohana.data.household.HouseholdRepository
-import com.ohana.data.household.TagRepository
 import com.ohana.data.member.MemberRepository
+import com.ohana.data.tags.TagRepository
+import com.ohana.data.tags.TaskTagRepository
 import com.ohana.data.task.TaskRepository
-import com.ohana.data.task.TaskTagRepository
 
 // Unit of Work interface
 interface UnitOfWork {

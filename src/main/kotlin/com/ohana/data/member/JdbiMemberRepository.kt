@@ -4,10 +4,17 @@ import com.ohana.data.utils.DatabaseUtils
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
+import org.jdbi.v3.core.mapper.RowMapper
+import org.jdbi.v3.core.statement.StatementContext
+import java.sql.ResultSet
 
 class JdbiMemberRepository(
     private val handle: Handle,
 ) : MemberRepository {
+    init {
+        handle.registerRowMapper(MemberRowMapper())
+    }
+
     override fun findById(id: String): Member? {
         val selectQuery = """
             SELECT id, name, age, gender, email
@@ -16,11 +23,11 @@ class JdbiMemberRepository(
         """
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 mapOf("id" to id),
-                Member.mapper,
+                Member::class,
             ).firstOrNull()
     }
 
@@ -31,11 +38,11 @@ class JdbiMemberRepository(
         """
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 mapOf(),
-                Member.mapper,
+                Member::class,
             )
     }
 
@@ -47,11 +54,11 @@ class JdbiMemberRepository(
         """
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 mapOf("email" to email),
-                Member.mapper,
+                Member::class,
             ).firstOrNull()
     }
 
@@ -102,5 +109,19 @@ class JdbiMemberRepository(
         if (updatedRows == 0) throw DbException("Failed to update member")
 
         return findById(member.id) ?: throw NotFoundException("Member not found after update")
+    }
+
+    private class MemberRowMapper : RowMapper<Member> {
+        override fun map(
+            rs: ResultSet,
+            ctx: StatementContext,
+        ): Member =
+            Member(
+                id = rs.getString("id"),
+                name = rs.getString("name"),
+                age = rs.getObject("age") as? Int,
+                gender = rs.getString("gender"),
+                email = rs.getString("email"),
+            )
     }
 }

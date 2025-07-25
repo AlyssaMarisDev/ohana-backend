@@ -1,10 +1,9 @@
-package com.ohana.domain.household
+package com.ohana.domain.tags
 
-import com.ohana.data.household.*
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.validators.HouseholdMemberValidator
 
-class TagGetByHouseholdIdHandler(
+class GetTagsHandler(
     private val unitOfWork: UnitOfWork,
     private val validator: HouseholdMemberValidator,
 ) {
@@ -27,7 +26,7 @@ class TagGetByHouseholdIdHandler(
             validator.validate(context, householdId, userId)
 
             // Get tags for the household
-            val tags = context.tags.findByHouseholdId(householdId)
+            val tags = context.tags.findByHouseholdIdWithDefaults(householdId)
 
             // Convert to response format
             Response(

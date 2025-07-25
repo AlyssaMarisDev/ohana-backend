@@ -168,7 +168,7 @@ class TaskUpdateRequestTest {
                 TaskUpdateRequest(
                     title = "", // Blank title
                     description = "A".repeat(1001), // Too long description
-                    dueDate = null,
+                    dueDate = null, // Missing due date (now optional)
                     status = "INVALID_STATUS", // Invalid status
                 )
 
@@ -178,10 +178,10 @@ class TaskUpdateRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(4, exception.errors!!.size)
+            assertEquals(3, exception.errors!!.size)
 
             val errorFields = exception.errors!!.map { it.field }.toSet()
-            assertEquals(setOf("title", "description", "dueDate", "status"), errorFields)
+            assertEquals(setOf("title", "description", "status"), errorFields)
         }
 
     @Test

@@ -1,4 +1,4 @@
-package com.ohana.data.household
+package com.ohana.data.tags
 
 interface TagRepository {
     fun findById(id: String): Tag?
@@ -6,6 +6,10 @@ interface TagRepository {
     fun findByIds(ids: List<String>): List<Tag>
 
     fun findByHouseholdId(householdId: String): List<Tag>
+
+    fun findDefaultTags(): List<Tag>
+
+    fun findByHouseholdIdWithDefaults(householdId: String): List<Tag>
 
     fun create(tag: Tag): Tag
 

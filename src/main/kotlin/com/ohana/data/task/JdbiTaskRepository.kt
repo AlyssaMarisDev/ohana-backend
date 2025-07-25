@@ -4,10 +4,17 @@ import com.ohana.data.utils.DatabaseUtils
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
+import org.jdbi.v3.core.mapper.RowMapper
+import org.jdbi.v3.core.statement.StatementContext
+import java.sql.ResultSet
 
 class JdbiTaskRepository(
     private val handle: Handle,
 ) : TaskRepository {
+    init {
+        handle.registerRowMapper(TaskRowMapper())
+    }
+
     override fun create(task: Task): Task {
         val insertQuery = """
             INSERT INTO tasks (id, title, description, due_date, status, created_by, household_id)
@@ -42,11 +49,11 @@ class JdbiTaskRepository(
         """
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 mapOf("id" to id),
-                Task.mapper,
+                Task::class,
             ).firstOrNull()
     }
 
@@ -57,11 +64,11 @@ class JdbiTaskRepository(
         """
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 mapOf(),
-                Task.mapper,
+                Task::class,
             )
     }
 
@@ -73,11 +80,11 @@ class JdbiTaskRepository(
         """
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 mapOf("household_id" to householdId),
-                Task.mapper,
+                Task::class,
             )
     }
 
@@ -97,11 +104,11 @@ class JdbiTaskRepository(
         val params = householdIds.mapIndexed { index, id -> "household_id_$index" to id }.toMap()
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 params,
-                Task.mapper,
+                Task::class,
             )
     }
 
@@ -144,5 +151,23 @@ class JdbiTaskRepository(
             )
 
         return deletedRows > 0
+    }
+
+    private class TaskRowMapper : RowMapper<Task> {
+        override fun map(
+            rs: ResultSet,
+            ctx: StatementContext,
+        ): Task =
+            Task(
+                id = rs.getString("id"),
+                title = rs.getString("title"),
+                description = rs.getString("description"),
+                dueDate = rs.getTimestamp("due_date")?.toInstant(),
+                status =
+                    com.ohana.shared.enums.TaskStatus
+                        .valueOf(rs.getString("status").uppercase()),
+                createdBy = rs.getString("created_by"),
+                householdId = rs.getString("household_id"),
+            )
     }
 }

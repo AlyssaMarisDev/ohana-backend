@@ -1,4 +1,4 @@
-package com.ohana.data.task
+package com.ohana.data.tags
 
 interface TaskTagRepository {
     fun findByTaskId(taskId: String): List<TaskTag>

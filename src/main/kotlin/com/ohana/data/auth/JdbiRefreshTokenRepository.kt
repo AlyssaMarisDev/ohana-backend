@@ -4,11 +4,18 @@ import com.ohana.data.utils.DatabaseUtils
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
+import org.jdbi.v3.core.mapper.RowMapper
+import org.jdbi.v3.core.statement.StatementContext
+import java.sql.ResultSet
 import java.time.Instant
 
 class JdbiRefreshTokenRepository(
     private val handle: Handle,
 ) : RefreshTokenRepository {
+    init {
+        handle.registerRowMapper(RefreshTokenRowMapper())
+    }
+
     override fun create(refreshToken: RefreshToken): RefreshToken {
         val insertQuery = """
             INSERT INTO refresh_tokens (id, token, user_id, expires_at, is_revoked, created_at)
@@ -42,11 +49,11 @@ class JdbiRefreshTokenRepository(
         """
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 mapOf("token" to token),
-                RefreshToken.mapper,
+                RefreshToken::class,
             ).firstOrNull()
     }
 
@@ -59,11 +66,11 @@ class JdbiRefreshTokenRepository(
         """
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 mapOf("user_id" to userId),
-                RefreshToken.mapper,
+                RefreshToken::class,
             )
     }
 
@@ -128,11 +135,27 @@ class JdbiRefreshTokenRepository(
         """
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 mapOf("id" to id),
-                RefreshToken.mapper,
+                RefreshToken::class,
             ).firstOrNull()
+    }
+
+    private class RefreshTokenRowMapper : RowMapper<RefreshToken> {
+        override fun map(
+            rs: ResultSet,
+            ctx: StatementContext,
+        ): RefreshToken =
+            RefreshToken(
+                id = rs.getString("id"),
+                token = rs.getString("token"),
+                userId = rs.getString("user_id"),
+                expiresAt = rs.getTimestamp("expires_at")?.toInstant() ?: Instant.now(),
+                isRevoked = rs.getBoolean("is_revoked"),
+                createdAt = rs.getTimestamp("created_at")?.toInstant() ?: Instant.now(),
+                revokedAt = rs.getTimestamp("revoked_at")?.toInstant(),
+            )
     }
 }

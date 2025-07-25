@@ -4,10 +4,17 @@ import com.ohana.data.utils.DatabaseUtils
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
+import org.jdbi.v3.core.mapper.RowMapper
+import org.jdbi.v3.core.statement.StatementContext
+import java.sql.ResultSet
 
 class JdbiAuthMemberRepository(
     private val handle: Handle,
 ) : AuthMemberRepository {
+    init {
+        handle.registerRowMapper(AuthMemberRowMapper())
+    }
+
     override fun findByEmail(email: String): AuthMember? {
         val selectQuery = """
             SELECT id, name, email, password, salt, age, gender
@@ -16,12 +23,28 @@ class JdbiAuthMemberRepository(
         """
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 mapOf("email" to email),
-                AuthMember.mapper,
+                AuthMember::class,
             ).firstOrNull()
+    }
+
+    private class AuthMemberRowMapper : RowMapper<AuthMember> {
+        override fun map(
+            rs: ResultSet,
+            ctx: StatementContext,
+        ): AuthMember =
+            AuthMember(
+                id = rs.getString("id"),
+                name = rs.getString("name"),
+                email = rs.getString("email"),
+                password = rs.getString("password"),
+                salt = rs.getBytes("salt"),
+                age = rs.getObject("age") as? Int,
+                gender = rs.getString("gender"),
+            )
     }
 
     override fun create(member: AuthMember): AuthMember {

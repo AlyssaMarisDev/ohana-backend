@@ -1,10 +1,10 @@
-package com.ohana.domain.task
+package com.ohana.domain.tags
 
 import com.ohana.TestUtils
 import com.ohana.data.household.HouseholdRepository
-import com.ohana.data.household.TagRepository
+import com.ohana.data.tags.TagRepository
+import com.ohana.data.tags.TaskTagRepository
 import com.ohana.data.task.TaskRepository
-import com.ohana.data.task.TaskTagRepository
 import com.ohana.data.unitOfWork.*
 import com.ohana.shared.exceptions.ValidationException
 import kotlinx.coroutines.test.runTest
@@ -162,6 +162,7 @@ class TaskTagManagerTest {
                 TestUtils.getTag(
                     id = tagId,
                     householdId = tagHouseholdId,
+                    isDefault = false,
                 )
 
             whenever(taskRepository.findById(taskId)).thenReturn(task)
@@ -175,6 +176,89 @@ class TaskTagManagerTest {
             assertEquals("Tag $tagId does not belong to the same household as task $taskId", ex.message)
             verify(taskTagRepository).deleteByTaskId(taskId)
             verify(taskTagRepository, never()).createMany(any())
+        }
+
+    @Test
+    fun `assignTagsToTask should allow default tags from any household`() =
+        runTest {
+            val taskId = UUID.randomUUID().toString()
+            val taskHouseholdId = UUID.randomUUID().toString()
+            val tagId = UUID.randomUUID().toString()
+
+            val task =
+                TestUtils.getTask(
+                    id = taskId,
+                    householdId = taskHouseholdId,
+                )
+
+            val defaultTag =
+                TestUtils.getTag(
+                    id = tagId,
+                    householdId = null,
+                    isDefault = true,
+                )
+
+            val expectedTaskTag = TestUtils.getTaskTag(taskId = taskId, tagId = tagId)
+
+            whenever(taskRepository.findById(taskId)).thenReturn(task)
+            whenever(tagRepository.findByIds(listOf(tagId))).thenReturn(listOf(defaultTag))
+            whenever(taskTagRepository.deleteByTaskId(taskId)).thenReturn(true)
+            whenever(taskTagRepository.createMany(any())).thenReturn(listOf(expectedTaskTag))
+
+            val result = taskTagManager.assignTagsToTask(context, taskId, listOf(tagId))
+
+            assertEquals(1, result.size)
+            assertEquals(defaultTag, result[0])
+            verify(taskTagRepository).deleteByTaskId(taskId)
+            verify(taskTagRepository).createMany(any())
+        }
+
+    @Test
+    fun `assignTagsToTask should allow mix of default and household-specific tags`() =
+        runTest {
+            val taskId = UUID.randomUUID().toString()
+            val taskHouseholdId = UUID.randomUUID().toString()
+            val defaultTagId = UUID.randomUUID().toString()
+            val householdTagId = UUID.randomUUID().toString()
+
+            val task =
+                TestUtils.getTask(
+                    id = taskId,
+                    householdId = taskHouseholdId,
+                )
+
+            val defaultTag =
+                TestUtils.getTag(
+                    id = defaultTagId,
+                    householdId = null,
+                    isDefault = true,
+                )
+
+            val householdTag =
+                TestUtils.getTag(
+                    id = householdTagId,
+                    householdId = taskHouseholdId,
+                    isDefault = false,
+                )
+
+            val expectedTaskTags =
+                listOf(
+                    TestUtils.getTaskTag(taskId = taskId, tagId = defaultTagId),
+                    TestUtils.getTaskTag(taskId = taskId, tagId = householdTagId),
+                )
+
+            whenever(taskRepository.findById(taskId)).thenReturn(task)
+            whenever(tagRepository.findByIds(listOf(defaultTagId, householdTagId))).thenReturn(listOf(defaultTag, householdTag))
+            whenever(taskTagRepository.deleteByTaskId(taskId)).thenReturn(true)
+            whenever(taskTagRepository.createMany(any())).thenReturn(expectedTaskTags)
+
+            val result = taskTagManager.assignTagsToTask(context, taskId, listOf(defaultTagId, householdTagId))
+
+            assertEquals(2, result.size)
+            assertTrue(result.contains(defaultTag))
+            assertTrue(result.contains(householdTag))
+            verify(taskTagRepository).deleteByTaskId(taskId)
+            verify(taskTagRepository).createMany(any())
         }
 
     @Test

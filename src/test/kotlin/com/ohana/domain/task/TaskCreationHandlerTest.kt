@@ -4,7 +4,7 @@ import com.ohana.TestUtils
 import com.ohana.data.member.MemberRepository
 import com.ohana.data.task.TaskRepository
 import com.ohana.data.unitOfWork.*
-import com.ohana.domain.task.TaskTagManager
+import com.ohana.domain.tags.TaskTagManager
 import com.ohana.domain.validators.HouseholdMemberValidator
 import com.ohana.shared.enums.TaskStatus
 import com.ohana.shared.exceptions.AuthorizationException

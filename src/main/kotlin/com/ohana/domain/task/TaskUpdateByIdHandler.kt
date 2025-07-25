@@ -1,6 +1,7 @@
 package com.ohana.domain.task
 
 import com.ohana.data.unitOfWork.*
+import com.ohana.domain.tags.TaskTagManager
 import com.ohana.domain.validators.*
 import com.ohana.shared.enums.TaskStatus
 import com.ohana.shared.exceptions.NotFoundException
@@ -14,7 +15,7 @@ class TaskUpdateByIdHandler(
     data class Request(
         val title: String,
         val description: String,
-        val dueDate: Instant,
+        val dueDate: Instant?,
         val status: TaskStatus,
         val tagIds: List<String>,
     )
@@ -23,7 +24,7 @@ class TaskUpdateByIdHandler(
         val id: String,
         val title: String,
         val description: String?,
-        val dueDate: Instant,
+        val dueDate: Instant?,
         val status: TaskStatus?,
         val createdBy: String,
         val householdId: String,

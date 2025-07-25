@@ -1,6 +1,7 @@
 package com.ohana.domain.task
 
 import com.ohana.data.unitOfWork.*
+import com.ohana.domain.tags.TaskTagManager
 import com.ohana.domain.validators.HouseholdMemberValidator
 import com.ohana.shared.enums.TaskStatus
 
@@ -17,7 +18,7 @@ class TaskGetAllHandler(
         val id: String,
         val title: String,
         val description: String,
-        val dueDate: java.time.Instant,
+        val dueDate: java.time.Instant?,
         val status: TaskStatus,
         val createdBy: String,
         val householdId: String,

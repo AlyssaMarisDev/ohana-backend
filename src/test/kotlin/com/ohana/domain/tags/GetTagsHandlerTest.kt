@@ -1,8 +1,8 @@
-package com.ohana.domain.household
+package com.ohana.domain.tags
 
 import com.ohana.TestUtils
 import com.ohana.data.household.HouseholdRepository
-import com.ohana.data.household.TagRepository
+import com.ohana.data.tags.TagRepository
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.validators.HouseholdMemberValidator
 import kotlinx.coroutines.test.runTest
@@ -13,13 +13,13 @@ import org.mockito.kotlin.*
 import java.util.UUID
 import kotlin.test.assertEquals
 
-class TagGetByHouseholdIdHandlerTest {
+class GetTagsHandlerTest {
     private lateinit var unitOfWork: UnitOfWork
     private lateinit var context: UnitOfWorkContext
     private lateinit var householdRepository: HouseholdRepository
     private lateinit var tagRepository: TagRepository
     private lateinit var validator: HouseholdMemberValidator
-    private lateinit var handler: TagGetByHouseholdIdHandler
+    private lateinit var handler: GetTagsHandler
 
     @BeforeEach
     fun setUp() {
@@ -32,7 +32,7 @@ class TagGetByHouseholdIdHandlerTest {
                 on { tags } doReturn tagRepository
             }
         unitOfWork = mock()
-        handler = TagGetByHouseholdIdHandler(unitOfWork, validator)
+        handler = GetTagsHandler(unitOfWork, validator)
     }
 
     @Test
@@ -59,7 +59,7 @@ class TagGetByHouseholdIdHandlerTest {
                     ),
                 )
 
-            whenever(tagRepository.findByHouseholdId(householdId)).thenReturn(expectedTags)
+            whenever(tagRepository.findByHouseholdIdWithDefaults(householdId)).thenReturn(expectedTags)
 
             val response = handler.handle(userId, householdId)
 
@@ -70,7 +70,7 @@ class TagGetByHouseholdIdHandlerTest {
             assertEquals("#EF4444", response.tags[1].color)
 
             verify(validator).validate(context, householdId, userId)
-            verify(tagRepository).findByHouseholdId(householdId)
+            verify(tagRepository).findByHouseholdIdWithDefaults(householdId)
         }
 
     @Test
@@ -81,14 +81,14 @@ class TagGetByHouseholdIdHandlerTest {
             val userId = UUID.randomUUID().toString()
             val householdId = UUID.randomUUID().toString()
 
-            whenever(tagRepository.findByHouseholdId(householdId)).thenReturn(emptyList())
+            whenever(tagRepository.findByHouseholdIdWithDefaults(householdId)).thenReturn(emptyList())
 
             val response = handler.handle(userId, householdId)
 
             assertEquals(0, response.tags.size)
 
             verify(validator).validate(context, householdId, userId)
-            verify(tagRepository).findByHouseholdId(householdId)
+            verify(tagRepository).findByHouseholdIdWithDefaults(householdId)
         }
 
     @Test
@@ -109,7 +109,7 @@ class TagGetByHouseholdIdHandlerTest {
 
             assertEquals("Validation failed", ex.message)
             verify(validator).validate(context, householdId, userId)
-            verify(tagRepository, never()).findByHouseholdId(any())
+            verify(tagRepository, never()).findByHouseholdIdWithDefaults(any())
         }
 
     @Test
@@ -120,7 +120,7 @@ class TagGetByHouseholdIdHandlerTest {
             val userId = UUID.randomUUID().toString()
             val householdId = UUID.randomUUID().toString()
 
-            whenever(tagRepository.findByHouseholdId(householdId))
+            whenever(tagRepository.findByHouseholdIdWithDefaults(householdId))
                 .thenThrow(RuntimeException("Database error"))
 
             val ex =
@@ -130,6 +130,6 @@ class TagGetByHouseholdIdHandlerTest {
 
             assertEquals("Database error", ex.message)
             verify(validator).validate(context, householdId, userId)
-            verify(tagRepository).findByHouseholdId(householdId)
+            verify(tagRepository).findByHouseholdIdWithDefaults(householdId)
         }
 }

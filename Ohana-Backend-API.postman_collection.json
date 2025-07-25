@@ -1,0 +1,541 @@
+{
+  "info": {
+    "_postman_id": "ohana-backend-api",
+    "name": "Ohana Backend API",
+    "description": "Complete API collection for the Ohana Backend service. This collection includes all authentication, household management, member management, and task management endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Simple health check endpoint to verify the service is running"
+          },
+          "response": []
+        }
+      ],
+      "description": "Health check endpoints"
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["register"]
+            },
+            "description": "Register a new user account. Password must be at least 8 characters with uppercase, number, and special character."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["login"]
+            },
+            "description": "Login with email and password. Returns JWT access token and refresh token."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"your-refresh-token-here\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["refresh"]
+            },
+            "description": "Refresh the access token using a valid refresh token."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"your-refresh-token-here\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["logout"]
+            },
+            "description": "Logout and invalidate the refresh token. Requires authentication."
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints for user registration, login, token refresh, and logout"
+    },
+    {
+      "name": "Households",
+      "item": [
+        {
+          "name": "Create Household",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{$guid}}\",\n  \"name\": \"Smith Family\",\n  \"description\": \"Our family household for managing daily tasks and responsibilities\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/households",
+              "host": ["{{baseUrl}}"],
+              "path": ["households"]
+            },
+            "description": "Create a new household. Automatically creates 5 default tags (metas, adult, work, kids, chores)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Households",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/households",
+              "host": ["{{baseUrl}}"],
+              "path": ["households"]
+            },
+            "description": "Get all households that the authenticated user is a member of."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Household by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/households/{{householdId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["households", "{{householdId}}"]
+            },
+            "description": "Get a specific household by ID. User must be a member of the household."
+          },
+          "response": []
+        },
+        {
+          "name": "Invite Member to Household",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": \"{{memberId}}\",\n  \"role\": \"MEMBER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/households/{{householdId}}/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["households", "{{householdId}}", "members"]
+            },
+            "description": "Invite a member to join the household. Requires ADMIN role. Role can be ADMIN or MEMBER."
+          },
+          "response": []
+        },
+        {
+          "name": "Accept Household Invite",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/households/{{householdId}}/accept-invite",
+              "host": ["{{baseUrl}}"],
+              "path": ["households", "{{householdId}}", "accept-invite"]
+            },
+            "description": "Accept an invitation to join a household."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Household Tags",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/households/tags?householdId={{householdId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["households", "tags"],
+              "query": [
+                {
+                  "key": "householdId",
+                  "value": "{{householdId}}"
+                }
+              ]
+            },
+            "description": "Get all tags available for a specific household."
+          },
+          "response": []
+        }
+      ],
+      "description": "Household management endpoints for creating, viewing, and managing households"
+    },
+    {
+      "name": "Members",
+      "item": [
+        {
+          "name": "Get All Members",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["members"]
+            },
+            "description": "Get all members in the system."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Member by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/members/{{memberId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["members", "{{memberId}}"]
+            },
+            "description": "Get a specific member by ID. User can only access their own member profile."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Member",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Smith\",\n  \"age\": 30,\n  \"gender\": \"MALE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/{{memberId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["members", "{{memberId}}"]
+            },
+            "description": "Update member profile. User can only update their own profile. All fields are optional."
+          },
+          "response": []
+        }
+      ],
+      "description": "Member management endpoints for viewing and updating member profiles"
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "Create Task",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{$guid}}\",\n  \"title\": \"Buy groceries\",\n  \"description\": \"Purchase items for dinner tonight\",\n  \"dueDate\": \"2024-01-15T18:00:00Z\",\n  \"status\": \"PENDING\",\n  \"householdId\": \"{{householdId}}\",\n  \"tagIds\": [\"{{tagId1}}\", \"{{tagId2}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks"]
+            },
+            "description": "Create a new task. Status can be PENDING, IN_PROGRESS, or COMPLETED. tagIds is optional."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Tasks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tasks?householdIds={{householdId1}},{{householdId2}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks"],
+              "query": [
+                {
+                  "key": "householdIds",
+                  "value": "{{householdId1}},{{householdId2}}",
+                  "description": "Comma-separated list of household IDs to filter tasks"
+                }
+              ]
+            },
+            "description": "Get all tasks. Use householdIds query parameter to filter by specific households."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Task by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}"]
+            },
+            "description": "Get a specific task by ID. User must be a member of the task's household."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Task",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Buy groceries and cook dinner\",\n  \"description\": \"Purchase items and prepare dinner for the family\",\n  \"dueDate\": \"2024-01-15T19:00:00Z\",\n  \"status\": \"IN_PROGRESS\",\n  \"tagIds\": [\"{{tagId1}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}"]
+            },
+            "description": "Update an existing task. All fields are optional. User must be a member of the task's household."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Task",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}"]
+            },
+            "description": "Delete a task. User must be a member of the task's household."
+          },
+          "response": []
+        }
+      ],
+      "description": "Task management endpoints for creating, viewing, updating, and deleting tasks"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string",
+      "description": "Base URL for the Ohana Backend API"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string",
+      "description": "JWT access token for authenticated requests"
+    },
+    {
+      "key": "householdId",
+      "value": "",
+      "type": "string",
+      "description": "Household ID for testing household-specific endpoints"
+    },
+    {
+      "key": "memberId",
+      "value": "",
+      "type": "string",
+      "description": "Member ID for testing member-specific endpoints"
+    },
+    {
+      "key": "taskId",
+      "value": "",
+      "type": "string",
+      "description": "Task ID for testing task-specific endpoints"
+    },
+    {
+      "key": "tagId1",
+      "value": "",
+      "type": "string",
+      "description": "Tag ID for testing task tagging functionality"
+    },
+    {
+      "key": "tagId2",
+      "value": "",
+      "type": "string",
+      "description": "Second tag ID for testing multiple tags"
+    },
+    {
+      "key": "householdId1",
+      "value": "",
+      "type": "string",
+      "description": "First household ID for testing multi-household queries"
+    },
+    {
+      "key": "householdId2",
+      "value": "",
+      "type": "string",
+      "description": "Second household ID for testing multi-household queries"
+    }
+  ]
+}

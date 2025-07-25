@@ -1,7 +1,7 @@
-package com.ohana.domain.task
+package com.ohana.domain.tags
 
-import com.ohana.data.household.Tag
-import com.ohana.data.task.TaskTag
+import com.ohana.data.tags.Tag
+import com.ohana.data.tags.TaskTag
 import com.ohana.data.unitOfWork.UnitOfWorkContext
 import com.ohana.shared.exceptions.ValidationException
 import java.time.Instant
@@ -37,7 +37,8 @@ class TaskTagManager {
         }
 
         tags.forEach { tag ->
-            if (tag.householdId != task.householdId) {
+            // Default tags can be used by any household
+            if (!tag.isDefault && tag.householdId != task.householdId) {
                 throw ValidationException("Tag ${tag.id} does not belong to the same household as task $taskId")
             }
         }

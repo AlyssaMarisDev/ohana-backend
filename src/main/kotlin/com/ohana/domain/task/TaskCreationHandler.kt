@@ -2,6 +2,7 @@ package com.ohana.domain.task
 
 import com.ohana.data.task.*
 import com.ohana.data.unitOfWork.*
+import com.ohana.domain.tags.TaskTagManager
 import com.ohana.domain.validators.*
 import com.ohana.shared.enums.*
 import java.time.Instant
@@ -15,7 +16,7 @@ class TaskCreationHandler(
         val id: String,
         val title: String,
         val description: String,
-        val dueDate: Instant,
+        val dueDate: Instant?,
         val status: TaskStatus,
         val householdId: String,
         val tagIds: List<String>,
@@ -25,7 +26,7 @@ class TaskCreationHandler(
         val id: String,
         val title: String,
         val description: String,
-        val dueDate: Instant,
+        val dueDate: Instant?,
         val status: TaskStatus,
         val createdBy: String,
         val householdId: String,

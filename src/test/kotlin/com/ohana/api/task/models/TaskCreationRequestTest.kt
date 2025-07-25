@@ -170,7 +170,7 @@ class TaskCreationRequestTest {
         }
 
     @Test
-    fun `toDomain should throw ValidationException when due date is null`() =
+    fun `toDomain should pass when due date is null`() =
         runTest {
             val request =
                 TaskCreationRequest(
@@ -181,15 +181,14 @@ class TaskCreationRequestTest {
                     householdId = Guid.generate(),
                 )
 
-            val exception =
-                assertThrows<ValidationException> {
-                    request.toDomain()
-                }
+            val domainRequest = request.toDomain()
 
-            assertEquals("Validation failed", exception.message)
-            assertEquals(1, exception.errors!!.size)
-            assertEquals("dueDate", exception.errors!![0].field)
-            assertEquals("Due date is required", exception.errors!![0].message)
+            assertEquals("Valid Title", domainRequest.title)
+            assertEquals("Valid description", domainRequest.description)
+            assertEquals(null, domainRequest.dueDate)
+            assertEquals(TaskStatus.PENDING, domainRequest.status)
+            assertEquals(request.householdId, domainRequest.householdId)
+            Guid.isValid(domainRequest.id)
         }
 
     @Test
@@ -336,7 +335,7 @@ class TaskCreationRequestTest {
                 TaskCreationRequest(
                     title = "", // Blank title
                     description = "A".repeat(1001), // Too long description
-                    dueDate = null, // Missing due date
+                    dueDate = null, // Missing due date (now optional)
                     status = "INVALID_STATUS", // Invalid status
                     householdId = null, // Missing household ID
                 )
@@ -347,10 +346,10 @@ class TaskCreationRequestTest {
                 }
 
             assertEquals("Validation failed", exception.message)
-            assertEquals(5, exception.errors!!.size)
+            assertEquals(4, exception.errors!!.size)
 
             val errorFields = exception.errors!!.map { it.field }.toSet()
-            assertEquals(setOf("title", "description", "dueDate", "status", "householdId"), errorFields)
+            assertEquals(setOf("title", "description", "status", "householdId"), errorFields)
         }
 
     @Test

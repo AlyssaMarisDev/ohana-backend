@@ -41,9 +41,7 @@ data class TaskCreationRequest(
             errors.add(ValidationError("description", "Description must be at most 1000 characters long"))
         }
 
-        if (dueDate == null) {
-            errors.add(ValidationError("dueDate", "Due date is required"))
-        }
+        // Due date is optional, so no validation needed
 
         if (status == null) {
             errors.add(ValidationError("status", "Status is required"))
@@ -79,7 +77,7 @@ data class TaskCreationRequest(
             id = id ?: Guid.generate(),
             title = title!!,
             description = description!!,
-            dueDate = dueDate!!,
+            dueDate = dueDate,
             status = TaskStatus.valueOf(status!!),
             householdId = householdId!!,
             tagIds = tagIds ?: emptyList(),

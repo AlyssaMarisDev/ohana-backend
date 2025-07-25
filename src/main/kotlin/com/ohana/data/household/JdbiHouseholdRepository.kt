@@ -4,10 +4,18 @@ import com.ohana.data.utils.DatabaseUtils
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
+import org.jdbi.v3.core.mapper.RowMapper
+import org.jdbi.v3.core.statement.StatementContext
+import java.sql.ResultSet
 
 class JdbiHouseholdRepository(
     private val handle: Handle,
 ) : HouseholdRepository {
+    init {
+        handle.registerRowMapper(HouseholdRowMapper())
+        handle.registerRowMapper(HouseholdMemberRowMapper())
+    }
+
     override fun findById(id: String): Household? {
         val selectQuery = """
             SELECT id, name, description, created_by
@@ -16,11 +24,11 @@ class JdbiHouseholdRepository(
         """
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 mapOf("id" to id),
-                Household.mapper,
+                Household::class,
             ).firstOrNull()
     }
 
@@ -31,11 +39,11 @@ class JdbiHouseholdRepository(
         """
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 mapOf(),
-                Household.mapper,
+                Household::class,
             )
     }
 
@@ -48,11 +56,11 @@ class JdbiHouseholdRepository(
         """
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 mapOf("memberId" to memberId),
-                Household.mapper,
+                Household::class,
             )
     }
 
@@ -90,14 +98,14 @@ class JdbiHouseholdRepository(
         """
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 mapOf(
                     "householdId" to householdId,
                     "memberId" to memberId,
                 ),
-                HouseholdMember.mapper,
+                HouseholdMember::class,
             ).firstOrNull()
     }
 
@@ -109,11 +117,11 @@ class JdbiHouseholdRepository(
         """
 
         return DatabaseUtils
-            .getWithMapper(
+            .get(
                 handle,
                 selectQuery,
                 mapOf("householdId" to householdId),
-                HouseholdMember.mapper,
+                HouseholdMember::class,
             )
     }
 
@@ -168,5 +176,36 @@ class JdbiHouseholdRepository(
 
         return findMemberById(member.householdId, member.memberId)
             ?: throw NotFoundException("Household member not found after update")
+    }
+
+    private class HouseholdRowMapper : RowMapper<Household> {
+        override fun map(
+            rs: ResultSet,
+            ctx: StatementContext,
+        ): Household =
+            Household(
+                id = rs.getString("id"),
+                name = rs.getString("name"),
+                description = rs.getString("description"),
+                createdBy = rs.getString("created_by"),
+            )
+    }
+
+    private class HouseholdMemberRowMapper : RowMapper<HouseholdMember> {
+        override fun map(
+            rs: ResultSet,
+            ctx: StatementContext,
+        ): HouseholdMember =
+            HouseholdMember(
+                id = rs.getString("id"),
+                householdId = rs.getString("household_id"),
+                memberId = rs.getString("member_id"),
+                role =
+                    com.ohana.shared.enums.HouseholdMemberRole
+                        .valueOf(rs.getString("role").uppercase()),
+                isActive = rs.getBoolean("is_active"),
+                invitedBy = rs.getString("invited_by"),
+                joinedAt = rs.getTimestamp("joined_at")?.toInstant(),
+            )
     }
 }

@@ -2,8 +2,9 @@ package com.ohana
 
 import com.ohana.data.household.Household
 import com.ohana.data.household.HouseholdMember
-import com.ohana.data.household.Tag
 import com.ohana.data.member.Member
+import com.ohana.data.tags.Tag
+import com.ohana.data.tags.TaskTag
 import com.ohana.data.task.Task
 import com.ohana.data.unitOfWork.*
 import com.ohana.shared.enums.HouseholdMemberRole
@@ -29,7 +30,7 @@ class TestUtils {
             id: String = UUID.randomUUID().toString(),
             title: String = "Test Task",
             description: String = "Test Description",
-            dueDate: Instant = Instant.now(),
+            dueDate: Instant? = Instant.now(),
             status: TaskStatus = TaskStatus.PENDING,
             createdBy: String = UUID.randomUUID().toString(),
             householdId: String = UUID.randomUUID().toString(),
@@ -73,18 +74,17 @@ class TestUtils {
             id: String = UUID.randomUUID().toString(),
             name: String = "Test Tag",
             color: String = "#3B82F6",
-            householdId: String = UUID.randomUUID().toString(),
+            householdId: String? = UUID.randomUUID().toString(),
+            isDefault: Boolean = false,
             createdAt: Instant = Instant.now(),
             updatedAt: Instant = Instant.now(),
-        ): Tag = Tag(id, name, color, householdId, createdAt, updatedAt)
+        ): Tag = Tag(id, name, color, householdId, isDefault, createdAt, updatedAt)
 
         fun getTaskTag(
             id: String = UUID.randomUUID().toString(),
             taskId: String = UUID.randomUUID().toString(),
             tagId: String = UUID.randomUUID().toString(),
             createdAt: Instant = Instant.now(),
-        ): com.ohana.data.task.TaskTag =
-            com.ohana.data.task
-                .TaskTag(id, taskId, tagId, createdAt)
+        ): TaskTag = TaskTag(id, taskId, tagId, createdAt)
     }
 }

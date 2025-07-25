@@ -4,12 +4,15 @@ import com.ohana.api.auth.AuthController
 import com.ohana.api.health.HealthController
 import com.ohana.api.household.HouseholdController
 import com.ohana.api.member.MemberController
+import com.ohana.api.tags.TagsController
 import com.ohana.api.task.TaskController
 import com.ohana.data.unitOfWork.JdbiUnitOfWork
 import com.ohana.data.unitOfWork.UnitOfWork
 import com.ohana.domain.auth.*
 import com.ohana.domain.household.*
 import com.ohana.domain.member.*
+import com.ohana.domain.tags.GetTagsHandler
+import com.ohana.domain.tags.TaskTagManager
 import com.ohana.domain.task.*
 import com.ohana.domain.validators.HouseholdMemberValidator
 import org.jdbi.v3.core.Jdbi
@@ -64,12 +67,15 @@ val appModule =
         single { HouseholdGetAllHandler(get()) }
         single { HouseholdGetByIdHandler(get(), get()) }
         single { HouseholdInviteMemberHandler(get()) }
-        single { TagGetByHouseholdIdHandler(get(), get()) }
+
+        // Tags handlers
+        single { GetTagsHandler(get(), get()) }
 
         // Controllers
         single { AuthController(get(), get(), get(), get()) }
         single { HealthController() }
-        single { HouseholdController(get(), get(), get(), get(), get(), get()) }
+        single { HouseholdController(get(), get(), get(), get(), get()) }
         single { MemberController(get(), get(), get()) }
         single { TaskController(get(), get(), get(), get(), get()) }
+        single { TagsController(get()) }
     }

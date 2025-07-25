@@ -3,7 +3,7 @@ package com.ohana.domain.task
 import com.ohana.TestUtils
 import com.ohana.data.task.TaskRepository
 import com.ohana.data.unitOfWork.*
-import com.ohana.domain.task.TaskTagManager
+import com.ohana.domain.tags.TaskTagManager
 import com.ohana.domain.validators.*
 import com.ohana.shared.enums.TaskStatus
 import com.ohana.shared.exceptions.NotFoundException

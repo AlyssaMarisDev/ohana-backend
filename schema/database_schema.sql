@@ -61,20 +61,23 @@ CREATE TABLE `household_members` (
   CONSTRAINT `fk_household_members_invited_by` FOREIGN KEY (`invited_by`) REFERENCES `members` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Junction table for household membership';
 
--- Tags table - stores tags that households can use for tasks
+-- Tags table - stores tags that households can use for tasks (including default tags)
 CREATE TABLE `tags` (
   `id` char(36) NOT NULL COMMENT 'UUID for tag identification',
   `name` varchar(100) NOT NULL COMMENT 'Name of the tag',
   `color` varchar(7) DEFAULT '#3B82F6' COMMENT 'Color of the tag in hex format',
-  `household_id` char(36) NOT NULL COMMENT 'ID of the household this tag belongs to',
+  `household_id` char(36) NULL COMMENT 'ID of the household this tag belongs to (NULL for default tags)',
+  `is_default` boolean NOT NULL DEFAULT FALSE COMMENT 'Whether this is a default tag available to all households',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Record creation timestamp',
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Record update timestamp',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_household_tag_name` (`household_id`, `name`),
+  UNIQUE KEY `uk_default_tag_name` (`name`) WHERE `is_default` = TRUE,
   KEY `idx_household_id` (`household_id`),
+  KEY `idx_is_default` (`is_default`),
   KEY `idx_name` (`name`),
   CONSTRAINT `fk_tags_household_id` FOREIGN KEY (`household_id`) REFERENCES `households` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores tags that households can use for tasks';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores tags that households can use for tasks (including default tags)';
 
 -- Tasks table - stores task information
 CREATE TABLE `tasks` (
@@ -128,6 +131,14 @@ CREATE TABLE `refresh_tokens` (
   KEY `idx_user_active_tokens` (`user_id`, `is_revoked`),
   CONSTRAINT `fk_refresh_tokens_user_id` FOREIGN KEY (`user_id`) REFERENCES `members` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores refresh tokens for authentication';
+
+-- Insert default tags (available to all households)
+INSERT INTO `tags` (`id`, `name`, `color`, `household_id`, `is_default`, `created_at`, `updated_at`) VALUES
+(UUID(), 'metas', '#FF6B6B', NULL, TRUE, NOW(), NOW()),
+(UUID(), 'adult', '#4ECDC4', NULL, TRUE, NOW(), NOW()),
+(UUID(), 'work', '#45B7D1', NULL, TRUE, NOW(), NOW()),
+(UUID(), 'kids', '#96CEB4', NULL, TRUE, NOW(), NOW()),
+(UUID(), 'chores', '#FFEAA7', NULL, TRUE, NOW(), NOW());
 
 -- Insert sample data (optional)
 -- Uncomment the following lines if you want to insert sample data

@@ -1,4 +1,4 @@
-package com.ohana.data.task
+package com.ohana.data.tags
 
 import java.time.Instant
 

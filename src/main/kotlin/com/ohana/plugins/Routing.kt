@@ -4,6 +4,7 @@ import com.ohana.api.auth.AuthController
 import com.ohana.api.health.HealthController
 import com.ohana.api.household.HouseholdController
 import com.ohana.api.member.MemberController
+import com.ohana.api.tags.TagsController
 import com.ohana.api.task.TaskController
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
@@ -15,6 +16,7 @@ fun Application.configureRouting() {
     val memberController: MemberController by inject()
     val taskController: TaskController by inject()
     val householdController: HouseholdController by inject()
+    val tagsController: TagsController by inject()
 
     routing {
         route("/api/v1") {
@@ -32,6 +34,9 @@ fun Application.configureRouting() {
             }
             householdController.apply {
                 registerHouseholdRoutes()
+            }
+            tagsController.apply {
+                registerTagsRoutes()
             }
         }
     }
