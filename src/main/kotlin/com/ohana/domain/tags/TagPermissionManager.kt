@@ -19,18 +19,19 @@ class TagPermissionManager(
             return emptyList()
         }
 
-        val permission = context.tagPermissions.findByHouseholdMemberId(householdMemberId)
+        val permission = context.permissions.findByHouseholdMemberId(householdMemberId)
 
         // If no permission is set, user can view all tasks (default behavior)
         if (permission == null) {
             return taskIds
         }
 
+        // Get the tags that the user can view
+        val userCanViewTagPermissions = context.tagPermissions.findByPermissionId(permission.id)
+        val userCanViewTagIds = userCanViewTagPermissions.map { it.tagId }.toSet()
+
         // Get all task tags for the given tasks
         val taskTagsMap = taskTagManager.getTasksTags(context, taskIds)
-
-        // Get the tags that the user can view
-        val userCanViewTags = permission.tagIds.toSet()
 
         // Filter the tasks that the user can view
         return taskIds.filter { taskId ->
@@ -42,7 +43,7 @@ class TagPermissionManager(
             }
 
             // Task is viewable if it has at least one tag that the user can view
-            taskTagIds.any { it in userCanViewTags }
+            taskTagIds.any { it in userCanViewTagIds }
         }
     }
 }

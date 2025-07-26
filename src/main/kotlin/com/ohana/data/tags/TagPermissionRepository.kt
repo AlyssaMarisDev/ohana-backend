@@ -1,5 +1,5 @@
 package com.ohana.data.tags
 
 interface TagPermissionRepository {
-    fun findByHouseholdMemberId(householdMemberId: String): TagPermission?
+    fun findByPermissionId(permissionId: String): List<TagPermission>
 }

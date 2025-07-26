@@ -169,21 +169,31 @@ INSERT INTO `tasks` (`id`, `title`, `description`, `due_date`, `status`, `create
 -- Show table information
 SHOW TABLES;
 
--- Create tag permissions table
-CREATE TABLE `tag_permissions` (
-  `id` char(36) NOT NULL COMMENT 'UUID for tag permission record',
+-- Create permissions table - stores base permission records for household members
+CREATE TABLE `permissions` (
+  `id` char(36) NOT NULL COMMENT 'UUID for permission record',
   `household_member_id` char(36) NOT NULL COMMENT 'Reference to household member',
-  `permission_type` varchar(20) NOT NULL COMMENT 'Type of permission (ALLOW_ALL_EXCEPT, DENY_ALL_EXCEPT)',
-  `tag_ids` JSON NOT NULL COMMENT 'Array of tag IDs for the exception list',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Record creation timestamp',
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Record update timestamp',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_household_member_permission` (`household_member_id`),
   KEY `idx_household_member_id` (`household_member_id`),
-  KEY `idx_permission_type` (`permission_type`),
-  CONSTRAINT `fk_tag_permissions_household_member_id` FOREIGN KEY (`household_member_id`) REFERENCES `household_members` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `chk_permission_type` CHECK (`permission_type` IN ('CAN_VIEW_TAGS'))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores tag-based viewing permissions for household members';
+  CONSTRAINT `fk_permissions_household_member_id` FOREIGN KEY (`household_member_id`) REFERENCES `household_members` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores base permission records for household members';
+
+-- Create tag permissions junction table - links permissions to tags
+CREATE TABLE `tag_permissions` (
+  `id` char(36) NOT NULL COMMENT 'UUID for tag permission record',
+  `permission_id` char(36) NOT NULL COMMENT 'Reference to permission',
+  `tag_id` char(36) NOT NULL COMMENT 'Reference to tag',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Record creation timestamp',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_permission_tag` (`permission_id`, `tag_id`),
+  KEY `idx_permission_id` (`permission_id`),
+  KEY `idx_tag_id` (`tag_id`),
+  CONSTRAINT `fk_tag_permissions_permission_id` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_tag_permissions_tag_id` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Junction table linking permissions to tags. Having a row here means the member can view that tag.';
 
 -- Show table structures
 DESCRIBE members;
@@ -193,4 +203,5 @@ DESCRIBE tags;
 DESCRIBE tasks;
 DESCRIBE task_tags;
 DESCRIBE refresh_tokens;
+DESCRIBE permissions;
 DESCRIBE tag_permissions;
