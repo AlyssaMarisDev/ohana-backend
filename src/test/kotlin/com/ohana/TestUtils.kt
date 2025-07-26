@@ -32,9 +32,10 @@ class TestUtils {
             description: String = "Test Description",
             dueDate: Instant? = Instant.now(),
             status: TaskStatus = TaskStatus.PENDING,
+            completedAt: Instant? = null,
             createdBy: String = UUID.randomUUID().toString(),
             householdId: String = UUID.randomUUID().toString(),
-        ): Task = Task(id, title, description, dueDate, status, createdBy, householdId)
+        ): Task = Task(id, title, description, dueDate, status, completedAt, createdBy, householdId)
 
         fun getMember(
             id: String = UUID.randomUUID().toString(),

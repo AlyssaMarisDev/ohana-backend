@@ -26,9 +26,10 @@ class TaskUpdateByIdHandler(
         val description: String?,
         val dueDate: Instant?,
         val status: TaskStatus?,
+        val completedAt: Instant?,
         val createdBy: String,
         val householdId: String,
-        val tags: List<String>,
+        val tagIds: List<String>,
     )
 
     suspend fun handle(
@@ -42,6 +43,14 @@ class TaskUpdateByIdHandler(
             // Validate that the user is a member of the household that the task belongs to
             householdMemberValidator.validate(context, existingTask.householdId, userId)
 
+            // Determine the completed_at timestamp based on status change
+            val completedAt =
+                when {
+                    request.status == TaskStatus.COMPLETED && existingTask.status != TaskStatus.COMPLETED -> Instant.now()
+                    request.status != TaskStatus.COMPLETED -> null
+                    else -> existingTask.completedAt
+                }
+
             val updatedTask =
                 context.tasks.update(
                     existingTask.copy(
@@ -49,6 +58,7 @@ class TaskUpdateByIdHandler(
                         description = request.description,
                         dueDate = request.dueDate,
                         status = request.status,
+                        completedAt = completedAt,
                     ),
                 )
 
@@ -60,9 +70,10 @@ class TaskUpdateByIdHandler(
                 description = updatedTask.description,
                 dueDate = updatedTask.dueDate,
                 status = updatedTask.status,
+                completedAt = updatedTask.completedAt,
                 createdBy = updatedTask.createdBy,
                 householdId = updatedTask.householdId,
-                tags = tags.map { it.id },
+                tagIds = tags.map { it.id },
             )
         }
 }

@@ -89,6 +89,7 @@ CREATE TABLE `tasks` (
   `description` text COMMENT 'Description of the task',
   `due_date` timestamp NULL DEFAULT NULL COMMENT 'Due date for the task',
   `status` varchar(50) NOT NULL DEFAULT 'pending' COMMENT 'Status of the task (pending, in_progress, completed)',
+  `completed_at` timestamp NULL DEFAULT NULL COMMENT 'Timestamp when the task was completed',
   `created_by` char(36) NOT NULL COMMENT 'ID of the member who created the task',
   `household_id` char(36) NOT NULL COMMENT 'ID of the household this task belongs to',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Record creation timestamp',
@@ -98,6 +99,7 @@ CREATE TABLE `tasks` (
   KEY `idx_household_id` (`household_id`),
   KEY `idx_status` (`status`),
   KEY `idx_due_date` (`due_date`),
+  KEY `idx_completed_at` (`completed_at`),
   KEY `idx_title` (`title`),
   CONSTRAINT `fk_tasks_created_by` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_tasks_household_id` FOREIGN KEY (`household_id`) REFERENCES `households` (`id`) ON DELETE CASCADE

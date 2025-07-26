@@ -9,6 +9,7 @@ data class Task(
     val description: String,
     val dueDate: Instant?,
     val status: TaskStatus,
+    val completedAt: Instant?,
     val createdBy: String,
     val householdId: String,
 )

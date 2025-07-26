@@ -28,9 +28,10 @@ class TaskCreationHandler(
         val description: String,
         val dueDate: Instant?,
         val status: TaskStatus,
+        val completedAt: Instant?,
         val createdBy: String,
         val householdId: String,
-        val tags: List<String>,
+        val tagIds: List<String>,
     )
 
     suspend fun handle(
@@ -40,6 +41,9 @@ class TaskCreationHandler(
         unitOfWork.execute { context ->
             householdMemberValidator.validate(context, request.householdId, userId)
 
+            // Set completed_at if the task is created with COMPLETED status
+            val completedAt = if (request.status == TaskStatus.COMPLETED) Instant.now() else null
+
             val task =
                 context.tasks.create(
                     Task(
@@ -48,6 +52,7 @@ class TaskCreationHandler(
                         description = request.description,
                         dueDate = request.dueDate,
                         status = request.status,
+                        completedAt = completedAt,
                         createdBy = userId,
                         householdId = request.householdId,
                     ),
@@ -61,9 +66,10 @@ class TaskCreationHandler(
                 description = task.description,
                 dueDate = task.dueDate,
                 status = task.status,
+                completedAt = task.completedAt,
                 createdBy = task.createdBy,
                 householdId = task.householdId,
-                tags = tags.map { it.id },
+                tagIds = tags.map { it.id },
             )
         }
 }

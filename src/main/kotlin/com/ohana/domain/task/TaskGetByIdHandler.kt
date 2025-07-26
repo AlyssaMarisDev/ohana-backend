@@ -17,9 +17,10 @@ class TaskGetByIdHandler(
         val description: String,
         val dueDate: java.time.Instant?,
         val status: TaskStatus,
+        val completedAt: java.time.Instant?,
         val createdBy: String,
         val householdId: String,
-        val tags: List<String>,
+        val tagIds: List<String>,
     )
 
     suspend fun handle(
@@ -39,9 +40,10 @@ class TaskGetByIdHandler(
                 description = task.description,
                 dueDate = task.dueDate,
                 status = task.status,
+                completedAt = task.completedAt,
                 createdBy = task.createdBy,
                 householdId = task.householdId,
-                tags = tags.map { it.id },
+                tagIds = tags.map { it.id },
             )
         }
 }

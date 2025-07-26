@@ -68,7 +68,7 @@ class TaskGetByIdHandlerTest {
             assertEquals(task.status, response.status)
             assertEquals(task.createdBy, response.createdBy)
             assertEquals(task.householdId, response.householdId)
-            assertEquals(0, response.tags.size)
+            assertEquals(0, response.tagIds.size)
 
             verify(householdMemberValidator).validate(context, householdId, userId)
             verify(taskRepository).findById(taskId)
@@ -357,9 +357,9 @@ class TaskGetByIdHandlerTest {
 
             val response = handler.handle(userId, taskId)
 
-            assertEquals(2, response.tags.size)
-            assertEquals(tagId1, response.tags[0])
-            assertEquals(tagId2, response.tags[1])
+            assertEquals(2, response.tagIds.size)
+            assertEquals(tagId1, response.tagIds[0])
+            assertEquals(tagId2, response.tagIds[1])
 
             verify(householdMemberValidator).validate(context, householdId, userId)
             verify(taskRepository).findById(taskId)

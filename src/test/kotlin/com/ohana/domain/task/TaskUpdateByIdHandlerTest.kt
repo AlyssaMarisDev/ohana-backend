@@ -87,7 +87,7 @@ class TaskUpdateByIdHandlerTest {
             assertEquals(TaskStatus.IN_PROGRESS, response.status)
             assertEquals(userId, response.createdBy)
             assertEquals(householdId, response.householdId)
-            assertEquals(0, response.tags.size)
+            assertEquals(0, response.tagIds.size)
 
             verify(householdMemberValidator).validate(context, householdId, userId)
             verify(taskRepository).findById(taskId)
@@ -97,7 +97,8 @@ class TaskUpdateByIdHandlerTest {
                         task.title == "Updated Title" &&
                         task.description == "Updated Description" &&
                         task.dueDate == request.dueDate &&
-                        task.status == TaskStatus.IN_PROGRESS
+                        task.status == TaskStatus.IN_PROGRESS &&
+                        task.completedAt == null
                 },
             )
             verify(taskTagManager).assignTagsToTask(context, updatedTask.id, request.tagIds)
@@ -313,6 +314,116 @@ class TaskUpdateByIdHandlerTest {
             verify(taskRepository).update(
                 argThat { task ->
                     task.createdBy == originalCreatorId && task.householdId == householdId
+                },
+            )
+        }
+
+    @Test
+    fun `handle should set completed_at when task is marked as completed`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val taskId = UUID.randomUUID().toString()
+            val householdId = UUID.randomUUID().toString()
+            val userId = UUID.randomUUID().toString()
+
+            val existingTask =
+                TestUtils.getTask(
+                    id = taskId,
+                    title = "Original Title",
+                    description = "Original Description",
+                    dueDate = Instant.now().plusSeconds(3600),
+                    status = TaskStatus.PENDING,
+                    createdBy = userId,
+                    householdId = householdId,
+                )
+
+            val request =
+                TaskUpdateByIdHandler.Request(
+                    title = "Updated Title",
+                    description = "Updated Description",
+                    dueDate = Instant.now().plusSeconds(7200),
+                    status = TaskStatus.COMPLETED,
+                    tagIds = emptyList(),
+                )
+
+            val updatedTask =
+                existingTask.copy(
+                    title = request.title,
+                    description = request.description,
+                    dueDate = request.dueDate,
+                    status = request.status,
+                    completedAt = Instant.now(),
+                )
+
+            whenever(taskRepository.findById(taskId)).thenReturn(existingTask)
+            whenever(taskRepository.update(any())).thenReturn(updatedTask)
+            whenever(taskTagManager.assignTagsToTask(context, updatedTask.id, request.tagIds)).thenReturn(emptyList())
+
+            val response = handler.handle(userId, taskId, request)
+
+            assertEquals(TaskStatus.COMPLETED, response.status)
+            assertEquals(updatedTask.completedAt, response.completedAt)
+
+            verify(taskRepository).update(
+                argThat { task ->
+                    task.status == TaskStatus.COMPLETED && task.completedAt != null
+                },
+            )
+        }
+
+    @Test
+    fun `handle should clear completed_at when task is unmarked as completed`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val taskId = UUID.randomUUID().toString()
+            val householdId = UUID.randomUUID().toString()
+            val userId = UUID.randomUUID().toString()
+            val completedAt = Instant.now().minusSeconds(3600)
+
+            val existingTask =
+                TestUtils.getTask(
+                    id = taskId,
+                    title = "Original Title",
+                    description = "Original Description",
+                    dueDate = Instant.now().plusSeconds(3600),
+                    status = TaskStatus.COMPLETED,
+                    completedAt = completedAt,
+                    createdBy = userId,
+                    householdId = householdId,
+                )
+
+            val request =
+                TaskUpdateByIdHandler.Request(
+                    title = "Updated Title",
+                    description = "Updated Description",
+                    dueDate = Instant.now().plusSeconds(7200),
+                    status = TaskStatus.IN_PROGRESS,
+                    tagIds = emptyList(),
+                )
+
+            val updatedTask =
+                existingTask.copy(
+                    title = request.title,
+                    description = request.description,
+                    dueDate = request.dueDate,
+                    status = request.status,
+                    completedAt = null,
+                )
+
+            whenever(taskRepository.findById(taskId)).thenReturn(existingTask)
+            whenever(taskRepository.update(any())).thenReturn(updatedTask)
+            whenever(taskTagManager.assignTagsToTask(context, updatedTask.id, request.tagIds)).thenReturn(emptyList())
+
+            val response = handler.handle(userId, taskId, request)
+
+            assertEquals(TaskStatus.IN_PROGRESS, response.status)
+            assertEquals(null, response.completedAt)
+
+            verify(taskRepository).update(
+                argThat { task ->
+                    task.status == TaskStatus.IN_PROGRESS && task.completedAt == null
                 },
             )
         }

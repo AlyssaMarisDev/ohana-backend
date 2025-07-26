@@ -17,8 +17,8 @@ class JdbiTaskRepository(
 
     override fun create(task: Task): Task {
         val insertQuery = """
-            INSERT INTO tasks (id, title, description, due_date, status, created_by, household_id)
-            VALUES (:id, :title, :description, :due_date, :status, :created_by, :household_id)
+            INSERT INTO tasks (id, title, description, due_date, status, completed_at, created_by, household_id)
+            VALUES (:id, :title, :description, :due_date, :status, :completed_at, :created_by, :household_id)
         """
 
         val insertedRows =
@@ -31,6 +31,7 @@ class JdbiTaskRepository(
                     "description" to task.description,
                     "due_date" to task.dueDate,
                     "status" to task.status.name,
+                    "completed_at" to task.completedAt,
                     "created_by" to task.createdBy,
                     "household_id" to task.householdId,
                 ),
@@ -43,7 +44,7 @@ class JdbiTaskRepository(
 
     override fun findById(id: String): Task? {
         val selectQuery = """
-            SELECT id, title, description, due_date, status, created_by, household_id
+            SELECT id, title, description, due_date, status, completed_at, created_by, household_id
             FROM tasks
             WHERE id = :id
         """
@@ -59,7 +60,7 @@ class JdbiTaskRepository(
 
     override fun findAll(): List<Task> {
         val selectQuery = """
-            SELECT id, title, description, due_date, status, created_by, household_id
+            SELECT id, title, description, due_date, status, completed_at, created_by, household_id
             FROM tasks
         """
 
@@ -74,7 +75,7 @@ class JdbiTaskRepository(
 
     override fun findByHouseholdId(householdId: String): List<Task> {
         val selectQuery = """
-            SELECT id, title, description, due_date, status, created_by, household_id
+            SELECT id, title, description, due_date, status, completed_at, created_by, household_id
             FROM tasks
             WHERE household_id = :household_id
         """
@@ -95,7 +96,7 @@ class JdbiTaskRepository(
 
         val placeholders = householdIds.mapIndexed { index, _ -> ":household_id_$index" }.joinToString(", ")
         val selectQuery = """
-            SELECT id, title, description, due_date, status, created_by, household_id
+            SELECT id, title, description, due_date, status, completed_at, created_by, household_id
             FROM tasks
             WHERE household_id IN ($placeholders)
             ORDER BY created_at DESC
@@ -115,7 +116,7 @@ class JdbiTaskRepository(
     override fun update(task: Task): Task {
         val updateQuery = """
             UPDATE tasks
-            SET title = :title, description = :description, due_date = :due_date, status = :status
+            SET title = :title, description = :description, due_date = :due_date, status = :status, completed_at = :completed_at
             WHERE id = :id
         """
 
@@ -129,6 +130,7 @@ class JdbiTaskRepository(
                     "description" to task.description,
                     "due_date" to task.dueDate,
                     "status" to task.status.name,
+                    "completed_at" to task.completedAt,
                 ),
             )
 
@@ -166,6 +168,7 @@ class JdbiTaskRepository(
                 status =
                     com.ohana.shared.enums.TaskStatus
                         .valueOf(rs.getString("status").uppercase()),
+                completedAt = rs.getTimestamp("completed_at")?.toInstant(),
                 createdBy = rs.getString("created_by"),
                 householdId = rs.getString("household_id"),
             )

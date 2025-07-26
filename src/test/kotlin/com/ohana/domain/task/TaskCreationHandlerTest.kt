@@ -85,7 +85,7 @@ class TaskCreationHandlerTest {
             assertEquals(task.status, response.status)
             assertEquals(task.createdBy, response.createdBy)
             assertEquals(task.householdId, response.householdId)
-            assertEquals(0, response.tags.size)
+            assertEquals(0, response.tagIds.size)
         }
 
     @Test
