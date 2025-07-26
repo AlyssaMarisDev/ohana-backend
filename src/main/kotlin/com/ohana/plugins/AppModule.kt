@@ -43,7 +43,7 @@ val appModule =
         // Shared
         single { HouseholdMemberValidator() }
         single { TaskTagManager() }
-        single { TagPermissionManager() }
+        single { TagPermissionManager(get()) }
 
         // Auth handlers
         single { RegistrationHandler(get()) }
