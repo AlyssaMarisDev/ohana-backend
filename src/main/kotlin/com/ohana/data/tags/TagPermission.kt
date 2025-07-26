@@ -7,7 +7,7 @@ data class TagPermission(
     val id: String,
     val householdMemberId: String,
     val permissionType: TagPermissionType,
-    val tagIds: List<String>,
+    val tagIds: List<String>, // Tags the user can view
     val createdAt: Instant,
     val updatedAt: Instant,
 )

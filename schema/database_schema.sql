@@ -182,7 +182,7 @@ CREATE TABLE `tag_permissions` (
   KEY `idx_household_member_id` (`household_member_id`),
   KEY `idx_permission_type` (`permission_type`),
   CONSTRAINT `fk_tag_permissions_household_member_id` FOREIGN KEY (`household_member_id`) REFERENCES `household_members` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `chk_permission_type` CHECK (`permission_type` IN ('ALLOW_ALL_EXCEPT', 'DENY_ALL_EXCEPT'))
+  CONSTRAINT `chk_permission_type` CHECK (`permission_type` IN ('CAN_VIEW_TAGS'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores tag-based viewing permissions for household members';
 
 -- Show table structures

@@ -60,8 +60,8 @@ class TagPermissionManagerTest {
                 TagPermission(
                     id = UUID.randomUUID().toString(),
                     householdMemberId = householdMemberId,
-                    permissionType = TagPermissionType.ALLOW_ALL_EXCEPT,
-                    tagIds = listOf("excluded-tag"),
+                    permissionType = TagPermissionType.CAN_VIEW_TAGS,
+                    tagIds = listOf("allowed-tag", "another-allowed-tag"),
                     createdAt = Instant.now(),
                     updatedAt = Instant.now(),
                 )
@@ -132,7 +132,7 @@ class TagPermissionManagerTest {
                 TagPermission(
                     id = UUID.randomUUID().toString(),
                     householdMemberId = householdMemberId,
-                    permissionType = TagPermissionType.DENY_ALL_EXCEPT,
+                    permissionType = TagPermissionType.CAN_VIEW_TAGS,
                     tagIds = listOf("allowed-tag"),
                     createdAt = Instant.now(),
                     updatedAt = Instant.now(),
@@ -190,18 +190,18 @@ class TagPermissionManagerTest {
         }
 
     @Test
-    fun `filterTasksByTagPermissions should handle DENY_ALL_EXCEPT permission type`() =
+    fun `filterTasksByTagPermissions should return only tasks with permitted tags`() =
         runTest {
             // Given
             val householdMemberId = UUID.randomUUID().toString()
-            val taskIds = listOf("task1", "task2", "task3")
+            val taskIds = listOf("task1", "task2", "task3", "task4")
 
             val permission =
                 TagPermission(
                     id = UUID.randomUUID().toString(),
                     householdMemberId = householdMemberId,
-                    permissionType = TagPermissionType.DENY_ALL_EXCEPT,
-                    tagIds = listOf("allowed-tag1", "allowed-tag2"),
+                    permissionType = TagPermissionType.CAN_VIEW_TAGS,
+                    tagIds = listOf("kids", "chores"),
                     createdAt = Instant.now(),
                     updatedAt = Instant.now(),
                 )
@@ -211,11 +211,11 @@ class TagPermissionManagerTest {
                     "task1" to
                         listOf(
                             Tag(
-                                "allowed-tag1",
-                                "Allowed Tag 1",
+                                "kids",
+                                "Kids",
                                 "#000000",
                                 "household1",
-                                false,
+                                true,
                                 Instant.now(),
                                 Instant.now(),
                             ),
@@ -223,11 +223,11 @@ class TagPermissionManagerTest {
                     "task2" to
                         listOf(
                             Tag(
-                                "denied-tag",
-                                "Denied Tag",
+                                "work",
+                                "Work",
                                 "#000000",
                                 "household1",
-                                false,
+                                true,
                                 Instant.now(),
                                 Instant.now(),
                             ),
@@ -235,15 +235,16 @@ class TagPermissionManagerTest {
                     "task3" to
                         listOf(
                             Tag(
-                                "allowed-tag2",
-                                "Allowed Tag 2",
+                                "chores",
+                                "Chores",
                                 "#000000",
                                 "household1",
-                                false,
+                                true,
                                 Instant.now(),
                                 Instant.now(),
                             ),
                         ),
+                    "task4" to emptyList<Tag>(),
                 )
 
             whenever(mockContext.tagPermissions.findByHouseholdMemberId(householdMemberId)).thenReturn(permission)
@@ -258,6 +259,6 @@ class TagPermissionManagerTest {
                 )
 
             // Then
-            assertEquals(listOf("task1", "task3"), result)
+            assertEquals(listOf("task1", "task3", "task4"), result)
         }
 }
