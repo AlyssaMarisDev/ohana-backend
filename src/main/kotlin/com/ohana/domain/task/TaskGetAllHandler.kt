@@ -1,6 +1,7 @@
 package com.ohana.domain.task
 
 import com.ohana.data.unitOfWork.*
+import com.ohana.domain.tags.TagPermissionManager
 import com.ohana.domain.tags.TaskTagManager
 import com.ohana.domain.validators.HouseholdMemberValidator
 import com.ohana.shared.enums.TaskStatus
@@ -10,6 +11,7 @@ class TaskGetAllHandler(
     private val unitOfWork: UnitOfWork,
     private val householdMemberValidator: HouseholdMemberValidator,
     private val taskTagManager: TaskTagManager,
+    private val tagPermissionManager: TagPermissionManager,
 ) {
     data class Request(
         val householdIds: List<String>,
@@ -48,9 +50,29 @@ class TaskGetAllHandler(
                 )
             val taskIds = tasks.map { it.id }
 
-            val tags = taskTagManager.getTasksTags(context, taskIds)
+            // Filter tasks based on tag permissions for each household
+            val filteredTaskIds = mutableListOf<String>()
+            for (householdId in effectiveHouseholdIds) {
+                val householdMember = context.households.findMemberById(householdId, userId)
+                if (householdMember != null) {
+                    val householdTaskIds = tasks.filter { it.householdId == householdId }.map { it.id }
+                    val filteredHouseholdTaskIds =
+                        tagPermissionManager.filterTasksByTagPermissions(
+                            context,
+                            householdMember.id,
+                            householdTaskIds,
+                        )
+                    filteredTaskIds.addAll(filteredHouseholdTaskIds)
+                }
+            }
 
-            tasks.map { task ->
+            // Get only the filtered tasks
+            val filteredTasks = tasks.filter { it.id in filteredTaskIds }
+            val filteredTaskIdsForTags = filteredTasks.map { it.id }
+
+            val tags = taskTagManager.getTasksTags(context, filteredTaskIdsForTags)
+
+            filteredTasks.map { task ->
                 Response(
                     id = task.id,
                     title = task.title,

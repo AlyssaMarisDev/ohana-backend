@@ -12,6 +12,7 @@ import com.ohana.domain.auth.*
 import com.ohana.domain.household.*
 import com.ohana.domain.member.*
 import com.ohana.domain.tags.GetTagsHandler
+import com.ohana.domain.tags.TagPermissionManager
 import com.ohana.domain.tags.TaskTagManager
 import com.ohana.domain.task.*
 import com.ohana.domain.validators.HouseholdMemberValidator
@@ -42,6 +43,7 @@ val appModule =
         // Shared
         single { HouseholdMemberValidator() }
         single { TaskTagManager() }
+        single { TagPermissionManager() }
 
         // Auth handlers
         single { RegistrationHandler(get()) }
@@ -57,7 +59,7 @@ val appModule =
         // Tasks handlers - now only need UnitOfWork
         single { TaskCreationHandler(get(), get(), get()) }
         single { TaskDeleteByIdHandler(get(), get()) }
-        single { TaskGetAllHandler(get(), get(), get()) }
+        single { TaskGetAllHandler(get(), get(), get(), get()) }
         single { TaskGetByIdHandler(get(), get(), get()) }
         single { TaskUpdateByIdHandler(get(), get(), get()) }
 

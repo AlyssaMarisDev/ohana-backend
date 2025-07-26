@@ -4,6 +4,7 @@ import com.ohana.TestUtils
 import com.ohana.data.household.HouseholdRepository
 import com.ohana.data.task.TaskRepository
 import com.ohana.data.unitOfWork.*
+import com.ohana.domain.tags.TagPermissionManager
 import com.ohana.domain.tags.TaskTagManager
 import com.ohana.domain.validators.HouseholdMemberValidator
 import com.ohana.shared.enums.TaskStatus
@@ -24,6 +25,7 @@ class TaskGetAllHandlerTest {
     private lateinit var householdRepository: HouseholdRepository
     private lateinit var householdMemberValidator: HouseholdMemberValidator
     private lateinit var taskTagManager: TaskTagManager
+    private lateinit var tagPermissionManager: TagPermissionManager
     private lateinit var handler: TaskGetAllHandler
 
     private val userId = UUID.randomUUID().toString()
@@ -36,13 +38,16 @@ class TaskGetAllHandlerTest {
         householdRepository = mock()
         householdMemberValidator = mock()
         taskTagManager = mock()
+        tagPermissionManager = mock()
         context =
             mock {
                 on { tasks } doReturn taskRepository
                 on { households } doReturn householdRepository
+                on { tagPermissions } doReturn mock()
+                on { taskTags } doReturn mock()
             }
         unitOfWork = mock()
-        handler = TaskGetAllHandler(unitOfWork, householdMemberValidator, taskTagManager)
+        handler = TaskGetAllHandler(unitOfWork, householdMemberValidator, taskTagManager, tagPermissionManager)
     }
 
     @Test
@@ -88,6 +93,23 @@ class TaskGetAllHandlerTest {
                 ),
             ).thenReturn(tasks)
             whenever(taskTagManager.getTasksTags(context, tasks.map { it.id })).thenReturn(emptyMap())
+
+            // Mock household member lookup
+            val householdMember =
+                TestUtils.getHouseholdMember(
+                    householdId = householdId,
+                    memberId = userId,
+                )
+            whenever(context.households.findMemberById(householdId, userId)).thenReturn(householdMember)
+
+            // Mock tag permission manager to return all task IDs for the household
+            whenever(
+                tagPermissionManager.filterTasksByTagPermissions(
+                    context,
+                    householdMember.id,
+                    tasks.map { it.id },
+                ),
+            ).thenReturn(tasks.map { it.id })
 
             val response =
                 handler.handle(
@@ -304,6 +326,24 @@ class TaskGetAllHandlerTest {
                     completedDateTo = null,
                 ),
             ).thenReturn(tasks)
+            whenever(taskTagManager.getTasksTags(context, tasks.map { it.id })).thenReturn(emptyMap())
+
+            // Mock household member lookup
+            val householdMember =
+                TestUtils.getHouseholdMember(
+                    householdId = householdId,
+                    memberId = userId,
+                )
+            whenever(context.households.findMemberById(householdId, userId)).thenReturn(householdMember)
+
+            // Mock tag permission manager to return all task IDs for the household
+            whenever(
+                tagPermissionManager.filterTasksByTagPermissions(
+                    context,
+                    householdMember.id,
+                    tasks.map { it.id },
+                ),
+            ).thenReturn(tasks.map { it.id })
 
             val response =
                 handler.handle(
@@ -356,6 +396,24 @@ class TaskGetAllHandlerTest {
                     completedDateTo = null,
                 ),
             ).thenReturn(tasks)
+            whenever(taskTagManager.getTasksTags(context, tasks.map { it.id })).thenReturn(emptyMap())
+
+            // Mock household member lookup
+            val householdMember =
+                TestUtils.getHouseholdMember(
+                    householdId = householdId,
+                    memberId = userId,
+                )
+            whenever(context.households.findMemberById(householdId, userId)).thenReturn(householdMember)
+
+            // Mock tag permission manager to return all task IDs for the household
+            whenever(
+                tagPermissionManager.filterTasksByTagPermissions(
+                    context,
+                    householdMember.id,
+                    tasks.map { it.id },
+                ),
+            ).thenReturn(tasks.map { it.id })
 
             val response =
                 handler.handle(
@@ -409,6 +467,37 @@ class TaskGetAllHandlerTest {
                     completedDateTo = null,
                 ),
             ).thenReturn(allTasks)
+            whenever(taskTagManager.getTasksTags(context, allTasks.map { it.id })).thenReturn(emptyMap())
+
+            // Mock household member lookup for both households
+            val householdMember1 =
+                TestUtils.getHouseholdMember(
+                    householdId = householdId,
+                    memberId = userId,
+                )
+            val householdMember2 =
+                TestUtils.getHouseholdMember(
+                    householdId = householdId2,
+                    memberId = userId,
+                )
+            whenever(context.households.findMemberById(householdId, userId)).thenReturn(householdMember1)
+            whenever(context.households.findMemberById(householdId2, userId)).thenReturn(householdMember2)
+
+            // Mock tag permission manager to return all task IDs for both households
+            whenever(
+                tagPermissionManager.filterTasksByTagPermissions(
+                    context,
+                    householdMember1.id,
+                    tasksFromHousehold1.map { it.id },
+                ),
+            ).thenReturn(tasksFromHousehold1.map { it.id })
+            whenever(
+                tagPermissionManager.filterTasksByTagPermissions(
+                    context,
+                    householdMember2.id,
+                    tasksFromHousehold2.map { it.id },
+                ),
+            ).thenReturn(tasksFromHousehold2.map { it.id })
 
             val response =
                 handler.handle(
@@ -523,6 +612,37 @@ class TaskGetAllHandlerTest {
                     completedDateTo = null,
                 ),
             ).thenReturn(tasks)
+            whenever(taskTagManager.getTasksTags(context, tasks.map { it.id })).thenReturn(emptyMap())
+
+            // Mock household member lookup for both households
+            val householdMember1 =
+                TestUtils.getHouseholdMember(
+                    householdId = householdId,
+                    memberId = userId,
+                )
+            val householdMember2 =
+                TestUtils.getHouseholdMember(
+                    householdId = householdId2,
+                    memberId = userId,
+                )
+            whenever(context.households.findMemberById(householdId, userId)).thenReturn(householdMember1)
+            whenever(context.households.findMemberById(householdId2, userId)).thenReturn(householdMember2)
+
+            // Mock tag permission manager to return all task IDs for both households
+            whenever(
+                tagPermissionManager.filterTasksByTagPermissions(
+                    context,
+                    householdMember1.id,
+                    listOf(tasks[0].id),
+                ),
+            ).thenReturn(listOf(tasks[0].id))
+            whenever(
+                tagPermissionManager.filterTasksByTagPermissions(
+                    context,
+                    householdMember2.id,
+                    listOf(tasks[1].id),
+                ),
+            ).thenReturn(listOf(tasks[1].id))
 
             val response =
                 handler.handle(
@@ -617,6 +737,23 @@ class TaskGetAllHandlerTest {
             ).thenReturn(tasks)
             whenever(taskTagManager.getTasksTags(context, tasks.map { it.id })).thenReturn(emptyMap())
 
+            // Mock household member lookup
+            val householdMember =
+                TestUtils.getHouseholdMember(
+                    householdId = householdId,
+                    memberId = userId,
+                )
+            whenever(context.households.findMemberById(householdId, userId)).thenReturn(householdMember)
+
+            // Mock tag permission manager to return all task IDs for the household
+            whenever(
+                tagPermissionManager.filterTasksByTagPermissions(
+                    context,
+                    householdMember.id,
+                    tasks.map { it.id },
+                ),
+            ).thenReturn(tasks.map { it.id })
+
             val response = handler.handle(userId, request)
 
             assertEquals(1, response.size)
@@ -669,6 +806,23 @@ class TaskGetAllHandlerTest {
                 ),
             ).thenReturn(tasks)
             whenever(taskTagManager.getTasksTags(context, tasks.map { it.id })).thenReturn(emptyMap())
+
+            // Mock household member lookup
+            val householdMember =
+                TestUtils.getHouseholdMember(
+                    householdId = householdId,
+                    memberId = userId,
+                )
+            whenever(context.households.findMemberById(householdId, userId)).thenReturn(householdMember)
+
+            // Mock tag permission manager to return all task IDs for the household
+            whenever(
+                tagPermissionManager.filterTasksByTagPermissions(
+                    context,
+                    householdMember.id,
+                    tasks.map { it.id },
+                ),
+            ).thenReturn(tasks.map { it.id })
 
             val response = handler.handle(userId, request)
 
@@ -727,6 +881,23 @@ class TaskGetAllHandlerTest {
             ).thenReturn(tasks)
             whenever(taskTagManager.getTasksTags(context, tasks.map { it.id })).thenReturn(emptyMap())
 
+            // Mock household member lookup
+            val householdMember =
+                TestUtils.getHouseholdMember(
+                    householdId = householdId,
+                    memberId = userId,
+                )
+            whenever(context.households.findMemberById(householdId, userId)).thenReturn(householdMember)
+
+            // Mock tag permission manager to return all task IDs for the household
+            whenever(
+                tagPermissionManager.filterTasksByTagPermissions(
+                    context,
+                    householdMember.id,
+                    tasks.map { it.id },
+                ),
+            ).thenReturn(tasks.map { it.id })
+
             val response = handler.handle(userId, request)
 
             assertEquals(1, response.size)
@@ -777,6 +948,23 @@ class TaskGetAllHandlerTest {
                 ),
             ).thenReturn(tasks)
             whenever(taskTagManager.getTasksTags(context, tasks.map { it.id })).thenReturn(emptyMap())
+
+            // Mock household member lookup
+            val householdMember =
+                TestUtils.getHouseholdMember(
+                    householdId = householdId,
+                    memberId = userId,
+                )
+            whenever(context.households.findMemberById(householdId, userId)).thenReturn(householdMember)
+
+            // Mock tag permission manager to return all task IDs for the household
+            whenever(
+                tagPermissionManager.filterTasksByTagPermissions(
+                    context,
+                    householdMember.id,
+                    tasks.map { it.id },
+                ),
+            ).thenReturn(tasks.map { it.id })
 
             val response = handler.handle(userId, request)
 

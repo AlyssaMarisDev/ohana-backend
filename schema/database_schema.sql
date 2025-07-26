@@ -169,6 +169,22 @@ INSERT INTO `tasks` (`id`, `title`, `description`, `due_date`, `status`, `create
 -- Show table information
 SHOW TABLES;
 
+-- Create tag permissions table
+CREATE TABLE `household_member_tag_permissions` (
+  `id` char(36) NOT NULL COMMENT 'UUID for tag permission record',
+  `household_member_id` char(36) NOT NULL COMMENT 'Reference to household member',
+  `permission_type` varchar(20) NOT NULL COMMENT 'Type of permission (ALLOW_ALL_EXCEPT, DENY_ALL_EXCEPT)',
+  `tag_ids` JSON NOT NULL COMMENT 'Array of tag IDs for the exception list',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Record creation timestamp',
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Record update timestamp',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_household_member_permission` (`household_member_id`),
+  KEY `idx_household_member_id` (`household_member_id`),
+  KEY `idx_permission_type` (`permission_type`),
+  CONSTRAINT `fk_tag_permissions_household_member_id` FOREIGN KEY (`household_member_id`) REFERENCES `household_members` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `chk_permission_type` CHECK (`permission_type` IN ('ALLOW_ALL_EXCEPT', 'DENY_ALL_EXCEPT'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores tag-based viewing permissions for household members';
+
 -- Show table structures
 DESCRIBE members;
 DESCRIBE households;
@@ -177,3 +193,4 @@ DESCRIBE tags;
 DESCRIBE tasks;
 DESCRIBE task_tags;
 DESCRIBE refresh_tokens;
+DESCRIBE household_member_tag_permissions;

@@ -4,6 +4,7 @@ import com.ohana.data.auth.AuthMemberRepository
 import com.ohana.data.auth.RefreshTokenRepository
 import com.ohana.data.household.HouseholdRepository
 import com.ohana.data.member.MemberRepository
+import com.ohana.data.tags.TagPermissionRepository
 import com.ohana.data.tags.TagRepository
 import com.ohana.data.tags.TaskTagRepository
 import com.ohana.data.task.TaskRepository
@@ -20,6 +21,7 @@ interface UnitOfWorkContext {
     val members: MemberRepository
     val households: HouseholdRepository
     val tags: TagRepository
+    val tagPermissions: TagPermissionRepository
     val authMembers: AuthMemberRepository
     val refreshTokens: RefreshTokenRepository
 }
