@@ -1,8 +1,0 @@
----
-description: When needing to add or update business logic
-alwaysApply: false
----
-
-- Read and apply the patterns shown in this file
-
-@docs/architecture/domain-architecture.md

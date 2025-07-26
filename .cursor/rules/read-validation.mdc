@@ -1,8 +1,0 @@
----
-description: When needing to add or update validation for our api requests
-alwaysApply: false
----
-
-- Read and apply the patterns shown in this file
-
-@docs/architecture/validation.md

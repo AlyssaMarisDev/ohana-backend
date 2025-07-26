@@ -1,7 +1,0 @@
----
-alwaysApply: true
----
-
-- Read and apply the patterns shown in this file
-
-@docs/architecture/architecture-overview.md

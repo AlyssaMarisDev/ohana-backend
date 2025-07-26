@@ -1,0 +1,404 @@
+---
+alwaysApply: true
+---
+
+# Ohana Backend - AI Agent Guide
+
+## Project Overview
+
+Ohana Backend is a Kotlin-based REST API built with Ktor framework, implementing a household task management system. The application follows a clean architecture pattern with clear separation of concerns across multiple layers.
+
+## Technology Stack
+
+- **Language**: Kotlin 2.1.20
+- **Framework**: Ktor 3.1.2 (Netty server)
+- **Database**: MySQL with JDBI 3.27.0 for data access
+- **Dependency Injection**: Koin
+- **Authentication**: JWT-based authentication
+- **Testing**: JUnit 5, Mockito, Kotlin Coroutines Test
+- **Code Quality**: ktlint for formatting
+
+## Architecture Pattern
+
+The application follows a **Clean Architecture** pattern with the following layers:
+
+### 1. API Layer (`src/main/kotlin/com/ohana/api/`)
+
+- **Controllers**: Handle HTTP requests/responses, parameter validation, and routing
+- **Models**: Request/response DTOs with validation logic
+- **Utils**: Helper functions like `getUserId()` for extracting user context
+
+### 2. Domain Layer (`src/main/kotlin/com/ohana/domain/`)
+
+- **Handlers**: Business logic implementation (e.g., `TaskCreationHandler`, `TaskGetAllHandler`)
+- **Validators**: Business rule validation (e.g., `HouseholdMemberValidator`)
+- **Managers**: Complex business operations (e.g., `TaskTagManager`)
+
+### 3. Data Layer (`src/main/kotlin/com/ohana/data/`)
+
+- **Entities**: Data models (e.g., `Task`, `Member`, `Household`)
+- **Repositories**: Data access interfaces and implementations
+- **Unit of Work**: Transaction management and repository coordination
+
+### 4. Shared Layer (`src/main/kotlin/com/ohana/shared/`)
+
+- **Enums**: Domain enums (e.g., `TaskStatus`, `HouseholdMemberRole`)
+- **Exceptions**: Custom exception types
+- **Utils**: Shared utilities (e.g., `Guid` validation)
+
+## Key Design Patterns
+
+### 1. Unit of Work Pattern
+
+- **Purpose**: Manages database transactions and provides access to repositories
+- **Implementation**: `UnitOfWork` interface with `UnitOfWorkContext`
+- **Usage**: All domain handlers receive `UnitOfWork` and execute business logic within transactions
+
+### 2. Repository Pattern
+
+- **Purpose**: Abstracts data access logic
+- **Implementation**: Interface + JDBI implementation (e.g., `TaskRepository` + `JdbiTaskRepository`)
+- **Features**: Custom row mappers for type safety and performance
+
+### 3. Handler Pattern
+
+- **Purpose**: Encapsulates business logic for specific operations
+- **Structure**: Each handler has `Request` and `Response` data classes
+- **Authentication**: `userId` is always the first parameter in handler methods
+
+### 4. Validation Pattern
+
+- **Purpose**: Centralized validation logic
+- **Implementation**: Request models have `toDomain()` methods that validate and convert to domain objects
+- **Error Handling**: `ValidationException` with field-specific errors
+
+## Database Schema
+
+### Core Tables
+
+- **members**: User accounts with authentication data
+- **households**: Household groups
+- **household_members**: Many-to-many relationship with roles
+- **tasks**: Task management with status tracking
+- **tags**: Categorization system (household-specific + default)
+- **task_tags**: Many-to-many task-tag relationships
+- **refresh_tokens**: JWT refresh token management
+
+### Key Features
+
+- UUID primary keys throughout
+- Timestamp tracking (`created_at`, `updated_at`)
+- Proper indexing for performance
+
+## Authentication & Authorization
+
+### JWT Authentication
+
+- **Implementation**: Ktor JWT plugin
+- **User Context**: Extracted via `getUserId()` utility
+- **Authorization**: Household membership validation via `HouseholdMemberValidator`
+
+### Security Features
+
+- Password hashing with salt
+- JWT token refresh mechanism
+- Rate limiting
+- CORS configuration
+
+## Testing Strategy
+
+### Test Structure
+
+- **Unit Tests**: Test individual components in isolation
+- **Mocking**: Mockito for dependency mocking
+- **Test Utils**: `TestUtils` class provides factory methods for test data
+- **Coroutines**: `runTest` for testing suspend functions
+
+### Testing Patterns
+
+- **Given-When-Then**: Clear test structure
+- **Mock Verification**: Verify interactions with dependencies
+- **Exception Testing**: Test error scenarios
+- **Edge Cases**: Comprehensive validation testing
+
+## Development Guidelines
+
+### 1. Adding New Features
+
+#### Step 1: Define the Entity
+
+```kotlin
+// src/main/kotlin/com/ohana/data/entity/NewEntity.kt
+data class NewEntity(
+    val id: String,
+    val name: String,
+    // ... other fields
+)
+```
+
+#### Step 2: Create Repository Interface
+
+```kotlin
+// src/main/kotlin/com/ohana/data/entity/NewEntityRepository.kt
+interface NewEntityRepository {
+    fun create(entity: NewEntity): NewEntity
+    fun findById(id: String): NewEntity?
+    // ... other methods
+}
+```
+
+#### Step 3: Implement Repository
+
+```kotlin
+// src/main/kotlin/com/ohana/data/entity/JdbiNewEntityRepository.kt
+class JdbiNewEntityRepository(private val handle: Handle) : NewEntityRepository {
+    // Implementation with custom row mapper
+}
+```
+
+#### Step 4: Create Domain Handler
+
+```kotlin
+// src/main/kotlin/com/ohana/domain/entity/NewEntityHandler.kt
+class NewEntityHandler(private val unitOfWork: UnitOfWork) {
+    data class Request(val name: String)
+    data class Response(val id: String, val name: String)
+
+    suspend fun handle(userId: String, request: Request): Response {
+        return unitOfWork.execute { context ->
+            // Business logic here
+        }
+    }
+}
+```
+
+#### Step 5: Create API Models
+
+```kotlin
+// src/main/kotlin/com/ohana/api/entity/models/NewEntityRequest.kt
+data class NewEntityRequest(val name: String) {
+    fun toDomain(): NewEntityHandler.Request {
+        // Validation logic
+        return NewEntityHandler.Request(name)
+    }
+}
+```
+
+#### Step 6: Create Controller
+
+```kotlin
+// src/main/kotlin/com/ohana/api/entity/NewEntityController.kt
+class NewEntityController(private val handler: NewEntityHandler) {
+    fun Route.registerNewEntityRoutes() {
+        authenticate("auth-jwt") {
+            route("/new-entities") {
+                post("") {
+                    val userId = getUserId(call.principal<JWTPrincipal>())
+                    val request = call.receive<NewEntityRequest>()
+                    val response = handler.handle(userId, request.toDomain())
+                    call.respond(HttpStatusCode.Created, response)
+                }
+            }
+        }
+    }
+}
+```
+
+#### Step 7: Update Dependencies
+
+- Add to `AppModule.kt` for dependency injection
+- Add to `Routing.kt` for route registration
+- Update `UnitOfWorkContext` if needed
+
+### 2. Database Changes
+
+#### Schema Updates
+
+1. Update `schema/database_schema.sql` for new installations
+2. Create migration scripts in `schema/` for existing databases
+3. Update entity classes and repositories
+4. Add appropriate indexes for performance
+
+#### Migration Example
+
+```sql
+-- schema/migration_add_new_field.sql
+ALTER TABLE existing_table ADD COLUMN new_field VARCHAR(255);
+CREATE INDEX idx_new_field ON existing_table(new_field);
+```
+
+### 3. Testing New Features
+
+#### Test Structure
+
+```kotlin
+// src/test/kotlin/com/ohana/domain/entity/NewEntityHandlerTest.kt
+class NewEntityHandlerTest {
+    @Test
+    fun `handle should create entity successfully`() = runTest {
+        // Given
+        val request = NewEntityHandler.Request("Test Entity")
+
+        // When
+        val response = handler.handle(userId, request)
+
+        // Then
+        assertEquals("Test Entity", response.name)
+        verify(repository).create(any())
+    }
+}
+```
+
+## Common Patterns & Conventions
+
+### 1. Error Handling
+
+- Use custom exceptions extending `KnownError`
+- `ValidationException` for input validation errors
+- `NotFoundException` for missing resources
+- `AuthorizationException` for permission issues
+- `ConflictException` for business rule violations
+
+### 2. Validation
+
+- Request models validate input in `toDomain()` method
+- Return `ValidationException` with field-specific errors
+- Use `Guid.isValid()` for UUID validation
+- Validate date ranges and formats
+
+### 3. Database Operations
+
+- Use dedicated row mappers for type safety
+- Implement proper error handling for database operations
+- Use parameterized queries to prevent SQL injection
+- Add appropriate indexes for query performance
+
+### 4. Authentication Context
+
+- Always extract `userId` from JWT principal
+- Pass `userId` as first parameter to handlers
+- Validate household membership for household-related operations
+- Use `HouseholdMemberValidator` for authorization checks
+
+### 5. Date Handling
+
+- Use `Instant` for all timestamps
+- ISO 8601 format for API date strings
+- Proper timezone handling in database queries
+
+## Performance Considerations
+
+### 1. Database
+
+- Use appropriate indexes for frequently queried fields
+- Implement pagination for large result sets
+- Use efficient SQL queries with proper joins
+- Consider query optimization for complex operations
+
+### 2. Caching
+
+- Consider caching for frequently accessed data
+- Implement cache invalidation strategies
+- Use appropriate cache TTL values
+
+### 3. API Design
+
+- Implement proper HTTP status codes
+- Use pagination for list endpoints
+- Consider filtering and sorting options
+- Implement rate limiting for API protection
+
+## Security Best Practices
+
+### 1. Input Validation
+
+- Validate all user inputs
+- Use parameterized queries
+- Implement proper error handling
+- Sanitize data before database operations
+
+### 2. Authentication
+
+- Use secure JWT implementation
+- Implement proper token refresh
+- Validate user permissions for all operations
+- Use HTTPS in production
+
+### 3. Authorization
+
+- Validate household membership for all household operations
+- Implement role-based access control
+- Check user ownership for resource modifications
+
+## Deployment Considerations
+
+### 1. Configuration
+
+- Use environment variables for configuration
+- Implement proper logging
+- Configure database connection pooling
+- Set up monitoring and health checks
+
+### 2. Database
+
+- Use proper database credentials
+- Implement database migrations
+- Configure backup strategies
+- Monitor database performance
+
+### 3. Security
+
+- Use HTTPS in production
+- Implement proper CORS policies
+- Configure rate limiting
+- Set up security headers
+
+## Troubleshooting Guide
+
+### Common Issues
+
+1. **Compilation Errors**
+
+   - Check Kotlin version compatibility
+   - Verify import statements
+   - Ensure proper dependency injection setup
+
+2. **Database Connection Issues**
+
+   - Verify database configuration
+   - Check network connectivity
+   - Validate database credentials
+
+3. **Authentication Issues**
+
+   - Verify JWT configuration
+   - Check token expiration
+   - Validate user permissions
+
+4. **Validation Errors**
+   - Check request model validation logic
+   - Verify field names in error messages
+   - Ensure proper error handling
+
+### Debugging Tips
+
+1. **Enable Debug Logging**
+
+   - Configure logback for debug level
+   - Add logging statements in handlers
+   - Monitor database query logs
+
+2. **Use Test Utils**
+
+   - Leverage `TestUtils` for test data creation
+   - Use mock objects for dependency isolation
+   - Implement comprehensive test coverage
+
+3. **Database Debugging**
+   - Use database client tools
+   - Monitor slow query logs
+   - Verify index usage
+
+## Conclusion
+
+This codebase follows well-established patterns and conventions that promote maintainability, testability, and scalability. When adding new features or making changes, always follow the established patterns and ensure comprehensive test coverage. The clean architecture design makes it easy to understand and modify the codebase while maintaining separation of concerns.

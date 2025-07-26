@@ -1,8 +1,0 @@
----
-description: When creating or updating controller endpoints
-alwaysApply: false
----
-
-- Read and apply the patterns shown in this file
-
-@docs/architecture/api-design.md

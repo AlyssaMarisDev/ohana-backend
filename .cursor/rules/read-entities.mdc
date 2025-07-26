@@ -1,7 +1,0 @@
----
-alwaysApply: true
----
-
-- Read this file
-
-@docs/architecture/entities.md
