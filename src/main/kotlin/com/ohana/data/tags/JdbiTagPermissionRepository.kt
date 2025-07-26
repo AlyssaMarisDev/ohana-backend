@@ -21,7 +21,7 @@ class JdbiTagPermissionRepository(
     private val rowMapper = TagPermissionRowMapper()
 
     override fun findByHouseholdMemberId(householdMemberId: String): TagPermission? {
-        val sql = "SELECT * FROM household_member_tag_permissions WHERE household_member_id = ?"
+        val sql = "SELECT * FROM tag_permissions WHERE household_member_id = ?"
 
         return handle
             .createQuery(sql)

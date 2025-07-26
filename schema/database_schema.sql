@@ -170,7 +170,7 @@ INSERT INTO `tasks` (`id`, `title`, `description`, `due_date`, `status`, `create
 SHOW TABLES;
 
 -- Create tag permissions table
-CREATE TABLE `household_member_tag_permissions` (
+CREATE TABLE `tag_permissions` (
   `id` char(36) NOT NULL COMMENT 'UUID for tag permission record',
   `household_member_id` char(36) NOT NULL COMMENT 'Reference to household member',
   `permission_type` varchar(20) NOT NULL COMMENT 'Type of permission (ALLOW_ALL_EXCEPT, DENY_ALL_EXCEPT)',
@@ -193,4 +193,4 @@ DESCRIBE tags;
 DESCRIBE tasks;
 DESCRIBE task_tags;
 DESCRIBE refresh_tokens;
-DESCRIBE household_member_tag_permissions;
+DESCRIBE tag_permissions;
