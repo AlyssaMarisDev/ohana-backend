@@ -1,5 +1,6 @@
 package com.ohana.api.tags
 
+import com.ohana.api.tags.models.GetTagsRequest
 import com.ohana.api.utils.getUserId
 import com.ohana.domain.tags.GetTagsHandler
 import io.ktor.http.HttpStatusCode
@@ -20,9 +21,13 @@ class TagsController(
             route("/tags") {
                 get {
                     val userId = getUserId(call.principal<JWTPrincipal>())
+
+                    // Parse query parameters
                     val householdId = call.request.queryParameters["householdId"]
 
-                    val response = getTagsHandler.handle(userId, householdId)
+                    val request = GetTagsRequest(householdId = householdId)
+
+                    val response = getTagsHandler.handle(userId, request.toDomain())
                     call.respond(HttpStatusCode.OK, response)
                 }
             }

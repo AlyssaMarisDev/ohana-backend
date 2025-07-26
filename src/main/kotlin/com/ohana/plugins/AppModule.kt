@@ -71,7 +71,7 @@ val appModule =
         single { HouseholdInviteMemberHandler(get()) }
 
         // Tags handlers
-        single { GetTagsHandler(get(), get()) }
+        single { GetTagsHandler(get(), get(), get()) }
 
         // Controllers
         single { AuthController(get(), get(), get(), get()) }

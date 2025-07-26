@@ -2,7 +2,7 @@ package com.ohana.domain.tags
 
 import com.ohana.TestUtils
 import com.ohana.data.household.HouseholdRepository
-import com.ohana.data.tags.TagRepository
+import com.ohana.data.tags.*
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.validators.HouseholdMemberValidator
 import kotlinx.coroutines.test.runTest
@@ -18,196 +18,170 @@ class GetTagsHandlerTest {
     private lateinit var context: UnitOfWorkContext
     private lateinit var householdRepository: HouseholdRepository
     private lateinit var tagRepository: TagRepository
+    private lateinit var permissionRepository: PermissionRepository
+    private lateinit var tagPermissionRepository: TagPermissionRepository
     private lateinit var validator: HouseholdMemberValidator
+    private lateinit var tagPermissionManager: TagPermissionManager
     private lateinit var handler: GetTagsHandler
+
+    private val userId = UUID.randomUUID().toString()
+    private val householdId = UUID.randomUUID().toString()
+    private val memberId = UUID.randomUUID().toString()
 
     @BeforeEach
     fun setUp() {
+        unitOfWork = mock()
+        context = mock()
         householdRepository = mock()
         tagRepository = mock()
+        permissionRepository = mock()
+        tagPermissionRepository = mock()
         validator = mock()
-        context =
-            mock {
-                on { households } doReturn householdRepository
-                on { tags } doReturn tagRepository
-            }
-        unitOfWork = mock()
-        handler = GetTagsHandler(unitOfWork, validator)
+        tagPermissionManager = mock()
+
+        whenever(context.households).thenReturn(householdRepository)
+        whenever(context.tags).thenReturn(tagRepository)
+        whenever(context.permissions).thenReturn(permissionRepository)
+        whenever(context.tagPermissions).thenReturn(tagPermissionRepository)
+
+        handler = GetTagsHandler(unitOfWork, validator, tagPermissionManager)
     }
-
-    @Test
-    fun `handle should return tags for household when user is authorized`() =
-        runTest {
-            TestUtils.mockUnitOfWork(unitOfWork, context)
-
-            val userId = UUID.randomUUID().toString()
-            val householdId = UUID.randomUUID().toString()
-
-            val expectedTags =
-                listOf(
-                    TestUtils.getTag(
-                        id = UUID.randomUUID().toString(),
-                        name = "metas",
-                        color = "#3B82F6",
-                        householdId = householdId,
-                    ),
-                    TestUtils.getTag(
-                        id = UUID.randomUUID().toString(),
-                        name = "adult",
-                        color = "#EF4444",
-                        householdId = householdId,
-                    ),
-                )
-
-            whenever(tagRepository.findByHouseholdIdWithDefaults(householdId)).thenReturn(expectedTags)
-
-            val response = handler.handle(userId, householdId)
-
-            assertEquals(2, response.tags.size)
-            assertEquals("metas", response.tags[0].name)
-            assertEquals("#3B82F6", response.tags[0].color)
-            assertEquals("adult", response.tags[1].name)
-            assertEquals("#EF4444", response.tags[1].color)
-
-            verify(validator).validate(context, householdId, userId)
-            verify(tagRepository).findByHouseholdIdWithDefaults(householdId)
-        }
 
     @Test
     fun `handle should return default tags when householdId is null`() =
         runTest {
-            TestUtils.mockUnitOfWork(unitOfWork, context)
-
-            val userId = UUID.randomUUID().toString()
-
-            val expectedDefaultTags =
+            // Given
+            val request = GetTagsHandler.Request()
+            val defaultTags =
                 listOf(
-                    TestUtils.getTag(
-                        id = UUID.randomUUID().toString(),
-                        name = "chores",
-                        color = "#10B981",
-                        householdId = null,
-                        isDefault = true,
-                    ),
-                    TestUtils.getTag(
-                        id = UUID.randomUUID().toString(),
-                        name = "shopping",
-                        color = "#F59E0B",
-                        householdId = null,
-                        isDefault = true,
-                    ),
+                    TestUtils.getTag(id = "tag1", name = "Default Tag 1", isDefault = true),
+                    TestUtils.getTag(id = "tag2", name = "Default Tag 2", isDefault = true),
                 )
 
-            whenever(tagRepository.findDefaultTags()).thenReturn(expectedDefaultTags)
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+            whenever(tagRepository.findDefaultTags()).thenReturn(defaultTags)
 
-            val response = handler.handle(userId, null)
+            // When
+            val response = handler.handle(userId, request)
 
+            // Then
             assertEquals(2, response.tags.size)
-            assertEquals("chores", response.tags[0].name)
-            assertEquals("#10B981", response.tags[0].color)
-            assertEquals("shopping", response.tags[1].name)
-            assertEquals("#F59E0B", response.tags[1].color)
-
-            verify(validator, never()).validate(any(), any(), any())
-            verify(tagRepository).findDefaultTags()
-            verify(tagRepository, never()).findByHouseholdIdWithDefaults(any())
+            assertEquals("tag1", response.tags[0].id)
+            assertEquals("Default Tag 1", response.tags[0].name)
+            assertEquals("tag2", response.tags[1].id)
+            assertEquals("Default Tag 2", response.tags[1].name)
         }
 
     @Test
-    fun `handle should return empty list when no tags exist`() =
+    fun `handle should return user viewable tags when householdId is provided`() =
         runTest {
+            // Given
+            val request = GetTagsHandler.Request(householdId = householdId)
+            val viewableTags =
+                listOf(
+                    TestUtils.getTag(id = "tag1", name = "Household Tag 1", householdId = householdId),
+                    TestUtils.getTag(id = "tag2", name = "Default Tag 1", isDefault = true),
+                )
+
             TestUtils.mockUnitOfWork(unitOfWork, context)
+            whenever(validator.validate(context, householdId, userId)).thenReturn(memberId)
+            whenever(tagPermissionManager.getUserViewableTags(context, memberId)).thenReturn(viewableTags)
 
-            val userId = UUID.randomUUID().toString()
-            val householdId = UUID.randomUUID().toString()
+            // When
+            val response = handler.handle(userId, request)
 
-            whenever(tagRepository.findByHouseholdIdWithDefaults(householdId)).thenReturn(emptyList())
-
-            val response = handler.handle(userId, householdId)
-
-            assertEquals(0, response.tags.size)
-
+            // Then
+            assertEquals(2, response.tags.size)
+            assertEquals("tag1", response.tags[0].id)
+            assertEquals("Household Tag 1", response.tags[0].name)
+            assertEquals("tag2", response.tags[1].id)
+            assertEquals("Default Tag 1", response.tags[1].name)
             verify(validator).validate(context, householdId, userId)
-            verify(tagRepository).findByHouseholdIdWithDefaults(householdId)
+            verify(tagPermissionManager).getUserViewableTags(context, memberId)
+        }
+
+    @Test
+    fun `handle should return empty list when user has no viewable tags`() =
+        runTest {
+            // Given
+            val request = GetTagsHandler.Request(householdId = householdId)
+
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+            whenever(validator.validate(context, householdId, userId)).thenReturn(memberId)
+            whenever(tagPermissionManager.getUserViewableTags(context, memberId)).thenReturn(emptyList())
+
+            // When
+            val response = handler.handle(userId, request)
+
+            // Then
+            assertEquals(0, response.tags.size)
+            verify(validator).validate(context, householdId, userId)
+            verify(tagPermissionManager).getUserViewableTags(context, memberId)
         }
 
     @Test
     fun `handle should return empty list when no default tags exist`() =
         runTest {
+            // Given
+            val request = GetTagsHandler.Request()
+
             TestUtils.mockUnitOfWork(unitOfWork, context)
-
-            val userId = UUID.randomUUID().toString()
-
             whenever(tagRepository.findDefaultTags()).thenReturn(emptyList())
 
-            val response = handler.handle(userId, null)
+            // When
+            val response = handler.handle(userId, request)
 
+            // Then
             assertEquals(0, response.tags.size)
-
-            verify(validator, never()).validate(any(), any(), any())
-            verify(tagRepository).findDefaultTags()
-            verify(tagRepository, never()).findByHouseholdIdWithDefaults(any())
         }
 
     @Test
     fun `handle should propagate validation exception`() =
         runTest {
+            // Given
+            val request = GetTagsHandler.Request(householdId = householdId)
+            val exception =
+                com.ohana.shared.exceptions
+                    .AuthorizationException("User is not a member")
+
             TestUtils.mockUnitOfWork(unitOfWork, context)
+            whenever(validator.validate(context, householdId, userId)).thenThrow(exception)
 
-            val userId = UUID.randomUUID().toString()
-            val householdId = UUID.randomUUID().toString()
-
-            whenever(validator.validate(context, householdId, userId))
-                .thenThrow(RuntimeException("Validation failed"))
-
-            val ex =
-                assertThrows<RuntimeException> {
-                    handler.handle(userId, householdId)
-                }
-
-            assertEquals("Validation failed", ex.message)
-            verify(validator).validate(context, householdId, userId)
-            verify(tagRepository, never()).findByHouseholdIdWithDefaults(any())
+            // When & Then
+            assertThrows<com.ohana.shared.exceptions.AuthorizationException> {
+                handler.handle(userId, request)
+            }
         }
 
     @Test
     fun `handle should propagate repository exception`() =
         runTest {
+            // Given
+            val request = GetTagsHandler.Request()
+            val exception = RuntimeException("Database error")
+
             TestUtils.mockUnitOfWork(unitOfWork, context)
+            whenever(tagRepository.findDefaultTags()).thenThrow(exception)
 
-            val userId = UUID.randomUUID().toString()
-            val householdId = UUID.randomUUID().toString()
-
-            whenever(tagRepository.findByHouseholdIdWithDefaults(householdId))
-                .thenThrow(RuntimeException("Database error"))
-
-            val ex =
-                assertThrows<RuntimeException> {
-                    handler.handle(userId, householdId)
-                }
-
-            assertEquals("Database error", ex.message)
-            verify(validator).validate(context, householdId, userId)
-            verify(tagRepository).findByHouseholdIdWithDefaults(householdId)
+            // When & Then
+            assertThrows<RuntimeException> {
+                handler.handle(userId, request)
+            }
         }
 
     @Test
     fun `handle should propagate repository exception when getting default tags`() =
         runTest {
+            // Given
+            val request = GetTagsHandler.Request()
+            val exception = RuntimeException("Database error")
+
             TestUtils.mockUnitOfWork(unitOfWork, context)
+            whenever(tagRepository.findDefaultTags()).thenThrow(exception)
 
-            val userId = UUID.randomUUID().toString()
-
-            whenever(tagRepository.findDefaultTags())
-                .thenThrow(RuntimeException("Database error"))
-
-            val ex =
-                assertThrows<RuntimeException> {
-                    handler.handle(userId, null)
-                }
-
-            assertEquals("Database error", ex.message)
-            verify(validator, never()).validate(any(), any(), any())
-            verify(tagRepository).findDefaultTags()
+            // When & Then
+            assertThrows<RuntimeException> {
+                handler.handle(userId, request)
+            }
         }
 }

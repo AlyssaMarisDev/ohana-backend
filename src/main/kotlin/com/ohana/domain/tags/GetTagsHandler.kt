@@ -6,7 +6,12 @@ import com.ohana.domain.validators.HouseholdMemberValidator
 class GetTagsHandler(
     private val unitOfWork: UnitOfWork,
     private val validator: HouseholdMemberValidator,
+    private val tagPermissionManager: TagPermissionManager,
 ) {
+    data class Request(
+        val householdId: String? = null,
+    )
+
     data class Response(
         val tags: List<TagResponse>,
     )
@@ -19,22 +24,20 @@ class GetTagsHandler(
 
     suspend fun handle(
         userId: String,
-        householdId: String? = null,
+        request: Request,
     ): Response =
         unitOfWork.execute { context ->
             val tags =
-                if (householdId != null) {
-                    // Validate that user is a member of the household
-                    validator.validate(context, householdId, userId)
+                if (request.householdId != null) {
+                    // Validate user is member of household
+                    val householdMemberId = validator.validate(context, request.householdId, userId)
 
-                    // Get tags for the household (including defaults)
-                    context.tags.findByHouseholdIdWithDefaults(householdId)
+                    tagPermissionManager.getUserViewableTags(context, householdMemberId)
                 } else {
-                    // Return only default tags when no household ID is provided
-                    context.tags.findDefaultTags()
+                    // Get default tags only
+                    context.tags.findDefaultTags().toList()
                 }
 
-            // Convert to response format
             Response(
                 tags =
                     tags.map { tag ->

@@ -1,363 +1,288 @@
 package com.ohana.domain.tags
 
-import com.ohana.data.tags.Permission
-import com.ohana.data.tags.Tag
-import com.ohana.data.tags.TagPermission
-import com.ohana.data.unitOfWork.UnitOfWorkContext
+import com.ohana.TestUtils
+import com.ohana.data.tags.*
+import com.ohana.data.unitOfWork.*
+import com.ohana.domain.tags.TaskTagManager
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import java.time.Instant
 import java.util.UUID
+import kotlin.test.assertEquals
 
 class TagPermissionManagerTest {
-    private lateinit var tagPermissionManager: TagPermissionManager
-    private lateinit var mockTaskTagManager: TaskTagManager
-    private lateinit var mockContext: UnitOfWorkContext
+    private lateinit var taskTagManager: TaskTagManager
+    private lateinit var context: UnitOfWorkContext
+    private lateinit var permissionRepository: PermissionRepository
+    private lateinit var tagPermissionRepository: TagPermissionRepository
+    private lateinit var tagRepository: TagRepository
+    private lateinit var manager: TagPermissionManager
+
+    private val householdMemberId = UUID.randomUUID().toString()
+    private val permissionId = UUID.randomUUID().toString()
 
     @BeforeEach
     fun setUp() {
-        mockTaskTagManager = mock()
-        tagPermissionManager = TagPermissionManager(mockTaskTagManager)
-        mockContext =
-            mock {
-                on { permissions } doReturn mock()
-                on { tagPermissions } doReturn mock()
-            }
+        taskTagManager = mock()
+        context = mock()
+        permissionRepository = mock()
+        tagPermissionRepository = mock()
+        tagRepository = mock()
+
+        whenever(context.permissions).thenReturn(permissionRepository)
+        whenever(context.tagPermissions).thenReturn(tagPermissionRepository)
+        whenever(context.tags).thenReturn(tagRepository)
+
+        manager = TagPermissionManager(taskTagManager)
     }
 
     @Test
-    fun `filterTasksByTagPermissions should return all tasks when no permission exists`() =
+    fun `filterTasksByTagPermissions should return empty list when no tasks provided`() =
         runTest {
             // Given
-            val householdMemberId = UUID.randomUUID().toString()
-            val taskIds = listOf("task1", "task2", "task3")
-
-            whenever(mockContext.permissions.findByHouseholdMemberId(householdMemberId)).thenReturn(null)
+            val taskIds = emptyList<String>()
 
             // When
-            val result =
-                tagPermissionManager.filterTasksByTagPermissions(
-                    context = mockContext,
-                    householdMemberId = householdMemberId,
-                    taskIds = taskIds,
-                )
+            val result = manager.filterTasksByTagPermissions(context, householdMemberId, taskIds)
 
             // Then
-            assertEquals(taskIds, result)
+            assertEquals(emptyList(), result)
+        }
+
+    @Test
+    fun `filterTasksByTagPermissions should return empty list when no permission exists`() =
+        runTest {
+            // Given
+            val taskIds = listOf("task1", "task2", "task3")
+
+            whenever(permissionRepository.findByHouseholdMemberId(householdMemberId)).thenReturn(null)
+
+            // When
+            val result = manager.filterTasksByTagPermissions(context, householdMemberId, taskIds)
+
+            // Then
+            assertEquals(emptyList(), result)
         }
 
     @Test
     fun `filterTasksByTagPermissions should return tasks with viewable tags`() =
         runTest {
             // Given
-            val householdMemberId = UUID.randomUUID().toString()
             val taskIds = listOf("task1", "task2", "task3")
-
             val permission =
                 Permission(
-                    id = UUID.randomUUID().toString(),
+                    id = permissionId,
                     householdMemberId = householdMemberId,
                     createdAt = Instant.now(),
                     updatedAt = Instant.now(),
                 )
-
             val tagPermissions =
                 listOf(
                     TagPermission(
                         id = UUID.randomUUID().toString(),
-                        permissionId = permission.id,
-                        tagId = "allowed-tag",
-                        createdAt = Instant.now(),
-                    ),
-                    TagPermission(
-                        id = UUID.randomUUID().toString(),
-                        permissionId = permission.id,
-                        tagId = "another-allowed-tag",
+                        permissionId = permissionId,
+                        tagId = "tag1",
                         createdAt = Instant.now(),
                     ),
                 )
-
             val taskTagsMap =
                 mapOf(
-                    "task1" to
-                        listOf(
-                            Tag(
-                                "allowed-tag",
-                                "Allowed Tag",
-                                "#000000",
-                                "household1",
-                                true,
-                                Instant.now(),
-                                Instant.now(),
-                            ),
-                        ),
-                    "task2" to
-                        listOf(
-                            Tag(
-                                "excluded-tag",
-                                "Excluded Tag",
-                                "#000000",
-                                "household1",
-                                false,
-                                Instant.now(),
-                                Instant.now(),
-                            ),
-                        ),
-                    "task3" to
-                        listOf(
-                            Tag(
-                                "another-allowed-tag",
-                                "Another Allowed Tag",
-                                "#000000",
-                                "household1",
-                                false,
-                                Instant.now(),
-                                Instant.now(),
-                            ),
-                        ),
+                    "task1" to listOf(TestUtils.getTag(id = "tag1")),
+                    "task2" to listOf(TestUtils.getTag(id = "tag2")),
+                    "task3" to emptyList<Tag>(),
                 )
 
-            whenever(mockContext.permissions.findByHouseholdMemberId(householdMemberId)).thenReturn(permission)
-            whenever(mockContext.tagPermissions.findByPermissionId(permission.id)).thenReturn(tagPermissions)
-            whenever(mockTaskTagManager.getTasksTags(mockContext, taskIds)).thenReturn(taskTagsMap)
+            whenever(permissionRepository.findByHouseholdMemberId(householdMemberId)).thenReturn(permission)
+            whenever(tagPermissionRepository.findByPermissionId(permissionId)).thenReturn(tagPermissions)
+            whenever(taskTagManager.getTasksTags(context, taskIds)).thenReturn(taskTagsMap)
 
             // When
-            val result =
-                tagPermissionManager.filterTasksByTagPermissions(
-                    context = mockContext,
-                    householdMemberId = householdMemberId,
-                    taskIds = taskIds,
-                )
+            val result = manager.filterTasksByTagPermissions(context, householdMemberId, taskIds)
 
             // Then
             assertEquals(listOf("task1", "task3"), result)
         }
 
     @Test
-    fun `filterTasksByTagPermissions should return tasks with no tags`() =
-        runTest {
-            // Given
-            val householdMemberId = UUID.randomUUID().toString()
-            val taskIds = listOf("task1", "task2")
-
-            val permission =
-                Permission(
-                    id = UUID.randomUUID().toString(),
-                    householdMemberId = householdMemberId,
-                    createdAt = Instant.now(),
-                    updatedAt = Instant.now(),
-                )
-
-            val tagPermissions =
-                listOf(
-                    TagPermission(
-                        id = UUID.randomUUID().toString(),
-                        permissionId = permission.id,
-                        tagId = "allowed-tag",
-                        createdAt = Instant.now(),
-                    ),
-                )
-
-            val taskTagsMap =
-                mapOf(
-                    "task1" to
-                        listOf(
-                            Tag(
-                                "allowed-tag",
-                                "Allowed Tag",
-                                "#000000",
-                                "household1",
-                                false,
-                                Instant.now(),
-                                Instant.now(),
-                            ),
-                        ),
-                    "task2" to emptyList<Tag>(),
-                )
-
-            whenever(mockContext.permissions.findByHouseholdMemberId(householdMemberId)).thenReturn(permission)
-            whenever(mockContext.tagPermissions.findByPermissionId(permission.id)).thenReturn(tagPermissions)
-            whenever(mockTaskTagManager.getTasksTags(mockContext, taskIds)).thenReturn(taskTagsMap)
-
-            // When
-            val result =
-                tagPermissionManager.filterTasksByTagPermissions(
-                    context = mockContext,
-                    householdMemberId = householdMemberId,
-                    taskIds = taskIds,
-                )
-
-            // Then
-            assertEquals(listOf("task1", "task2"), result)
-        }
-
-    @Test
-    fun `filterTasksByTagPermissions should return empty list when no tasks provided`() =
-        runTest {
-            // Given
-            val householdMemberId = UUID.randomUUID().toString()
-            val taskIds = emptyList<String>()
-
-            // When
-            val result =
-                tagPermissionManager.filterTasksByTagPermissions(
-                    context = mockContext,
-                    householdMemberId = householdMemberId,
-                    taskIds = taskIds,
-                )
-
-            // Then
-            assertTrue(result.isEmpty())
-        }
-
-    @Test
     fun `filterTasksByTagPermissions should return only tasks with permitted tags`() =
         runTest {
             // Given
-            val householdMemberId = UUID.randomUUID().toString()
-            val taskIds = listOf("task1", "task2", "task3", "task4")
-
+            val taskIds = listOf("task1", "task2")
             val permission =
                 Permission(
-                    id = UUID.randomUUID().toString(),
+                    id = permissionId,
                     householdMemberId = householdMemberId,
                     createdAt = Instant.now(),
                     updatedAt = Instant.now(),
                 )
-
             val tagPermissions =
                 listOf(
                     TagPermission(
                         id = UUID.randomUUID().toString(),
-                        permissionId = permission.id,
-                        tagId = "kids",
-                        createdAt = Instant.now(),
-                    ),
-                    TagPermission(
-                        id = UUID.randomUUID().toString(),
-                        permissionId = permission.id,
-                        tagId = "chores",
+                        permissionId = permissionId,
+                        tagId = "tag1",
                         createdAt = Instant.now(),
                     ),
                 )
-
             val taskTagsMap =
                 mapOf(
-                    "task1" to
-                        listOf(
-                            Tag(
-                                "kids",
-                                "Kids",
-                                "#000000",
-                                "household1",
-                                true,
-                                Instant.now(),
-                                Instant.now(),
-                            ),
-                        ),
-                    "task2" to
-                        listOf(
-                            Tag(
-                                "work",
-                                "Work",
-                                "#000000",
-                                "household1",
-                                true,
-                                Instant.now(),
-                                Instant.now(),
-                            ),
-                        ),
-                    "task3" to
-                        listOf(
-                            Tag(
-                                "chores",
-                                "Chores",
-                                "#000000",
-                                "household1",
-                                true,
-                                Instant.now(),
-                                Instant.now(),
-                            ),
-                        ),
-                    "task4" to emptyList<Tag>(),
+                    "task1" to listOf(TestUtils.getTag(id = "tag1")),
+                    "task2" to listOf(TestUtils.getTag(id = "tag2")),
                 )
 
-            whenever(mockContext.permissions.findByHouseholdMemberId(householdMemberId)).thenReturn(permission)
-            whenever(mockContext.tagPermissions.findByPermissionId(permission.id)).thenReturn(tagPermissions)
-            whenever(mockTaskTagManager.getTasksTags(mockContext, taskIds)).thenReturn(taskTagsMap)
+            whenever(permissionRepository.findByHouseholdMemberId(householdMemberId)).thenReturn(permission)
+            whenever(tagPermissionRepository.findByPermissionId(permissionId)).thenReturn(tagPermissions)
+            whenever(taskTagManager.getTasksTags(context, taskIds)).thenReturn(taskTagsMap)
 
             // When
-            val result =
-                tagPermissionManager.filterTasksByTagPermissions(
-                    context = mockContext,
-                    householdMemberId = householdMemberId,
-                    taskIds = taskIds,
-                )
+            val result = manager.filterTasksByTagPermissions(context, householdMemberId, taskIds)
 
             // Then
-            assertEquals(listOf("task1", "task3", "task4"), result)
+            assertEquals(listOf("task1"), result)
+        }
+
+    @Test
+    fun `filterTasksByTagPermissions should return tasks with no tags`() =
+        runTest {
+            // Given
+            val taskIds = listOf("task1", "task2")
+            val permission =
+                Permission(
+                    id = permissionId,
+                    householdMemberId = householdMemberId,
+                    createdAt = Instant.now(),
+                    updatedAt = Instant.now(),
+                )
+            val tagPermissions = emptyList<TagPermission>()
+            val taskTagsMap =
+                mapOf(
+                    "task1" to emptyList<Tag>(),
+                    "task2" to listOf(TestUtils.getTag(id = "tag1")),
+                )
+
+            whenever(permissionRepository.findByHouseholdMemberId(householdMemberId)).thenReturn(permission)
+            whenever(tagPermissionRepository.findByPermissionId(permissionId)).thenReturn(tagPermissions)
+            whenever(taskTagManager.getTasksTags(context, taskIds)).thenReturn(taskTagsMap)
+
+            // When
+            val result = manager.filterTasksByTagPermissions(context, householdMemberId, taskIds)
+
+            // Then
+            assertEquals(listOf("task1"), result)
         }
 
     @Test
     fun `filterTasksByTagPermissions should return only untagged tasks when user has no tag permissions`() =
         runTest {
             // Given
-            val householdMemberId = UUID.randomUUID().toString()
             val taskIds = listOf("task1", "task2", "task3")
-
             val permission =
                 Permission(
-                    id = UUID.randomUUID().toString(),
+                    id = permissionId,
                     householdMemberId = householdMemberId,
                     createdAt = Instant.now(),
                     updatedAt = Instant.now(),
                 )
-
+            val tagPermissions = emptyList<TagPermission>()
             val taskTagsMap =
                 mapOf(
-                    "task1" to
-                        listOf(
-                            Tag(
-                                "kids",
-                                "Kids",
-                                "#000000",
-                                "household1",
-                                true,
-                                Instant.now(),
-                                Instant.now(),
-                            ),
-                        ),
-                    "task2" to emptyList<Tag>(),
-                    "task3" to
-                        listOf(
-                            Tag(
-                                "work",
-                                "Work",
-                                "#000000",
-                                "household1",
-                                true,
-                                Instant.now(),
-                                Instant.now(),
-                            ),
-                        ),
+                    "task1" to emptyList<Tag>(),
+                    "task2" to listOf(TestUtils.getTag(id = "tag1")),
+                    "task3" to listOf(TestUtils.getTag(id = "tag2")),
                 )
 
-            whenever(mockContext.permissions.findByHouseholdMemberId(householdMemberId)).thenReturn(permission)
-            whenever(mockContext.tagPermissions.findByPermissionId(permission.id)).thenReturn(emptyList())
-            whenever(mockTaskTagManager.getTasksTags(mockContext, taskIds)).thenReturn(taskTagsMap)
+            whenever(permissionRepository.findByHouseholdMemberId(householdMemberId)).thenReturn(permission)
+            whenever(tagPermissionRepository.findByPermissionId(permissionId)).thenReturn(tagPermissions)
+            whenever(taskTagManager.getTasksTags(context, taskIds)).thenReturn(taskTagsMap)
 
             // When
-            val result =
-                tagPermissionManager.filterTasksByTagPermissions(
-                    context = mockContext,
-                    householdMemberId = householdMemberId,
-                    taskIds = taskIds,
-                )
+            val result = manager.filterTasksByTagPermissions(context, householdMemberId, taskIds)
 
             // Then
-            assertEquals(listOf("task2"), result)
+            assertEquals(listOf("task1"), result)
+        }
+
+    @Test
+    fun `getUserViewableTags should return empty list when no permission exists`() =
+        runTest {
+            // Given
+            whenever(permissionRepository.findByHouseholdMemberId(householdMemberId)).thenReturn(null)
+
+            // When
+            val result = manager.getUserViewableTags(context, householdMemberId)
+
+            // Then
+            assertEquals(emptyList(), result)
+        }
+
+    @Test
+    fun `getUserViewableTags should return user viewable tags when permission exists`() =
+        runTest {
+            // Given
+            val permission =
+                Permission(
+                    id = permissionId,
+                    householdMemberId = householdMemberId,
+                    createdAt = Instant.now(),
+                    updatedAt = Instant.now(),
+                )
+            val tagPermissions =
+                listOf(
+                    TagPermission(
+                        id = UUID.randomUUID().toString(),
+                        permissionId = permissionId,
+                        tagId = "tag1",
+                        createdAt = Instant.now(),
+                    ),
+                    TagPermission(
+                        id = UUID.randomUUID().toString(),
+                        permissionId = permissionId,
+                        tagId = "tag2",
+                        createdAt = Instant.now(),
+                    ),
+                )
+            val viewableTags =
+                listOf(
+                    TestUtils.getTag(id = "tag1", name = "Tag 1"),
+                    TestUtils.getTag(id = "tag2", name = "Tag 2"),
+                )
+
+            whenever(permissionRepository.findByHouseholdMemberId(householdMemberId)).thenReturn(permission)
+            whenever(tagPermissionRepository.findByPermissionId(permissionId)).thenReturn(tagPermissions)
+            whenever(tagRepository.findByIds(listOf("tag1", "tag2"))).thenReturn(viewableTags)
+
+            // When
+            val result = manager.getUserViewableTags(context, householdMemberId)
+
+            // Then
+            assertEquals(2, result.size)
+            assertEquals("tag1", result[0].id)
+            assertEquals("tag2", result[1].id)
+        }
+
+    @Test
+    fun `getUserViewableTags should return empty list when user has no tag permissions`() =
+        runTest {
+            // Given
+            val permission =
+                Permission(
+                    id = permissionId,
+                    householdMemberId = householdMemberId,
+                    createdAt = Instant.now(),
+                    updatedAt = Instant.now(),
+                )
+            val tagPermissions = emptyList<TagPermission>()
+
+            whenever(permissionRepository.findByHouseholdMemberId(householdMemberId)).thenReturn(permission)
+            whenever(tagPermissionRepository.findByPermissionId(permissionId)).thenReturn(tagPermissions)
+            whenever(tagRepository.findByIds(emptyList())).thenReturn(emptyList())
+
+            // When
+            val result = manager.getUserViewableTags(context, householdMemberId)
+
+            // Then
+            assertEquals(emptyList(), result)
         }
 }

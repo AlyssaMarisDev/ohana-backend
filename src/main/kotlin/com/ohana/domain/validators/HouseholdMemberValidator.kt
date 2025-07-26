@@ -10,7 +10,7 @@ class HouseholdMemberValidator {
         context: UnitOfWorkContext,
         householdId: String,
         userId: String,
-    ) {
+    ): String {
         if (!Guid.isValid(householdId) || !Guid.isValid(userId)) {
             throw IllegalArgumentException("Household ID and user ID must be valid GUIDs")
         }
@@ -25,5 +25,7 @@ class HouseholdMemberValidator {
         if (!member.isActive) {
             throw AuthorizationException("User is not an active member of the household")
         }
+
+        return member.id
     }
 }

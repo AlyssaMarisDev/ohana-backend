@@ -1,5 +1,6 @@
 package com.ohana.domain.tags
 
+import com.ohana.data.tags.Tag
 import com.ohana.data.unitOfWork.UnitOfWorkContext
 import com.ohana.domain.tags.TaskTagManager
 
@@ -21,14 +22,13 @@ class TagPermissionManager(
 
         val permission = context.permissions.findByHouseholdMemberId(householdMemberId)
 
-        // If no permission is set, user can view all tasks (default behavior)
+        // If no permission is set, user can't view any tasks
         if (permission == null) {
-            return taskIds
+            return emptyList()
         }
 
         // Get the tags that the user can view
-        val userCanViewTagPermissions = context.tagPermissions.findByPermissionId(permission.id)
-        val userCanViewTagIds = userCanViewTagPermissions.map { it.tagId }.toSet()
+        val userViewableTagIds = getUserViewableTagIds(context, permission.id)
 
         // Get all task tags for the given tasks
         val taskTagsMap = taskTagManager.getTasksTags(context, taskIds)
@@ -43,7 +43,36 @@ class TagPermissionManager(
             }
 
             // Task is viewable if it has at least one tag that the user can view
-            taskTagIds.any { it in userCanViewTagIds }
+            taskTagIds.any { it in userViewableTagIds }
         }
+    }
+
+    /**
+     * Filters tags based on user's tag permissions
+     * Returns only tags that the user can view (default tags + permitted household tags)
+     */
+    fun getUserViewableTags(
+        context: UnitOfWorkContext,
+        householdMemberId: String,
+    ): List<Tag> {
+        val permission = context.permissions.findByHouseholdMemberId(householdMemberId)
+
+        // If no permission is set, user can't view any tags
+        if (permission == null) {
+            return emptyList()
+        }
+
+        // Get the tags that the user can view
+        val userViewableTagIds = getUserViewableTagIds(context, permission.id)
+
+        return context.tags.findByIds(userViewableTagIds.toList())
+    }
+
+    private fun getUserViewableTagIds(
+        context: UnitOfWorkContext,
+        permissionId: String,
+    ): Set<String> {
+        val userViewableTagPermissions = context.tagPermissions.findByPermissionId(permissionId)
+        return userViewableTagPermissions.map { it.tagId }.toSet()
     }
 }
