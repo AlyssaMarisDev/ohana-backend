@@ -9,7 +9,7 @@ class GetTagsHandler(
     private val tagPermissionManager: TagPermissionManager,
 ) {
     data class Request(
-        val householdId: String? = null,
+        val householdId: String,
     )
 
     data class Response(
@@ -27,16 +27,11 @@ class GetTagsHandler(
         request: Request,
     ): Response =
         unitOfWork.execute { context ->
-            val tags =
-                if (request.householdId != null) {
-                    // Validate user is member of household
-                    val householdMemberId = validator.validate(context, request.householdId, userId)
+            // Validate user is member of household and get household member ID
+            val householdMemberId = validator.validate(context, request.householdId, userId)
 
-                    tagPermissionManager.getUserViewableTags(context, householdMemberId)
-                } else {
-                    // Get default tags only
-                    context.tags.findDefaultTags().toList()
-                }
+            // Get user viewable tags for the household
+            val tags = tagPermissionManager.getUserViewableTags(context, householdMemberId)
 
             Response(
                 tags =

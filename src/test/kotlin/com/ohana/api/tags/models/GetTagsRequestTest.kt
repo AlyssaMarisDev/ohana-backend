@@ -22,18 +22,6 @@ class GetTagsRequestTest {
     }
 
     @Test
-    fun `toDomain should return correct domain request with null householdId`() {
-        // Given
-        val request = GetTagsRequest(householdId = null)
-
-        // When
-        val domainRequest = request.toDomain()
-
-        // Then
-        assertEquals(null, domainRequest.householdId)
-    }
-
-    @Test
     fun `toDomain should throw ValidationException with invalid householdId`() {
         // Given
         val request = GetTagsRequest(householdId = "invalid-uuid")
@@ -45,7 +33,7 @@ class GetTagsRequestTest {
     }
 
     @Test
-    fun `toDomain should work with empty string householdId`() {
+    fun `toDomain should throw ValidationException with empty string householdId`() {
         // Given
         val request = GetTagsRequest(householdId = "")
 

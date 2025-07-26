@@ -18,17 +18,19 @@ class TagsController(
 ) {
     fun Route.registerTagsRoutes() {
         authenticate("auth-jwt") {
-            route("/tags") {
-                get {
-                    val userId = getUserId(call.principal<JWTPrincipal>())
+            route("/households") {
+                route("/{householdId}/tags") {
+                    get {
+                        val userId = getUserId(call.principal<JWTPrincipal>())
+                        val householdId =
+                            call.parameters["householdId"]
+                                ?: throw IllegalArgumentException("householdId parameter is required")
 
-                    // Parse query parameters
-                    val householdId = call.request.queryParameters["householdId"]
+                        val request = GetTagsRequest(householdId = householdId)
 
-                    val request = GetTagsRequest(householdId = householdId)
-
-                    val response = getTagsHandler.handle(userId, request.toDomain())
-                    call.respond(HttpStatusCode.OK, response)
+                        val response = getTagsHandler.handle(userId, request.toDomain())
+                        call.respond(HttpStatusCode.OK, response)
+                    }
                 }
             }
         }

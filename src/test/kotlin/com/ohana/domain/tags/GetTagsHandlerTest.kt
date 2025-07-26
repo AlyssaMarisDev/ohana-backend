@@ -48,39 +48,14 @@ class GetTagsHandlerTest {
     }
 
     @Test
-    fun `handle should return default tags when householdId is null`() =
-        runTest {
-            // Given
-            val request = GetTagsHandler.Request()
-            val defaultTags =
-                listOf(
-                    TestUtils.getTag(id = "tag1", name = "Default Tag 1", isDefault = true),
-                    TestUtils.getTag(id = "tag2", name = "Default Tag 2", isDefault = true),
-                )
-
-            TestUtils.mockUnitOfWork(unitOfWork, context)
-            whenever(tagRepository.findDefaultTags()).thenReturn(defaultTags)
-
-            // When
-            val response = handler.handle(userId, request)
-
-            // Then
-            assertEquals(2, response.tags.size)
-            assertEquals("tag1", response.tags[0].id)
-            assertEquals("Default Tag 1", response.tags[0].name)
-            assertEquals("tag2", response.tags[1].id)
-            assertEquals("Default Tag 2", response.tags[1].name)
-        }
-
-    @Test
-    fun `handle should return user viewable tags when householdId is provided`() =
+    fun `handle should return user viewable tags for household`() =
         runTest {
             // Given
             val request = GetTagsHandler.Request(householdId = householdId)
             val viewableTags =
                 listOf(
                     TestUtils.getTag(id = "tag1", name = "Household Tag 1", householdId = householdId),
-                    TestUtils.getTag(id = "tag2", name = "Default Tag 1", isDefault = true),
+                    TestUtils.getTag(id = "tag2", name = "Household Tag 2", householdId = householdId),
                 )
 
             TestUtils.mockUnitOfWork(unitOfWork, context)
@@ -95,7 +70,7 @@ class GetTagsHandlerTest {
             assertEquals("tag1", response.tags[0].id)
             assertEquals("Household Tag 1", response.tags[0].name)
             assertEquals("tag2", response.tags[1].id)
-            assertEquals("Default Tag 1", response.tags[1].name)
+            assertEquals("Household Tag 2", response.tags[1].name)
             verify(validator).validate(context, householdId, userId)
             verify(tagPermissionManager).getUserViewableTags(context, memberId)
         }
@@ -120,22 +95,6 @@ class GetTagsHandlerTest {
         }
 
     @Test
-    fun `handle should return empty list when no default tags exist`() =
-        runTest {
-            // Given
-            val request = GetTagsHandler.Request()
-
-            TestUtils.mockUnitOfWork(unitOfWork, context)
-            whenever(tagRepository.findDefaultTags()).thenReturn(emptyList())
-
-            // When
-            val response = handler.handle(userId, request)
-
-            // Then
-            assertEquals(0, response.tags.size)
-        }
-
-    @Test
     fun `handle should propagate validation exception`() =
         runTest {
             // Given
@@ -157,27 +116,12 @@ class GetTagsHandlerTest {
     fun `handle should propagate repository exception`() =
         runTest {
             // Given
-            val request = GetTagsHandler.Request()
+            val request = GetTagsHandler.Request(householdId = householdId)
             val exception = RuntimeException("Database error")
 
             TestUtils.mockUnitOfWork(unitOfWork, context)
-            whenever(tagRepository.findDefaultTags()).thenThrow(exception)
-
-            // When & Then
-            assertThrows<RuntimeException> {
-                handler.handle(userId, request)
-            }
-        }
-
-    @Test
-    fun `handle should propagate repository exception when getting default tags`() =
-        runTest {
-            // Given
-            val request = GetTagsHandler.Request()
-            val exception = RuntimeException("Database error")
-
-            TestUtils.mockUnitOfWork(unitOfWork, context)
-            whenever(tagRepository.findDefaultTags()).thenThrow(exception)
+            whenever(validator.validate(context, householdId, userId)).thenReturn(memberId)
+            whenever(tagPermissionManager.getUserViewableTags(context, memberId)).thenThrow(exception)
 
             // When & Then
             assertThrows<RuntimeException> {
