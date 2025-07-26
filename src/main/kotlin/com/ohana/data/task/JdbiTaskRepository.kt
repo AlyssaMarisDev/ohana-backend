@@ -7,6 +7,7 @@ import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.mapper.RowMapper
 import org.jdbi.v3.core.statement.StatementContext
 import java.sql.ResultSet
+import java.time.Instant
 
 class JdbiTaskRepository(
     private val handle: Handle,
@@ -103,6 +104,66 @@ class JdbiTaskRepository(
         """
 
         val params = householdIds.mapIndexed { index, id -> "household_id_$index" to id }.toMap()
+
+        return DatabaseUtils
+            .get(
+                handle,
+                selectQuery,
+                params,
+                Task::class,
+            )
+    }
+
+    override fun findByHouseholdIdsWithDateFilters(
+        householdIds: List<String>,
+        dueDateFrom: Instant?,
+        dueDateTo: Instant?,
+        completedDateFrom: Instant?,
+        completedDateTo: Instant?,
+    ): List<Task> {
+        if (householdIds.isEmpty()) {
+            return emptyList()
+        }
+
+        val placeholders = householdIds.mapIndexed { index, _ -> ":household_id_$index" }.joinToString(", ")
+
+        val conditions = mutableListOf<String>()
+        val params = mutableMapOf<String, Any>()
+
+        // Add household IDs condition
+        conditions.add("household_id IN ($placeholders)")
+        householdIds.forEachIndexed { index, id ->
+            params["household_id_$index"] = id
+        }
+
+        // Add due date range conditions
+        if (dueDateFrom != null) {
+            conditions.add("due_date >= :due_date_from")
+            params["due_date_from"] = dueDateFrom
+        }
+        if (dueDateTo != null) {
+            conditions.add("due_date <= :due_date_to")
+            params["due_date_to"] = dueDateTo
+        }
+
+        // Add completed date range conditions
+        if (completedDateFrom != null) {
+            conditions.add("completed_at >= :completed_date_from")
+            params["completed_date_from"] = completedDateFrom
+        }
+        if (completedDateTo != null) {
+            conditions.add("completed_at <= :completed_date_to")
+            params["completed_date_to"] = completedDateTo
+        }
+
+        val whereClause = if (conditions.isNotEmpty()) "WHERE ${conditions.joinToString(" AND ")}" else ""
+
+        val selectQuery = """
+            SELECT id, title, description, due_date, status, completed_at, created_by, household_id
+            FROM tasks
+            $whereClause
+            ORDER BY created_at DESC
+        """
 
         return DatabaseUtils
             .get(

@@ -78,12 +78,36 @@ class TaskGetAllHandlerTest {
                     ),
                 )
 
-            whenever(taskRepository.findByHouseholdIds(listOf(householdId))).thenReturn(tasks)
+            whenever(
+                taskRepository.findByHouseholdIdsWithDateFilters(
+                    householdIds = listOf(householdId),
+                    dueDateFrom = null,
+                    dueDateTo = null,
+                    completedDateFrom = null,
+                    completedDateTo = null,
+                ),
+            ).thenReturn(tasks)
             whenever(taskTagManager.getTasksTags(context, tasks.map { it.id })).thenReturn(emptyMap())
 
-            val response = handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
+            val response =
+                handler.handle(
+                    userId,
+                    TaskGetAllHandler.Request(
+                        householdIds = listOf(householdId),
+                        dueDateFrom = null,
+                        dueDateTo = null,
+                        completedDateFrom = null,
+                        completedDateTo = null,
+                    ),
+                )
 
-            verify(taskRepository).findByHouseholdIds(listOf(householdId))
+            verify(taskRepository).findByHouseholdIdsWithDateFilters(
+                householdIds = listOf(householdId),
+                dueDateFrom = null,
+                dueDateTo = null,
+                completedDateFrom = null,
+                completedDateTo = null,
+            )
 
             assertEquals(3, response.size)
 
@@ -120,7 +144,16 @@ class TaskGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
-            handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
+            handler.handle(
+                userId,
+                TaskGetAllHandler.Request(
+                    householdIds = listOf(householdId),
+                    dueDateFrom = null,
+                    dueDateTo = null,
+                    completedDateFrom = null,
+                    completedDateTo = null,
+                ),
+            )
 
             verify(householdMemberValidator).validate(context, householdId, userId)
         }
@@ -130,12 +163,36 @@ class TaskGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
-            whenever(taskRepository.findByHouseholdIds(listOf(householdId))).thenReturn(emptyList())
+            whenever(
+                taskRepository.findByHouseholdIdsWithDateFilters(
+                    householdIds = listOf(householdId),
+                    dueDateFrom = null,
+                    dueDateTo = null,
+                    completedDateFrom = null,
+                    completedDateTo = null,
+                ),
+            ).thenReturn(emptyList())
             whenever(taskTagManager.getTasksTags(context, emptyList())).thenReturn(emptyMap())
 
-            val response = handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
+            val response =
+                handler.handle(
+                    userId,
+                    TaskGetAllHandler.Request(
+                        householdIds = listOf(householdId),
+                        dueDateFrom = null,
+                        dueDateTo = null,
+                        completedDateFrom = null,
+                        completedDateTo = null,
+                    ),
+                )
 
-            verify(taskRepository).findByHouseholdIds(listOf(householdId))
+            verify(taskRepository).findByHouseholdIdsWithDateFilters(
+                householdIds = listOf(householdId),
+                dueDateFrom = null,
+                dueDateTo = null,
+                completedDateFrom = null,
+                completedDateTo = null,
+            )
 
             assertTrue(response.isEmpty())
         }
@@ -154,12 +211,21 @@ class TaskGetAllHandlerTest {
 
             val ex =
                 assertThrows<com.ohana.shared.exceptions.AuthorizationException> {
-                    handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
+                    handler.handle(
+                        userId,
+                        TaskGetAllHandler.Request(
+                            householdIds = listOf(householdId),
+                            dueDateFrom = null,
+                            dueDateTo = null,
+                            completedDateFrom = null,
+                            completedDateTo = null,
+                        ),
+                    )
                 }
 
             assertEquals("User is not a member of the household", ex.message)
             verify(householdMemberValidator).validate(context, householdId, userId)
-            verify(taskRepository, never()).findByHouseholdIds(any())
+            verify(taskRepository, never()).findByHouseholdIdsWithDateFilters(any(), any(), any(), any(), any())
         }
 
     @Test
@@ -167,16 +233,39 @@ class TaskGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
-            whenever(taskRepository.findByHouseholdIds(listOf(householdId))).thenThrow(RuntimeException("Database connection error"))
+            whenever(
+                taskRepository.findByHouseholdIdsWithDateFilters(
+                    householdIds = listOf(householdId),
+                    dueDateFrom = null,
+                    dueDateTo = null,
+                    completedDateFrom = null,
+                    completedDateTo = null,
+                ),
+            ).thenThrow(RuntimeException("Database connection error"))
 
             val ex =
                 assertThrows<RuntimeException> {
-                    handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
+                    handler.handle(
+                        userId,
+                        TaskGetAllHandler.Request(
+                            householdIds = listOf(householdId),
+                            dueDateFrom = null,
+                            dueDateTo = null,
+                            completedDateFrom = null,
+                            completedDateTo = null,
+                        ),
+                    )
                 }
 
             assertEquals("Database connection error", ex.message)
             verify(householdMemberValidator).validate(context, householdId, userId)
-            verify(taskRepository).findByHouseholdIds(listOf(householdId))
+            verify(taskRepository).findByHouseholdIdsWithDateFilters(
+                householdIds = listOf(householdId),
+                dueDateFrom = null,
+                dueDateTo = null,
+                completedDateFrom = null,
+                completedDateTo = null,
+            )
         }
 
     @Test
@@ -206,9 +295,27 @@ class TaskGetAllHandlerTest {
                     ),
                 )
 
-            whenever(taskRepository.findByHouseholdIds(listOf(householdId))).thenReturn(tasks)
+            whenever(
+                taskRepository.findByHouseholdIdsWithDateFilters(
+                    householdIds = listOf(householdId),
+                    dueDateFrom = null,
+                    dueDateTo = null,
+                    completedDateFrom = null,
+                    completedDateTo = null,
+                ),
+            ).thenReturn(tasks)
 
-            val response = handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
+            val response =
+                handler.handle(
+                    userId,
+                    TaskGetAllHandler.Request(
+                        householdIds = listOf(householdId),
+                        dueDateFrom = null,
+                        dueDateTo = null,
+                        completedDateFrom = null,
+                        completedDateTo = null,
+                    ),
+                )
 
             assertEquals(3, response.size)
             assertEquals(TaskStatus.PENDING, response[0].status)
@@ -240,9 +347,27 @@ class TaskGetAllHandlerTest {
                     ),
                 )
 
-            whenever(taskRepository.findByHouseholdIds(listOf(householdId))).thenReturn(tasks)
+            whenever(
+                taskRepository.findByHouseholdIdsWithDateFilters(
+                    householdIds = listOf(householdId),
+                    dueDateFrom = null,
+                    dueDateTo = null,
+                    completedDateFrom = null,
+                    completedDateTo = null,
+                ),
+            ).thenReturn(tasks)
 
-            val response = handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId)))
+            val response =
+                handler.handle(
+                    userId,
+                    TaskGetAllHandler.Request(
+                        householdIds = listOf(householdId),
+                        dueDateFrom = null,
+                        dueDateTo = null,
+                        completedDateFrom = null,
+                        completedDateTo = null,
+                    ),
+                )
 
             assertEquals(3, response.size)
             assertEquals(tasks[0].createdBy, response[0].createdBy)
@@ -275,9 +400,27 @@ class TaskGetAllHandlerTest {
 
             val allTasks = tasksFromHousehold1 + tasksFromHousehold2
 
-            whenever(taskRepository.findByHouseholdIds(listOf(householdId, householdId2))).thenReturn(allTasks)
+            whenever(
+                taskRepository.findByHouseholdIdsWithDateFilters(
+                    householdIds = listOf(householdId, householdId2),
+                    dueDateFrom = null,
+                    dueDateTo = null,
+                    completedDateFrom = null,
+                    completedDateTo = null,
+                ),
+            ).thenReturn(allTasks)
 
-            val response = handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId, householdId2)))
+            val response =
+                handler.handle(
+                    userId,
+                    TaskGetAllHandler.Request(
+                        householdIds = listOf(householdId, householdId2),
+                        dueDateFrom = null,
+                        dueDateTo = null,
+                        completedDateFrom = null,
+                        completedDateTo = null,
+                    ),
+                )
 
             assertEquals(2, response.size)
             assertEquals(householdId, response[0].householdId)
@@ -299,13 +442,22 @@ class TaskGetAllHandlerTest {
 
             val ex =
                 assertThrows<com.ohana.shared.exceptions.AuthorizationException> {
-                    handler.handle(userId, TaskGetAllHandler.Request(listOf(householdId, householdId2)))
+                    handler.handle(
+                        userId,
+                        TaskGetAllHandler.Request(
+                            householdIds = listOf(householdId, householdId2),
+                            dueDateFrom = null,
+                            dueDateTo = null,
+                            completedDateFrom = null,
+                            completedDateTo = null,
+                        ),
+                    )
                 }
 
             assertEquals("User is not a member of household 2", ex.message)
             verify(householdMemberValidator).validate(context, householdId, userId)
             verify(householdMemberValidator).validate(context, householdId2, userId)
-            verify(taskRepository, never()).findByHouseholdIds(any())
+            verify(taskRepository, never()).findByHouseholdIdsWithDateFilters(any(), any(), any(), any(), any())
         }
 
     @Test
@@ -313,10 +465,26 @@ class TaskGetAllHandlerTest {
         runTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
 
-            val response = handler.handle(userId, TaskGetAllHandler.Request(emptyList()))
+            val response =
+                handler.handle(
+                    userId,
+                    TaskGetAllHandler.Request(
+                        householdIds = emptyList(),
+                        dueDateFrom = null,
+                        dueDateTo = null,
+                        completedDateFrom = null,
+                        completedDateTo = null,
+                    ),
+                )
 
             assertTrue(response.isEmpty())
-            verify(taskRepository).findByHouseholdIds(emptyList())
+            verify(taskRepository).findByHouseholdIdsWithDateFilters(
+                householdIds = emptyList(),
+                dueDateFrom = null,
+                dueDateTo = null,
+                completedDateFrom = null,
+                completedDateTo = null,
+            )
             verify(householdMemberValidator, never()).validate(any(), any(), any())
         }
 
@@ -346,13 +514,37 @@ class TaskGetAllHandlerTest {
                 )
 
             whenever(householdRepository.findByMemberId(userId)).thenReturn(userHouseholds)
-            whenever(taskRepository.findByHouseholdIds(listOf(householdId, householdId2))).thenReturn(tasks)
+            whenever(
+                taskRepository.findByHouseholdIdsWithDateFilters(
+                    householdIds = listOf(householdId, householdId2),
+                    dueDateFrom = null,
+                    dueDateTo = null,
+                    completedDateFrom = null,
+                    completedDateTo = null,
+                ),
+            ).thenReturn(tasks)
 
-            val response = handler.handle(userId, TaskGetAllHandler.Request(emptyList()))
+            val response =
+                handler.handle(
+                    userId,
+                    TaskGetAllHandler.Request(
+                        householdIds = emptyList(),
+                        dueDateFrom = null,
+                        dueDateTo = null,
+                        completedDateFrom = null,
+                        completedDateTo = null,
+                    ),
+                )
 
             assertEquals(2, response.size)
             verify(householdRepository).findByMemberId(userId)
-            verify(taskRepository).findByHouseholdIds(listOf(householdId, householdId2))
+            verify(taskRepository).findByHouseholdIdsWithDateFilters(
+                householdIds = listOf(householdId, householdId2),
+                dueDateFrom = null,
+                dueDateTo = null,
+                completedDateFrom = null,
+                completedDateTo = null,
+            )
             verify(householdMemberValidator, never()).validate(any(), any(), any())
         }
 
@@ -363,11 +555,240 @@ class TaskGetAllHandlerTest {
 
             whenever(householdRepository.findByMemberId(userId)).thenReturn(emptyList())
 
-            val response = handler.handle(userId, TaskGetAllHandler.Request(emptyList()))
+            val response =
+                handler.handle(
+                    userId,
+                    TaskGetAllHandler.Request(
+                        householdIds = emptyList(),
+                        dueDateFrom = null,
+                        dueDateTo = null,
+                        completedDateFrom = null,
+                        completedDateTo = null,
+                    ),
+                )
 
             assertTrue(response.isEmpty())
             verify(householdRepository).findByMemberId(userId)
-            verify(taskRepository).findByHouseholdIds(emptyList())
+            verify(taskRepository).findByHouseholdIdsWithDateFilters(
+                householdIds = emptyList(),
+                dueDateFrom = null,
+                dueDateTo = null,
+                completedDateFrom = null,
+                completedDateTo = null,
+            )
             verify(householdMemberValidator, never()).validate(any(), any(), any())
+        }
+
+    @Test
+    fun `handle should filter tasks by due date range`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val dueDateFrom = Instant.parse("2023-12-01T10:00:00Z")
+            val dueDateTo = Instant.parse("2023-12-31T23:59:59Z")
+
+            val request =
+                TaskGetAllHandler.Request(
+                    householdIds = listOf(householdId),
+                    dueDateFrom = dueDateFrom,
+                    dueDateTo = dueDateTo,
+                    completedDateFrom = null,
+                    completedDateTo = null,
+                )
+
+            val tasks =
+                listOf(
+                    TestUtils.getTask(
+                        title = "Task within range",
+                        dueDate = Instant.parse("2023-12-15T12:00:00Z"),
+                        createdBy = userId,
+                        householdId = householdId,
+                    ),
+                )
+
+            whenever(
+                taskRepository.findByHouseholdIdsWithDateFilters(
+                    householdIds = listOf(householdId),
+                    dueDateFrom = dueDateFrom,
+                    dueDateTo = dueDateTo,
+                    completedDateFrom = null,
+                    completedDateTo = null,
+                ),
+            ).thenReturn(tasks)
+            whenever(taskTagManager.getTasksTags(context, tasks.map { it.id })).thenReturn(emptyMap())
+
+            val response = handler.handle(userId, request)
+
+            assertEquals(1, response.size)
+            assertEquals("Task within range", response[0].title)
+
+            verify(taskRepository).findByHouseholdIdsWithDateFilters(
+                householdIds = listOf(householdId),
+                dueDateFrom = dueDateFrom,
+                dueDateTo = dueDateTo,
+                completedDateFrom = null,
+                completedDateTo = null,
+            )
+        }
+
+    @Test
+    fun `handle should filter tasks by completed date range`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val completedDateFrom = Instant.parse("2023-12-15T00:00:00Z")
+            val completedDateTo = Instant.parse("2023-12-15T23:59:59Z")
+
+            val request =
+                TaskGetAllHandler.Request(
+                    householdIds = listOf(householdId),
+                    dueDateFrom = null,
+                    dueDateTo = null,
+                    completedDateFrom = completedDateFrom,
+                    completedDateTo = completedDateTo,
+                )
+
+            val tasks =
+                listOf(
+                    TestUtils.getTask(
+                        title = "Completed task within range",
+                        status = TaskStatus.COMPLETED,
+                        completedAt = Instant.parse("2023-12-15T12:00:00Z"),
+                        createdBy = userId,
+                        householdId = householdId,
+                    ),
+                )
+
+            whenever(
+                taskRepository.findByHouseholdIdsWithDateFilters(
+                    householdIds = listOf(householdId),
+                    dueDateFrom = null,
+                    dueDateTo = null,
+                    completedDateFrom = completedDateFrom,
+                    completedDateTo = completedDateTo,
+                ),
+            ).thenReturn(tasks)
+            whenever(taskTagManager.getTasksTags(context, tasks.map { it.id })).thenReturn(emptyMap())
+
+            val response = handler.handle(userId, request)
+
+            assertEquals(1, response.size)
+            assertEquals("Completed task within range", response[0].title)
+            assertEquals(TaskStatus.COMPLETED, response[0].status)
+
+            verify(taskRepository).findByHouseholdIdsWithDateFilters(
+                householdIds = listOf(householdId),
+                dueDateFrom = null,
+                dueDateTo = null,
+                completedDateFrom = completedDateFrom,
+                completedDateTo = completedDateTo,
+            )
+        }
+
+    @Test
+    fun `handle should filter tasks by both due date and completed date ranges`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val dueDateFrom = Instant.parse("2023-12-01T10:00:00Z")
+            val dueDateTo = Instant.parse("2023-12-31T23:59:59Z")
+            val completedDateFrom = Instant.parse("2023-12-15T00:00:00Z")
+            val completedDateTo = Instant.parse("2023-12-15T23:59:59Z")
+
+            val request =
+                TaskGetAllHandler.Request(
+                    householdIds = listOf(householdId),
+                    dueDateFrom = dueDateFrom,
+                    dueDateTo = dueDateTo,
+                    completedDateFrom = completedDateFrom,
+                    completedDateTo = completedDateTo,
+                )
+
+            val tasks =
+                listOf(
+                    TestUtils.getTask(
+                        title = "Task with both filters",
+                        dueDate = Instant.parse("2023-12-15T12:00:00Z"),
+                        status = TaskStatus.COMPLETED,
+                        completedAt = Instant.parse("2023-12-15T12:00:00Z"),
+                        createdBy = userId,
+                        householdId = householdId,
+                    ),
+                )
+
+            whenever(
+                taskRepository.findByHouseholdIdsWithDateFilters(
+                    householdIds = listOf(householdId),
+                    dueDateFrom = dueDateFrom,
+                    dueDateTo = dueDateTo,
+                    completedDateFrom = completedDateFrom,
+                    completedDateTo = completedDateTo,
+                ),
+            ).thenReturn(tasks)
+            whenever(taskTagManager.getTasksTags(context, tasks.map { it.id })).thenReturn(emptyMap())
+
+            val response = handler.handle(userId, request)
+
+            assertEquals(1, response.size)
+            assertEquals("Task with both filters", response[0].title)
+
+            verify(taskRepository).findByHouseholdIdsWithDateFilters(
+                householdIds = listOf(householdId),
+                dueDateFrom = dueDateFrom,
+                dueDateTo = dueDateTo,
+                completedDateFrom = completedDateFrom,
+                completedDateTo = completedDateTo,
+            )
+        }
+
+    @Test
+    fun `handle should work with partial date filters`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val dueDateFrom = Instant.parse("2023-12-01T10:00:00Z")
+
+            val request =
+                TaskGetAllHandler.Request(
+                    householdIds = listOf(householdId),
+                    dueDateFrom = dueDateFrom,
+                    dueDateTo = null,
+                    completedDateFrom = null,
+                    completedDateTo = null,
+                )
+
+            val tasks =
+                listOf(
+                    TestUtils.getTask(
+                        title = "Task after due date from",
+                        dueDate = Instant.parse("2023-12-15T12:00:00Z"),
+                        createdBy = userId,
+                        householdId = householdId,
+                    ),
+                )
+
+            whenever(
+                taskRepository.findByHouseholdIdsWithDateFilters(
+                    householdIds = listOf(householdId),
+                    dueDateFrom = dueDateFrom,
+                    dueDateTo = null,
+                    completedDateFrom = null,
+                    completedDateTo = null,
+                ),
+            ).thenReturn(tasks)
+            whenever(taskTagManager.getTasksTags(context, tasks.map { it.id })).thenReturn(emptyMap())
+
+            val response = handler.handle(userId, request)
+
+            assertEquals(1, response.size)
+            assertEquals("Task after due date from", response[0].title)
+
+            verify(taskRepository).findByHouseholdIdsWithDateFilters(
+                householdIds = listOf(householdId),
+                dueDateFrom = dueDateFrom,
+                dueDateTo = null,
+                completedDateFrom = null,
+                completedDateTo = null,
+            )
         }
 }

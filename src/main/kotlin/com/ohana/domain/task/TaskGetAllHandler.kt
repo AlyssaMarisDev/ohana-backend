@@ -4,6 +4,7 @@ import com.ohana.data.unitOfWork.*
 import com.ohana.domain.tags.TaskTagManager
 import com.ohana.domain.validators.HouseholdMemberValidator
 import com.ohana.shared.enums.TaskStatus
+import java.time.Instant
 
 class TaskGetAllHandler(
     private val unitOfWork: UnitOfWork,
@@ -12,6 +13,10 @@ class TaskGetAllHandler(
 ) {
     data class Request(
         val householdIds: List<String>,
+        val dueDateFrom: Instant?,
+        val dueDateTo: Instant?,
+        val completedDateFrom: Instant?,
+        val completedDateTo: Instant?,
     )
 
     data class Response(
@@ -33,7 +38,14 @@ class TaskGetAllHandler(
         unitOfWork.execute { context ->
             val effectiveHouseholdIds = getEffectiveHouseholdIds(context, request.householdIds, userId)
 
-            val tasks = context.tasks.findByHouseholdIds(effectiveHouseholdIds)
+            val tasks =
+                context.tasks.findByHouseholdIdsWithDateFilters(
+                    householdIds = effectiveHouseholdIds,
+                    dueDateFrom = request.dueDateFrom,
+                    dueDateTo = request.dueDateTo,
+                    completedDateFrom = request.completedDateFrom,
+                    completedDateTo = request.completedDateTo,
+                )
             val taskIds = tasks.map { it.id }
 
             val tags = taskTagManager.getTasksTags(context, taskIds)
