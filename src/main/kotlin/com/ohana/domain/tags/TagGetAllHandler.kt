@@ -4,7 +4,7 @@ import com.ohana.data.unitOfWork.*
 import com.ohana.domain.permissions.TagPermissionManager
 import com.ohana.domain.validators.HouseholdMemberValidator
 
-class GetTagsHandler(
+class TagGetAllHandler(
     private val unitOfWork: UnitOfWork,
     private val validator: HouseholdMemberValidator,
     private val tagPermissionManager: TagPermissionManager,
