@@ -2,12 +2,14 @@ package com.ohana.domain.household
 
 import com.ohana.data.household.*
 import com.ohana.data.unitOfWork.*
+import com.ohana.domain.permissions.TagPermissionManager
 import com.ohana.shared.enums.HouseholdMemberRole
 import java.time.Instant
 import java.util.UUID
 
 class HouseholdCreationHandler(
     private val unitOfWork: UnitOfWork,
+    private val tagPermissionManager: TagPermissionManager,
 ) {
     data class Request(
         val id: String,
@@ -38,18 +40,22 @@ class HouseholdCreationHandler(
                 )
 
             // Create household member (admin)
-            context.households.createMember(
-                HouseholdMember(
-                    id = UUID.randomUUID().toString(),
-                    householdId = request.id,
-                    memberId = userId,
-                    role = HouseholdMemberRole.ADMIN,
-                    isActive = true,
-                    isDefault = true,
-                    invitedBy = userId,
-                    joinedAt = Instant.now(),
-                ),
-            )
+            val householdMember =
+                context.households.createMember(
+                    HouseholdMember(
+                        id = UUID.randomUUID().toString(),
+                        householdId = request.id,
+                        memberId = userId,
+                        role = HouseholdMemberRole.ADMIN,
+                        isActive = true,
+                        isDefault = true,
+                        invitedBy = userId,
+                        joinedAt = Instant.now(),
+                    ),
+                )
+
+            // Create default permissions for the household member and give them access to all default tags
+            tagPermissionManager.createDefaultPermissions(context, householdMember.id)
 
             // Return response
             Response(

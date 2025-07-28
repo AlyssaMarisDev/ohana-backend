@@ -1,8 +1,9 @@
 package com.ohana
 
+import com.ohana.data.auth.AuthMember
 import com.ohana.data.household.Household
 import com.ohana.data.household.HouseholdMember
-import com.ohana.data.member.Member
+import com.ohana.data.permissions.Permission
 import com.ohana.data.tags.Tag
 import com.ohana.data.tags.TaskTag
 import com.ohana.data.task.Task
@@ -16,41 +17,14 @@ import java.util.UUID
 
 class TestUtils {
     companion object {
-        suspend fun mockUnitOfWork(
-            unitOfWork: UnitOfWork,
-            context: UnitOfWorkContext,
-        ) {
-            whenever(unitOfWork.execute<Any>(any())).thenAnswer { invocation ->
-                val block = invocation.getArgument<(UnitOfWorkContext) -> Any>(0)
-                block.invoke(context)
-            }
-        }
-
-        fun getTask(
-            id: String = UUID.randomUUID().toString(),
-            title: String = "Test Task",
-            description: String = "Test Description",
-            dueDate: Instant? = Instant.now(),
-            status: TaskStatus = TaskStatus.PENDING,
-            completedAt: Instant? = null,
-            createdBy: String = UUID.randomUUID().toString(),
-            householdId: String = UUID.randomUUID().toString(),
-        ): Task = Task(id, title, description, dueDate, status, completedAt, createdBy, householdId)
-
-        fun getMember(
-            id: String = UUID.randomUUID().toString(),
-            name: String = "Test User",
-            email: String = "test@example.com",
-            age: Int? = null,
-            gender: String? = null,
-        ): Member = Member(id, name, email, age, gender)
-
         fun getHousehold(
             id: String = UUID.randomUUID().toString(),
             name: String = "Test Household",
-            description: String = "Test household description",
+            description: String = "A test household",
             createdBy: String = UUID.randomUUID().toString(),
-        ): Household = Household(id, name, description, createdBy)
+            createdAt: Instant = Instant.now(),
+            updatedAt: Instant = Instant.now(),
+        ): Household = Household(id, name, description, createdBy, createdAt, updatedAt)
 
         fun getHouseholdMember(
             id: String = UUID.randomUUID().toString(),
@@ -59,25 +33,56 @@ class TestUtils {
             role: HouseholdMemberRole = HouseholdMemberRole.MEMBER,
             isActive: Boolean = true,
             isDefault: Boolean = false,
-            invitedBy: String? = UUID.randomUUID().toString(),
-            joinedAt: Instant? = Instant.now(),
+            invitedBy: String = UUID.randomUUID().toString(),
+            joinedAt: Instant = Instant.now(),
+            createdAt: Instant = Instant.now(),
+            updatedAt: Instant = Instant.now(),
         ): HouseholdMember =
             HouseholdMember(
-                id = id,
-                householdId = householdId,
-                memberId = memberId,
-                role = role,
-                isActive = isActive,
-                isDefault = isDefault,
-                invitedBy = invitedBy,
-                joinedAt = joinedAt,
+                id,
+                householdId,
+                memberId,
+                role,
+                isActive,
+                isDefault,
+                invitedBy,
+                joinedAt,
+                createdAt,
+                updatedAt,
+            )
+
+        fun getTask(
+            id: String = UUID.randomUUID().toString(),
+            title: String = "Test Task",
+            description: String = "A test task",
+            status: TaskStatus = TaskStatus.TODO,
+            priority: Int = 1,
+            dueDate: Instant? = null,
+            assignedTo: String? = null,
+            createdBy: String = UUID.randomUUID().toString(),
+            householdId: String = UUID.randomUUID().toString(),
+            createdAt: Instant = Instant.now(),
+            updatedAt: Instant = Instant.now(),
+        ): Task =
+            Task(
+                id,
+                title,
+                description,
+                status,
+                priority,
+                dueDate,
+                assignedTo,
+                createdBy,
+                householdId,
+                createdAt,
+                updatedAt,
             )
 
         fun getTag(
             id: String = UUID.randomUUID().toString(),
             name: String = "Test Tag",
-            color: String = "#3B82F6",
-            householdId: String? = UUID.randomUUID().toString(),
+            color: String = "#FF0000",
+            householdId: String? = null,
             isDefault: Boolean = false,
             createdAt: Instant = Instant.now(),
             updatedAt: Instant = Instant.now(),
@@ -89,5 +94,31 @@ class TestUtils {
             tagId: String = UUID.randomUUID().toString(),
             createdAt: Instant = Instant.now(),
         ): TaskTag = TaskTag(id, taskId, tagId, createdAt)
+
+        fun getPermission(
+            id: String = UUID.randomUUID().toString(),
+            householdMemberId: String = UUID.randomUUID().toString(),
+            createdAt: Instant = Instant.now(),
+            updatedAt: Instant = Instant.now(),
+        ): Permission = Permission(id, householdMemberId, createdAt, updatedAt)
+
+        fun getAuthMember(
+            id: String = UUID.randomUUID().toString(),
+            email: String = "test@example.com",
+            passwordHash: String = "hashedPassword",
+            salt: String = "salt",
+            createdAt: Instant = Instant.now(),
+            updatedAt: Instant = Instant.now(),
+        ): AuthMember = AuthMember(id, email, passwordHash, salt, createdAt, updatedAt)
+
+        fun mockUnitOfWork(
+            unitOfWork: com.ohana.data.unitOfWork.UnitOfWork,
+            context: com.ohana.data.unitOfWork.UnitOfWorkContext,
+        ) {
+            whenever(unitOfWork.execute(any())).thenAnswer { invocation ->
+                val block = invocation.getArgument<suspend (com.ohana.data.unitOfWork.UnitOfWorkContext) -> Any>(0)
+                block(context)
+            }
+        }
     }
 }

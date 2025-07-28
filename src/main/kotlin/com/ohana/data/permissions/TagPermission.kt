@@ -1,4 +1,4 @@
-package com.ohana.data.tags
+package com.ohana.data.permissions
 
 import java.time.Instant
 

@@ -2,8 +2,11 @@ package com.ohana.domain.household
 
 import com.ohana.TestUtils
 import com.ohana.data.household.HouseholdRepository
+import com.ohana.data.permissions.PermissionRepository
+import com.ohana.data.permissions.TagPermissionRepository
 import com.ohana.data.tags.TagRepository
 import com.ohana.data.unitOfWork.*
+import com.ohana.domain.permissions.TagPermissionManager
 import com.ohana.shared.enums.HouseholdMemberRole
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
@@ -19,19 +22,27 @@ class HouseholdCreationHandlerTest {
     private lateinit var context: UnitOfWorkContext
     private lateinit var householdRepository: HouseholdRepository
     private lateinit var tagRepository: TagRepository
+    private lateinit var permissionRepository: PermissionRepository
+    private lateinit var tagPermissionRepository: TagPermissionRepository
+    private lateinit var tagPermissionManager: TagPermissionManager
     private lateinit var handler: HouseholdCreationHandler
 
     @BeforeEach
     fun setUp() {
         householdRepository = mock()
         tagRepository = mock()
+        permissionRepository = mock()
+        tagPermissionRepository = mock()
+        tagPermissionManager = mock()
         context =
             mock {
                 on { households } doReturn householdRepository
                 on { tags } doReturn tagRepository
+                on { permissions } doReturn permissionRepository
+                on { tagPermissions } doReturn tagPermissionRepository
             }
         unitOfWork = mock()
-        handler = HouseholdCreationHandler(unitOfWork)
+        handler = HouseholdCreationHandler(unitOfWork, tagPermissionManager)
     }
 
     @Test
@@ -64,8 +75,15 @@ class HouseholdCreationHandlerTest {
                     role = HouseholdMemberRole.ADMIN,
                 )
 
+            val expectedPermission =
+                TestUtils.getPermission(
+                    id = UUID.randomUUID().toString(),
+                    householdMemberId = expectedMember.id,
+                )
+
             whenever(householdRepository.create(any())).thenReturn(expectedHousehold)
             whenever(householdRepository.createMember(any())).thenReturn(expectedMember)
+            whenever(tagPermissionManager.createDefaultPermissions(context, expectedMember.id)).thenReturn(expectedPermission)
 
             val response = handler.handle(userId, request)
 
@@ -92,6 +110,8 @@ class HouseholdCreationHandlerTest {
                         member.joinedAt != null
                 },
             )
+
+            verify(tagPermissionManager).createDefaultPermissions(context, expectedMember.id)
         }
 
     @Test
@@ -124,8 +144,15 @@ class HouseholdCreationHandlerTest {
                     role = HouseholdMemberRole.ADMIN,
                 )
 
+            val expectedPermission =
+                TestUtils.getPermission(
+                    id = UUID.randomUUID().toString(),
+                    householdMemberId = expectedMember.id,
+                )
+
             whenever(householdRepository.create(any())).thenReturn(expectedHousehold)
             whenever(householdRepository.createMember(any())).thenReturn(expectedMember)
+            whenever(tagPermissionManager.createDefaultPermissions(context, expectedMember.id)).thenReturn(expectedPermission)
 
             val response = handler.handle(userId, request)
 
@@ -166,8 +193,15 @@ class HouseholdCreationHandlerTest {
                     role = HouseholdMemberRole.ADMIN,
                 )
 
+            val expectedPermission =
+                TestUtils.getPermission(
+                    id = UUID.randomUUID().toString(),
+                    householdMemberId = expectedMember.id,
+                )
+
             whenever(householdRepository.create(any())).thenReturn(expectedHousehold)
             whenever(householdRepository.createMember(any())).thenReturn(expectedMember)
+            whenever(tagPermissionManager.createDefaultPermissions(context, expectedMember.id)).thenReturn(expectedPermission)
 
             val response = handler.handle(userId, request)
 
@@ -199,6 +233,7 @@ class HouseholdCreationHandlerTest {
             assertEquals("DB error", ex.message)
             verify(householdRepository).create(any())
             verify(householdRepository, never()).createMember(any())
+            verify(tagPermissionManager, never()).createDefaultPermissions(any(), any())
         }
 
     @Test
@@ -233,6 +268,7 @@ class HouseholdCreationHandlerTest {
             assertEquals("Member creation failed", ex.message)
             verify(householdRepository).create(any())
             verify(householdRepository).createMember(any())
+            verify(tagPermissionManager, never()).createDefaultPermissions(any(), any())
         }
 
     @Test
@@ -265,8 +301,15 @@ class HouseholdCreationHandlerTest {
                     role = HouseholdMemberRole.ADMIN,
                 )
 
+            val expectedPermission =
+                TestUtils.getPermission(
+                    id = UUID.randomUUID().toString(),
+                    householdMemberId = expectedMember.id,
+                )
+
             whenever(householdRepository.create(any())).thenReturn(expectedHousehold)
             whenever(householdRepository.createMember(any())).thenReturn(expectedMember)
+            whenever(tagPermissionManager.createDefaultPermissions(context, expectedMember.id)).thenReturn(expectedPermission)
 
             handler.handle(userId, request)
 
@@ -312,8 +355,15 @@ class HouseholdCreationHandlerTest {
                     role = HouseholdMemberRole.ADMIN,
                 )
 
+            val expectedPermission =
+                TestUtils.getPermission(
+                    id = UUID.randomUUID().toString(),
+                    householdMemberId = expectedMember.id,
+                )
+
             whenever(householdRepository.create(any())).thenReturn(expectedHousehold)
             whenever(householdRepository.createMember(any())).thenReturn(expectedMember)
+            whenever(tagPermissionManager.createDefaultPermissions(context, expectedMember.id)).thenReturn(expectedPermission)
 
             handler.handle(userId, request)
 
@@ -354,8 +404,15 @@ class HouseholdCreationHandlerTest {
                     role = HouseholdMemberRole.ADMIN,
                 )
 
+            val expectedPermission =
+                TestUtils.getPermission(
+                    id = UUID.randomUUID().toString(),
+                    householdMemberId = expectedMember.id,
+                )
+
             whenever(householdRepository.create(any())).thenReturn(expectedHousehold)
             whenever(householdRepository.createMember(any())).thenReturn(expectedMember)
+            whenever(tagPermissionManager.createDefaultPermissions(context, expectedMember.id)).thenReturn(expectedPermission)
 
             val beforeCall = Instant.now()
             handler.handle(userId, request)
@@ -368,5 +425,50 @@ class HouseholdCreationHandlerTest {
                         member.joinedAt!! <= afterCall
                 },
             )
+        }
+
+    @Test
+    fun `handle should create permissions for household member`() =
+        runTest {
+            TestUtils.mockUnitOfWork(unitOfWork, context)
+
+            val userId = UUID.randomUUID().toString()
+            val householdId = UUID.randomUUID().toString()
+            val request =
+                HouseholdCreationHandler.Request(
+                    id = householdId,
+                    name = "Test Household",
+                    description = "Test description",
+                )
+
+            val expectedHousehold =
+                TestUtils.getHousehold(
+                    id = householdId,
+                    name = request.name,
+                    description = request.description,
+                    createdBy = userId,
+                )
+
+            val expectedMember =
+                TestUtils.getHouseholdMember(
+                    id = UUID.randomUUID().toString(),
+                    householdId = householdId,
+                    memberId = userId,
+                    role = HouseholdMemberRole.ADMIN,
+                )
+
+            val expectedPermission =
+                TestUtils.getPermission(
+                    id = UUID.randomUUID().toString(),
+                    householdMemberId = expectedMember.id,
+                )
+
+            whenever(householdRepository.create(any())).thenReturn(expectedHousehold)
+            whenever(householdRepository.createMember(any())).thenReturn(expectedMember)
+            whenever(tagPermissionManager.createDefaultPermissions(context, expectedMember.id)).thenReturn(expectedPermission)
+
+            handler.handle(userId, request)
+
+            verify(tagPermissionManager).createDefaultPermissions(context, expectedMember.id)
         }
 }

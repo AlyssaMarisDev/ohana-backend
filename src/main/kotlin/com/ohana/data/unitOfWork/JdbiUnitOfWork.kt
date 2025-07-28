@@ -8,12 +8,12 @@ import com.ohana.data.household.HouseholdRepository
 import com.ohana.data.household.JdbiHouseholdRepository
 import com.ohana.data.member.JdbiMemberRepository
 import com.ohana.data.member.MemberRepository
-import com.ohana.data.tags.JdbiPermissionRepository
-import com.ohana.data.tags.JdbiTagPermissionRepository
+import com.ohana.data.permissions.JdbiPermissionRepository
+import com.ohana.data.permissions.JdbiTagPermissionRepository
+import com.ohana.data.permissions.PermissionRepository
+import com.ohana.data.permissions.TagPermissionRepository
 import com.ohana.data.tags.JdbiTagRepository
 import com.ohana.data.tags.JdbiTaskTagRepository
-import com.ohana.data.tags.PermissionRepository
-import com.ohana.data.tags.TagPermissionRepository
 import com.ohana.data.tags.TagRepository
 import com.ohana.data.tags.TaskTagRepository
 import com.ohana.data.task.JdbiTaskRepository

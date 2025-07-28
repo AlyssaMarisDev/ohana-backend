@@ -1,7 +1,9 @@
-package com.ohana.domain.tags
+package com.ohana.domain.permissions
 
 import com.ohana.TestUtils
-import com.ohana.data.tags.*
+import com.ohana.data.permissions.*
+import com.ohana.data.tags.Tag
+import com.ohana.data.tags.TagRepository
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.tags.TaskTagManager
 import kotlinx.coroutines.test.runTest
@@ -37,6 +39,54 @@ class TagPermissionManagerTest {
 
         manager = TagPermissionManager(taskTagManager)
     }
+
+    @Test
+    fun `createDefaultPermissions should create permission and tag permissions for default tags`() =
+        runTest {
+            // Given
+            val defaultTags =
+                listOf(
+                    TestUtils.getTag(id = "tag1", name = "metas", isDefault = true),
+                    TestUtils.getTag(id = "tag2", name = "adult", isDefault = true),
+                    TestUtils.getTag(id = "tag3", name = "work", isDefault = true),
+                )
+
+            val expectedPermission =
+                TestUtils.getPermission(
+                    id = permissionId,
+                    householdMemberId = householdMemberId,
+                )
+
+            whenever(permissionRepository.create(any())).thenReturn(expectedPermission)
+            whenever(tagRepository.findDefaultTags()).thenReturn(defaultTags)
+            whenever(tagPermissionRepository.create(any())).thenAnswer { invocation ->
+                invocation.getArgument(0)
+            }
+
+            // When
+            val result = manager.createDefaultPermissions(context, householdMemberId)
+
+            // Then
+            assertEquals(expectedPermission, result)
+
+            verify(permissionRepository).create(
+                argThat { permission ->
+                    permission.householdMemberId == householdMemberId
+                },
+            )
+
+            verify(tagRepository).findDefaultTags()
+
+            // Verify tag permissions are created for each default tag
+            defaultTags.forEach { tag ->
+                verify(tagPermissionRepository).create(
+                    argThat { tagPermission ->
+                        tagPermission.permissionId == permissionId &&
+                            tagPermission.tagId == tag.id
+                    },
+                )
+            }
+        }
 
     @Test
     fun `filterTasksByTagPermissions should return empty list when no tasks provided`() =

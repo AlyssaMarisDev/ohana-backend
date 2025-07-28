@@ -1,7 +1,7 @@
 package com.ohana.domain.task
 
 import com.ohana.data.unitOfWork.*
-import com.ohana.domain.tags.TagPermissionManager
+import com.ohana.domain.permissions.TagPermissionManager
 import com.ohana.domain.tags.TaskTagManager
 import com.ohana.domain.validators.HouseholdMemberValidator
 import com.ohana.shared.enums.TaskStatus
