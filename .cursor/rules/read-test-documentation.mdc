@@ -1,8 +1,0 @@
----
-description: When writing or updating unit tests
-alwaysApply: false
----
-
-- Read and apply the patterns shown in this file
-
-@docs/testing/unit-tests.md

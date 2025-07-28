@@ -1,7 +1,3 @@
----
-alwaysApply: true
----
-
 # Ohana Backend - AI Agent Guide
 
 ## Project Overview
