@@ -62,6 +62,23 @@ class JdbiMemberRepository(
             ).firstOrNull()
     }
 
+    override fun findByHouseholdId(householdId: String): List<Member> {
+        val selectQuery = """
+            SELECT m.id, m.name, m.age, m.gender, m.email
+            FROM members m
+            INNER JOIN household_members hm ON m.id = hm.member_id
+            WHERE hm.household_id = :householdId AND hm.is_active = true
+        """
+
+        return DatabaseUtils
+            .get(
+                handle,
+                selectQuery,
+                mapOf("householdId" to householdId),
+                Member::class,
+            )
+    }
+
     override fun create(member: Member): Member {
         val insertQuery = """
             INSERT INTO members (id, name, age, gender, email)

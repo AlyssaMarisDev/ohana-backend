@@ -20,8 +20,8 @@ class MemberController(
 ) {
     fun Route.registerMemberRoutes() {
         authenticate("auth-jwt") {
-            route("/members") {
-                get("/{memberId}") {
+            route("") {
+                get("/members/{memberId}") {
                     val id =
                         call.parameters["memberId"]
                             ?: throw ValidationException(
@@ -34,12 +34,7 @@ class MemberController(
                     call.respond(HttpStatusCode.OK, response)
                 }
 
-                get("") {
-                    val response = memberGetAllHandler.handle()
-                    call.respond(HttpStatusCode.OK, response)
-                }
-
-                put("/{memberId}") {
+                put("/members/{memberId}") {
                     val id =
                         call.parameters["memberId"]
                             ?: throw ValidationException(
@@ -52,6 +47,21 @@ class MemberController(
 
                     val userId = getUserId(call.principal())
                     val response = memberUpdateByIdHandler.handle(userId, id, domainRequest)
+                    call.respond(HttpStatusCode.OK, response)
+                }
+            }
+
+            route("/households/{householdId}/members") {
+                get("") {
+                    val householdId =
+                        call.parameters["householdId"]
+                            ?: throw ValidationException(
+                                "Household ID is required",
+                                listOf(ValidationError("householdId", "Household ID is required")),
+                            )
+
+                    val userId = getUserId(call.principal())
+                    val response = memberGetAllHandler.handle(userId, householdId)
                     call.respond(HttpStatusCode.OK, response)
                 }
             }

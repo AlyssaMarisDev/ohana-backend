@@ -52,7 +52,7 @@ val appModule =
         single { LogoutHandler(get()) }
 
         // Members handlers - now only need UnitOfWork
-        single { MemberGetAllHandler(get()) }
+        single { MemberGetAllHandler(get(), get()) }
         single { MemberGetByIdHandler(get()) }
         single { MemberUpdateByIdHandler(get()) }
 
