@@ -3,6 +3,7 @@ package com.ohana.domain.household
 import com.ohana.data.household.*
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.permissions.TagPermissionManager
+import com.ohana.domain.tags.DefaultTagService
 import com.ohana.shared.enums.HouseholdMemberRole
 import java.time.Instant
 import java.util.UUID
@@ -10,6 +11,7 @@ import java.util.UUID
 class HouseholdCreationHandler(
     private val unitOfWork: UnitOfWork,
     private val tagPermissionManager: TagPermissionManager,
+    private val defaultTagService: DefaultTagService,
 ) {
     data class Request(
         val id: String,
@@ -54,8 +56,12 @@ class HouseholdCreationHandler(
                     ),
                 )
 
-            // Create default permissions for the household member and give them access to all default tags
-            tagPermissionManager.createDefaultPermissions(context, householdMember.id)
+            // Create default tags for the household
+            val defaultTags = defaultTagService.createDefaultTags(context, request.id)
+
+            // Create permissions for the household member and give them access to all default tags
+            val tagIds = defaultTags.map { it.id }
+            tagPermissionManager.createPermissionsWithTags(context, householdMember.id, tagIds)
 
             // Return response
             Response(

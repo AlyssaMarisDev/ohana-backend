@@ -109,6 +109,22 @@ class JdbiHouseholdRepository(
             ).firstOrNull()
     }
 
+    override fun findHouseholdMemberById(householdMemberId: String): HouseholdMember? {
+        val selectQuery = """
+            SELECT id, household_id, member_id, role, is_active, is_default, invited_by, joined_at
+            FROM household_members
+            WHERE id = :householdMemberId
+        """
+
+        return DatabaseUtils
+            .get(
+                handle,
+                selectQuery,
+                mapOf("householdMemberId" to householdMemberId),
+                HouseholdMember::class,
+            ).firstOrNull()
+    }
+
     override fun findMembersByHouseholdId(householdId: String): List<HouseholdMember> {
         val selectQuery = """
             SELECT id, household_id, member_id, role, is_active, is_default, invited_by, joined_at

@@ -12,6 +12,7 @@ import com.ohana.domain.auth.*
 import com.ohana.domain.household.*
 import com.ohana.domain.member.*
 import com.ohana.domain.permissions.TagPermissionManager
+import com.ohana.domain.tags.DefaultTagService
 import com.ohana.domain.tags.TagCreationHandler
 import com.ohana.domain.tags.TagGetAllHandler
 import com.ohana.domain.tags.TaskTagManager
@@ -45,6 +46,7 @@ val appModule =
         single { HouseholdMemberValidator() }
         single { TaskTagManager() }
         single { TagPermissionManager(get()) }
+        single { DefaultTagService() }
 
         // Auth handlers
         single { RegistrationHandler(get()) }
@@ -66,7 +68,7 @@ val appModule =
 
         // Household handlers
         single { HouseholdAcceptInviteHandler(get()) }
-        single { HouseholdCreationHandler(get(), get()) }
+        single { HouseholdCreationHandler(get(), get(), get()) }
         single { HouseholdGetAllHandler(get()) }
         single { HouseholdGetByIdHandler(get(), get()) }
         single { HouseholdInviteMemberHandler(get()) }

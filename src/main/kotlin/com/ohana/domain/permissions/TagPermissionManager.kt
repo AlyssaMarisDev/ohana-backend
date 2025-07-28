@@ -12,11 +12,12 @@ class TagPermissionManager(
     private val taskTagManager: TaskTagManager,
 ) {
     /**
-     * Creates default permissions for a household member and gives them access to all default tags
+     * Creates permissions for a household member and gives them access to specified tags
      */
-    fun createDefaultPermissions(
+    fun createPermissionsWithTags(
         context: UnitOfWorkContext,
         householdMemberId: String,
+        tagIds: List<String>,
     ): Permission {
         // Create permission for the household member
         val permission =
@@ -29,16 +30,13 @@ class TagPermissionManager(
                 ),
             )
 
-        // Get all default tags
-        val defaultTags = context.tags.findDefaultTags()
-
-        // Create tag permissions for all default tags
-        defaultTags.forEach { tag ->
+        // Create tag permissions for the specified tags
+        tagIds.forEach { tagId ->
             context.tagPermissions.create(
                 TagPermission(
                     id = UUID.randomUUID().toString(),
                     permissionId = permission.id,
-                    tagId = tag.id,
+                    tagId = tagId,
                     createdAt = Instant.now(),
                 ),
             )
@@ -89,7 +87,7 @@ class TagPermissionManager(
 
     /**
      * Filters tags based on user's tag permissions
-     * Returns only tags that the user can view (default tags + permitted household tags)
+     * Returns only tags that the user can view (household tags they have permission for)
      */
     fun getUserViewableTags(
         context: UnitOfWorkContext,

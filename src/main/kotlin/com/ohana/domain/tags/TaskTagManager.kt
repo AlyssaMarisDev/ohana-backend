@@ -37,8 +37,8 @@ class TaskTagManager {
         }
 
         tags.forEach { tag ->
-            // Default tags can be used by any household
-            if (!tag.isDefault && tag.householdId != task.householdId) {
+            // All tags must belong to the same household as the task
+            if (tag.householdId != task.householdId) {
                 throw ValidationException("Tag ${tag.id} does not belong to the same household as task $taskId")
             }
         }

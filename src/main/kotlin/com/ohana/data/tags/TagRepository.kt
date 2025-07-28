@@ -7,10 +7,6 @@ interface TagRepository {
 
     fun findByHouseholdId(householdId: String): List<Tag>
 
-    fun findDefaultTags(): List<Tag>
-
-    fun findByHouseholdIdWithDefaults(householdId: String): List<Tag>
-
     fun create(tag: Tag): Tag
 
     fun update(tag: Tag): Tag

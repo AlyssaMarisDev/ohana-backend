@@ -17,7 +17,7 @@ class JdbiTagRepository(
 
     override fun findById(id: String): Tag? {
         val selectQuery = """
-            SELECT id, name, color, household_id, is_default, created_at, updated_at
+            SELECT id, name, color, household_id, created_at, updated_at
             FROM tags
             WHERE id = :id
         """
@@ -38,7 +38,7 @@ class JdbiTagRepository(
 
         val placeholders = ids.mapIndexed { index, _ -> ":id_$index" }.joinToString(", ")
         val selectQuery = """
-            SELECT id, name, color, household_id, is_default, created_at, updated_at
+            SELECT id, name, color, household_id, created_at, updated_at
             FROM tags
             WHERE id IN ($placeholders)
         """
@@ -56,7 +56,7 @@ class JdbiTagRepository(
 
     override fun findByHouseholdId(householdId: String): List<Tag> {
         val selectQuery = """
-            SELECT id, name, color, household_id, is_default, created_at, updated_at
+            SELECT id, name, color, household_id, created_at, updated_at
             FROM tags
             WHERE household_id = :householdId
             ORDER BY name
@@ -71,44 +71,10 @@ class JdbiTagRepository(
             )
     }
 
-    override fun findDefaultTags(): List<Tag> {
-        val selectQuery = """
-            SELECT id, name, color, household_id, is_default, created_at, updated_at
-            FROM tags
-            WHERE is_default = TRUE
-            ORDER BY name
-        """
-
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf(),
-                Tag::class,
-            )
-    }
-
-    override fun findByHouseholdIdWithDefaults(householdId: String): List<Tag> {
-        val selectQuery = """
-            SELECT id, name, color, household_id, is_default, created_at, updated_at
-            FROM tags
-            WHERE household_id = :householdId OR is_default = TRUE
-            ORDER BY is_default DESC, name
-        """
-
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("householdId" to householdId),
-                Tag::class,
-            )
-    }
-
     override fun create(tag: Tag): Tag {
         val insertQuery = """
-            INSERT INTO tags (id, name, color, household_id, is_default, created_at, updated_at)
-            VALUES (:id, :name, :color, :householdId, :isDefault, :createdAt, :updatedAt)
+            INSERT INTO tags (id, name, color, household_id, created_at, updated_at)
+            VALUES (:id, :name, :color, :householdId, :createdAt, :updatedAt)
         """
 
         val insertedRows =
@@ -120,7 +86,6 @@ class JdbiTagRepository(
                     "name" to tag.name,
                     "color" to tag.color,
                     "householdId" to tag.householdId,
-                    "isDefault" to tag.isDefault,
                     "createdAt" to tag.createdAt,
                     "updatedAt" to tag.updatedAt,
                 ),
@@ -178,7 +143,6 @@ class JdbiTagRepository(
                 name = rs.getString("name"),
                 color = rs.getString("color"),
                 householdId = rs.getString("household_id"),
-                isDefault = rs.getBoolean("is_default"),
                 createdAt = rs.getTimestamp("created_at").toInstant(),
                 updatedAt = rs.getTimestamp("updated_at").toInstant(),
             )

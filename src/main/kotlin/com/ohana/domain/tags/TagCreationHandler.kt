@@ -21,7 +21,6 @@ class TagCreationHandler(
         val name: String,
         val color: String,
         val householdId: String,
-        val isDefault: Boolean,
         val createdAt: String,
         val updatedAt: String,
     )
@@ -57,7 +56,6 @@ class TagCreationHandler(
                     name = request.name,
                     color = request.color,
                     householdId = householdId,
-                    isDefault = false,
                     createdAt = now,
                     updatedAt = now,
                 )
@@ -68,8 +66,7 @@ class TagCreationHandler(
                 id = createdTag.id,
                 name = createdTag.name,
                 color = createdTag.color,
-                householdId = createdTag.householdId!!,
-                isDefault = createdTag.isDefault,
+                householdId = createdTag.householdId,
                 createdAt = createdTag.createdAt.toString(),
                 updatedAt = createdTag.updatedAt.toString(),
             )
