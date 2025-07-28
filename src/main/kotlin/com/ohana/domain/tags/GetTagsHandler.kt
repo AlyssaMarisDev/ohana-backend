@@ -1,6 +1,7 @@
 package com.ohana.domain.tags
 
 import com.ohana.data.unitOfWork.*
+import com.ohana.domain.permissions.TagPermissionManager
 import com.ohana.domain.validators.HouseholdMemberValidator
 
 class GetTagsHandler(
