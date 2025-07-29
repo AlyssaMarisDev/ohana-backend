@@ -15,4 +15,6 @@ interface TaskTagRepository {
         taskId: String,
         tagIds: List<String>,
     ): Boolean
+
+    fun deleteByTagId(tagId: String): Boolean
 }

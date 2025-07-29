@@ -14,6 +14,7 @@ import com.ohana.domain.member.*
 import com.ohana.domain.permissions.TagPermissionManager
 import com.ohana.domain.tags.DefaultTagService
 import com.ohana.domain.tags.TagCreationHandler
+import com.ohana.domain.tags.TagDeleteHandler
 import com.ohana.domain.tags.TagGetAllHandler
 import com.ohana.domain.tags.TagUpdateHandler
 import com.ohana.domain.tags.TaskTagManager
@@ -78,6 +79,7 @@ val appModule =
         single { TagGetAllHandler(get(), get(), get()) }
         single { TagCreationHandler(get(), get()) }
         single { TagUpdateHandler(get(), get()) }
+        single { TagDeleteHandler(get(), get()) }
 
         // Controllers
         single { AuthController(get(), get(), get(), get()) }
@@ -85,5 +87,5 @@ val appModule =
         single { HouseholdController(get(), get(), get(), get(), get()) }
         single { MemberController(get(), get(), get()) }
         single { TaskController(get(), get(), get(), get(), get()) }
-        single { TagsController(get(), get(), get()) }
+        single { TagsController(get(), get(), get(), get()) }
     }

@@ -148,6 +148,21 @@ class JdbiTaskTagRepository(
         return deletedRows > 0
     }
 
+    override fun deleteByTagId(tagId: String): Boolean {
+        val deleteQuery = """
+            DELETE FROM task_tags WHERE tag_id = :tagId
+        """
+
+        val deletedRows =
+            DatabaseUtils.delete(
+                handle,
+                deleteQuery,
+                mapOf("tagId" to tagId),
+            )
+
+        return deletedRows > 0
+    }
+
     private class TaskTagRowMapper : RowMapper<TaskTag> {
         override fun map(
             rs: ResultSet,
