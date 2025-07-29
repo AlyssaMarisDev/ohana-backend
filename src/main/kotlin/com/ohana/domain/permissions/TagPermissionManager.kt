@@ -46,6 +46,39 @@ class TagPermissionManager(
     }
 
     /**
+     * Gives an existing household member permission to view specific tags
+     * Assumes the member already has a permission record
+     */
+    fun giveTagPermissionsToMember(
+        context: UnitOfWorkContext,
+        householdMemberId: String,
+        tagIds: List<String>,
+    ) {
+        // Get the existing permission for the household member
+        val permission =
+            context.permissions.findByHouseholdMemberId(householdMemberId)
+                ?: throw IllegalArgumentException("No permission record found for household member")
+
+        // Get existing tag permissions to avoid duplicates
+        val existingTagPermissions = context.tagPermissions.findByPermissionId(permission.id)
+        val existingTagIds = existingTagPermissions.map { it.tagId }.toSet()
+
+        // Create tag permissions for tags that don't already exist
+        tagIds.forEach { tagId ->
+            if (tagId !in existingTagIds) {
+                context.tagPermissions.create(
+                    TagPermission(
+                        id = UUID.randomUUID().toString(),
+                        permissionId = permission.id,
+                        tagId = tagId,
+                        createdAt = Instant.now(),
+                    ),
+                )
+            }
+        }
+    }
+
+    /**
      * Filters tasks based on user's tag permissions
      * Returns only tasks that have at least one tag the user can view
      */
@@ -66,7 +99,8 @@ class TagPermissionManager(
         }
 
         // Get the tags that the user can view
-        val userViewableTagIds = getUserViewableTagIds(context, permission.id)
+        val userViewableTagPermissions = context.tagPermissions.findByPermissionId(permission.id)
+        val userViewableTagIds = userViewableTagPermissions.map { it.tagId }.toSet()
 
         // Get all task tags for the given tasks
         val taskTagsMap = taskTagManager.getTasksTags(context, taskIds)
@@ -101,16 +135,9 @@ class TagPermissionManager(
         }
 
         // Get the tags that the user can view
-        val userViewableTagIds = getUserViewableTagIds(context, permission.id)
+        val userViewableTagPermissions = context.tagPermissions.findByPermissionId(permission.id)
+        val userViewableTagIds = userViewableTagPermissions.map { it.tagId }.toSet()
 
         return context.tags.findByIds(userViewableTagIds.toList())
-    }
-
-    private fun getUserViewableTagIds(
-        context: UnitOfWorkContext,
-        permissionId: String,
-    ): Set<String> {
-        val userViewableTagPermissions = context.tagPermissions.findByPermissionId(permissionId)
-        return userViewableTagPermissions.map { it.tagId }.toSet()
     }
 }

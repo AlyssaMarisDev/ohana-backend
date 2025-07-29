@@ -77,7 +77,7 @@ val appModule =
 
         // Tags handlers
         single { TagGetAllHandler(get(), get(), get()) }
-        single { TagCreationHandler(get(), get()) }
+        single { TagCreationHandler(get(), get(), get()) }
         single { TagUpdateHandler(get(), get()) }
         single { TagDeleteHandler(get(), get()) }
 

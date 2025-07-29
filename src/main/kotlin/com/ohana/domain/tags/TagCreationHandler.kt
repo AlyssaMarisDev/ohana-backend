@@ -2,6 +2,7 @@ package com.ohana.domain.tags
 
 import com.ohana.data.tags.Tag
 import com.ohana.data.unitOfWork.UnitOfWork
+import com.ohana.domain.permissions.TagPermissionManager
 import com.ohana.domain.validators.HouseholdMemberValidator
 import com.ohana.shared.Guid
 import com.ohana.shared.exceptions.ConflictException
@@ -10,6 +11,7 @@ import java.time.Instant
 class TagCreationHandler(
     private val unitOfWork: UnitOfWork,
     private val validator: HouseholdMemberValidator,
+    private val tagPermissionManager: TagPermissionManager,
 ) {
     data class Request(
         val name: String,
@@ -32,7 +34,7 @@ class TagCreationHandler(
     ): Response =
         unitOfWork.execute { context ->
             // Validate user is member of household and get household member ID
-            validator.validate(context, householdId, userId)
+            val householdMemberId = validator.validate(context, householdId, userId)
 
             // Check if tag with same name already exists in this household
             val existingTags =
@@ -61,6 +63,9 @@ class TagCreationHandler(
                 )
 
             val createdTag = context.tags.create(tag)
+
+            // Give the creator permissions to view this tag
+            tagPermissionManager.giveTagPermissionsToMember(context, householdMemberId, listOf(createdTag.id))
 
             Response(
                 id = createdTag.id,
