@@ -73,7 +73,7 @@ val appModule =
         single { HouseholdCreationHandler(get(), get(), get()) }
         single { HouseholdGetAllHandler(get()) }
         single { HouseholdGetByIdHandler(get(), get()) }
-        single { HouseholdInviteMemberHandler(get()) }
+        single { HouseholdInviteMemberHandler(get(), get()) }
 
         // Tags handlers
         single { TagGetAllHandler(get(), get(), get()) }
