@@ -2,6 +2,7 @@ package com.ohana.domain.validators
 
 import com.ohana.data.unitOfWork.UnitOfWorkContext
 import com.ohana.shared.Guid
+import com.ohana.shared.enums.HouseholdMemberStatus
 import com.ohana.shared.exceptions.AuthorizationException
 import com.ohana.shared.exceptions.NotFoundException
 
@@ -22,7 +23,7 @@ class HouseholdMemberValidator {
             context.households.findMemberById(householdId, userId)
                 ?: throw AuthorizationException("User is not a member of the household")
 
-        if (!member.isActive) {
+        if (member.status != HouseholdMemberStatus.ACTIVE) {
             throw AuthorizationException("User is not an active member of the household")
         }
 

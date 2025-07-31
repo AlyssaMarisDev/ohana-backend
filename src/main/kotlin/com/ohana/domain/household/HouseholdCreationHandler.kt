@@ -5,6 +5,7 @@ import com.ohana.data.unitOfWork.*
 import com.ohana.domain.permissions.TagPermissionManager
 import com.ohana.domain.tags.DefaultTagService
 import com.ohana.shared.enums.HouseholdMemberRole
+import com.ohana.shared.enums.HouseholdMemberStatus
 import java.time.Instant
 import java.util.UUID
 
@@ -49,7 +50,7 @@ class HouseholdCreationHandler(
                         householdId = request.id,
                         memberId = userId,
                         role = HouseholdMemberRole.ADMIN,
-                        isActive = true,
+                        status = HouseholdMemberStatus.ACTIVE,
                         isDefault = true,
                         invitedBy = userId,
                         joinedAt = Instant.now(),

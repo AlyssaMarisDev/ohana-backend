@@ -4,9 +4,9 @@ import com.ohana.data.household.HouseholdMember
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.permissions.TagPermissionManager
 import com.ohana.shared.enums.HouseholdMemberRole
+import com.ohana.shared.enums.HouseholdMemberStatus
 import com.ohana.shared.exceptions.AuthorizationException
 import com.ohana.shared.exceptions.ConflictException
-import com.ohana.shared.exceptions.ValidationException
 import java.util.UUID
 
 class HouseholdInviteMemberHandler(
@@ -47,7 +47,7 @@ class HouseholdInviteMemberHandler(
                     householdId = householdId,
                     memberId = request.memberId,
                     role = request.role,
-                    isActive = false,
+                    status = HouseholdMemberStatus.INVITED,
                     invitedBy = userId,
                 ),
             )

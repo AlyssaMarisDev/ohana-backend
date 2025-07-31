@@ -67,7 +67,7 @@ class JdbiMemberRepository(
             SELECT m.id, m.name, m.age, m.gender, m.email
             FROM members m
             INNER JOIN household_members hm ON m.id = hm.member_id
-            WHERE hm.household_id = :householdId AND hm.is_active = true
+            WHERE hm.household_id = :householdId AND hm.status = 'active'
         """
 
         return DatabaseUtils

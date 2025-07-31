@@ -1,6 +1,7 @@
 package com.ohana.domain.household
 
 import com.ohana.data.unitOfWork.*
+import com.ohana.shared.enums.HouseholdMemberStatus
 import com.ohana.shared.exceptions.AuthorizationException
 import java.time.Instant
 
@@ -20,7 +21,7 @@ class HouseholdAcceptInviteHandler(
         // Update household member to active
         context.households.updateMember(
             householdMember.copy(
-                isActive = true,
+                status = HouseholdMemberStatus.ACTIVE,
                 joinedAt = Instant.now(),
             ),
         )

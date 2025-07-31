@@ -44,7 +44,7 @@ CREATE TABLE `household_members` (
   `household_id` char(36) NOT NULL COMMENT 'Reference to household',
   `member_id` char(36) NOT NULL COMMENT 'Reference to member',
   `role` varchar(50) DEFAULT 'member' COMMENT 'Role in the household (admin, member)',
-  `is_active` tinyint(1) DEFAULT 0 COMMENT 'Whether the member is active in the household',
+  `status` varchar(20) NOT NULL DEFAULT 'invited' COMMENT 'Status of the member (active, invited, inactive)',
   `is_default` tinyint(1) DEFAULT 0 COMMENT 'Whether this is the default household for the member',
   `invited_by` char(36) DEFAULT NULL COMMENT 'ID of the member who sent the invitation',
   `invited_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When the invitation was sent',
@@ -57,7 +57,8 @@ CREATE TABLE `household_members` (
   KEY `idx_household_id` (`household_id`),
   KEY `idx_member_id` (`member_id`),
   KEY `idx_invited_by` (`invited_by`),
-  KEY `idx_active_members` (`household_id`, `is_active`),
+  KEY `idx_household_members_status` (`household_id`, `status`),
+  KEY `idx_household_member_status` (`status`),
   KEY `idx_default_household` (`member_id`, `is_default`),
   CONSTRAINT `fk_household_members_household_id` FOREIGN KEY (`household_id`) REFERENCES `households` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_household_members_member_id` FOREIGN KEY (`member_id`) REFERENCES `members` (`id`) ON DELETE CASCADE,
@@ -149,8 +150,8 @@ INSERT INTO `households` (`id`, `name`, `description`, `created_by`) VALUES
 ('550e8400-e29b-41d4-a716-446655440001', 'Smith Family', 'The Smith family household', '550e8400-e29b-41d4-a716-446655440000');
 
 -- Sample household member
-INSERT INTO `household_members` (`id`, `household_id`, `member_id`, `role`, `is_active`, `invited_by`, `joined_at`) VALUES
-('550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440000', 'admin', 1, '550e8400-e29b-41d4-a716-446655440000', NOW());
+INSERT INTO `household_members` (`id`, `household_id`, `member_id`, `role`, `status`, `invited_by`, `joined_at`) VALUES
+('550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440000', 'admin', 'active', '550e8400-e29b-41d4-a716-446655440000', NOW());
 
 -- Sample task
 INSERT INTO `tasks` (`id`, `title`, `description`, `due_date`, `status`, `created_by`, `household_id`) VALUES

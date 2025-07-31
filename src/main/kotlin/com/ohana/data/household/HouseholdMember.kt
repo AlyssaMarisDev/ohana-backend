@@ -1,6 +1,7 @@
 package com.ohana.data.household
 
 import com.ohana.shared.enums.HouseholdMemberRole
+import com.ohana.shared.enums.HouseholdMemberStatus
 import java.time.Instant
 
 data class HouseholdMember(
@@ -8,7 +9,7 @@ data class HouseholdMember(
     val householdId: String,
     val memberId: String,
     val role: HouseholdMemberRole,
-    val isActive: Boolean = false,
+    val status: HouseholdMemberStatus,
     val isDefault: Boolean = false,
     val invitedBy: String? = null,
     val joinedAt: Instant? = null,

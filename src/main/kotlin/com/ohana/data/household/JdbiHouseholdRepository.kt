@@ -1,6 +1,7 @@
 package com.ohana.data.household
 
 import com.ohana.data.utils.DatabaseUtils
+import com.ohana.shared.enums.HouseholdMemberStatus
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
@@ -52,7 +53,7 @@ class JdbiHouseholdRepository(
             SELECT h.id, h.name, h.description, h.created_by
             FROM households h
             INNER JOIN household_members hm ON h.id = hm.household_id
-            WHERE hm.member_id = :memberId AND hm.is_active = true
+            WHERE hm.member_id = :memberId AND hm.status = 'active'
         """
 
         return DatabaseUtils
@@ -92,7 +93,7 @@ class JdbiHouseholdRepository(
         memberId: String,
     ): HouseholdMember? {
         val selectQuery = """
-            SELECT id, household_id, member_id, role, is_active, is_default, invited_by, joined_at
+            SELECT id, household_id, member_id, role, status, is_default, invited_by, joined_at
             FROM household_members
             WHERE household_id = :householdId AND member_id = :memberId
         """
@@ -111,7 +112,7 @@ class JdbiHouseholdRepository(
 
     override fun findHouseholdMemberById(householdMemberId: String): HouseholdMember? {
         val selectQuery = """
-            SELECT id, household_id, member_id, role, is_active, is_default, invited_by, joined_at
+            SELECT id, household_id, member_id, role, status, is_default, invited_by, joined_at
             FROM household_members
             WHERE id = :householdMemberId
         """
@@ -127,7 +128,7 @@ class JdbiHouseholdRepository(
 
     override fun findMembersByHouseholdId(householdId: String): List<HouseholdMember> {
         val selectQuery = """
-            SELECT id, household_id, member_id, role, is_active, is_default, invited_by, joined_at
+            SELECT id, household_id, member_id, role, status, is_default, invited_by, joined_at
             FROM household_members
             WHERE household_id = :householdId
         """
@@ -143,8 +144,8 @@ class JdbiHouseholdRepository(
 
     override fun createMember(member: HouseholdMember): HouseholdMember {
         val insertQuery = """
-            INSERT INTO household_members (id, household_id, member_id, role, is_active, is_default, invited_by, joined_at)
-            VALUES (:id, :householdId, :memberId, :role, :isActive, :isDefault, :invitedBy, :joinedAt)
+            INSERT INTO household_members (id, household_id, member_id, role, status, is_default, invited_by, joined_at)
+            VALUES (:id, :householdId, :memberId, :role, :status, :isDefault, :invitedBy, :joinedAt)
         """
 
         val insertedRows =
@@ -156,7 +157,7 @@ class JdbiHouseholdRepository(
                     "householdId" to member.householdId,
                     "memberId" to member.memberId,
                     "role" to member.role.name,
-                    "isActive" to member.isActive,
+                    "status" to member.status.name.lowercase(),
                     "isDefault" to member.isDefault,
                     "invitedBy" to member.invitedBy,
                     "joinedAt" to member.joinedAt,
@@ -172,7 +173,7 @@ class JdbiHouseholdRepository(
     override fun updateMember(member: HouseholdMember): HouseholdMember {
         val updateQuery = """
             UPDATE household_members
-            SET is_active = :isActive,
+            SET status = :status,
                 is_default = :isDefault,
                 joined_at = :joinedAt
             WHERE household_id = :householdId AND member_id = :memberId
@@ -185,7 +186,7 @@ class JdbiHouseholdRepository(
                 mapOf(
                     "householdId" to member.householdId,
                     "memberId" to member.memberId,
-                    "isActive" to member.isActive,
+                    "status" to member.status.name.lowercase(),
                     "isDefault" to member.isDefault,
                     "joinedAt" to member.joinedAt,
                 ),
@@ -199,7 +200,7 @@ class JdbiHouseholdRepository(
 
     override fun findDefaultHouseholdByMemberId(memberId: String): HouseholdMember? {
         val selectQuery = """
-            SELECT id, household_id, member_id, role, is_active, is_default, invited_by, joined_at
+            SELECT id, household_id, member_id, role, status, is_default, invited_by, joined_at
             FROM household_members
             WHERE member_id = :memberId AND is_default = true
         """
@@ -278,7 +279,7 @@ class JdbiHouseholdRepository(
                 role =
                     com.ohana.shared.enums.HouseholdMemberRole
                         .valueOf(rs.getString("role").uppercase()),
-                isActive = rs.getBoolean("is_active"),
+                status = HouseholdMemberStatus.valueOf(rs.getString("status").uppercase()),
                 isDefault = rs.getBoolean("is_default"),
                 invitedBy = rs.getString("invited_by"),
                 joinedAt = rs.getTimestamp("joined_at")?.toInstant(),
