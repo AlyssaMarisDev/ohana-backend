@@ -11,38 +11,34 @@ data class HouseholdCreationRequest(
     val description: String?,
 ) {
     fun toDomain(): HouseholdCreationHandler.Request {
-        val errors = mutableListOf<ValidationError>()
-
-        if (id == null) {
-            errors.add(ValidationError("id", "Household ID is required"))
-        } else if (id.isBlank()) {
-            errors.add(ValidationError("id", "Household ID cannot be blank"))
-        } else if (!Guid.isValid(id)) {
-            errors.add(ValidationError("id", "Household ID must be a valid GUID"))
-        }
-
-        if (name == null) {
-            errors.add(ValidationError("name", "Household name is required"))
-        } else if (name.isBlank()) {
-            errors.add(ValidationError("name", "Household name cannot be blank"))
-        } else if (name.length > 255) {
-            errors.add(ValidationError("name", "Household name must be at most 255 characters long"))
-        }
-
-        if (description == null) {
-            errors.add(ValidationError("description", "Household description is required"))
-        } else if (description.length > 1000) {
-            errors.add(ValidationError("description", "Household description must be at most 1000 characters long"))
-        }
-
-        if (errors.isNotEmpty()) {
-            throw ValidationException("Validation failed", errors)
-        }
+        validate(this)
 
         return HouseholdCreationHandler.Request(
             id = id ?: Guid.generate(),
             name = name!!,
             description = description!!,
         )
+    }
+
+    companion object {
+        private fun validate(request: HouseholdCreationRequest) {
+            val errors = mutableListOf<ValidationError>()
+
+            if (request.id == null || !Guid.isValid(request.id)) {
+                errors.add(ValidationError(HouseholdCreationHandler.Request::id.name, "Household ID is required and must be a valid GUID"))
+            }
+
+            if (request.name == null || request.name.isBlank() || request.name.length > 255) {
+                errors.add(ValidationError(HouseholdCreationHandler.Request::name.name, "Household name is required and must be between 1 and 255 characters"))
+            }
+
+            if (request.description == null || request.description.length > 1000) {
+                errors.add(ValidationError(HouseholdCreationHandler.Request::description.name, "Household description is required and must be at most 1000 characters long"))
+            }
+
+            if (errors.isNotEmpty()) {
+                throw ValidationException("Validation failed", errors)
+            }
+        }
     }
 }

@@ -40,6 +40,8 @@ dependencies {
     // Serialization
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 
     // Dependency Injection
     implementation("io.insert-koin:koin-core:$koinVersion")

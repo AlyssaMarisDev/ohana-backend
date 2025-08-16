@@ -8,20 +8,24 @@ data class LogoutRequest(
     val refreshToken: String?,
 ) {
     fun toDomain(): LogoutHandler.Request {
-        val errors = mutableListOf<ValidationError>()
-
-        if (refreshToken == null) {
-            errors.add(ValidationError("refreshToken", "Refresh token is required"))
-        } else if (refreshToken.isBlank()) {
-            errors.add(ValidationError("refreshToken", "Refresh token cannot be blank"))
-        }
-
-        if (errors.isNotEmpty()) {
-            throw ValidationException("Validation failed", errors)
-        }
+        validate(this)
 
         return LogoutHandler.Request(
             refreshToken = refreshToken!!,
         )
+    }
+
+    companion object {
+        private fun validate(request: LogoutRequest) {
+            val errors = mutableListOf<ValidationError>()
+
+            if (request.refreshToken == null || request.refreshToken.isBlank()) {
+                errors.add(ValidationError(LogoutHandler.Request::refreshToken.name, "Refresh token is required"))
+            }
+
+            if (errors.isNotEmpty()) {
+                throw ValidationException("Validation failed", errors)
+            }
+        }
     }
 }

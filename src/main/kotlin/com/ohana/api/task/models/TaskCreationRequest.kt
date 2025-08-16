@@ -17,61 +17,7 @@ data class TaskCreationRequest(
     val tagIds: List<String>? = emptyList(),
 ) {
     fun toDomain(): TaskCreationHandler.Request {
-        val errors = mutableListOf<ValidationError>()
-
-        if (id == null) {
-            errors.add(ValidationError("id", "Task ID is required"))
-        } else if (id.isBlank()) {
-            errors.add(ValidationError("id", "Task ID cannot be blank"))
-        } else if (!Guid.isValid(id)) {
-            errors.add(ValidationError("id", "Task ID must be a valid GUID"))
-        }
-
-        if (title == null) {
-            errors.add(ValidationError("title", "Title is required"))
-        } else if (title.isBlank()) {
-            errors.add(ValidationError("title", "Title cannot be blank"))
-        } else if (title.length > 255) {
-            errors.add(ValidationError("title", "Title must be at most 255 characters long"))
-        }
-
-        if (description == null) {
-            errors.add(ValidationError("description", "Description is required"))
-        } else if (description.length > 1000) {
-            errors.add(ValidationError("description", "Description must be at most 1000 characters long"))
-        }
-
-        // Due date is optional, so no validation needed
-
-        if (status == null) {
-            errors.add(ValidationError("status", "Status is required"))
-        } else {
-            try {
-                TaskStatus.valueOf(status)
-            } catch (e: IllegalArgumentException) {
-                errors.add(ValidationError("status", "Status must be one of: PENDING, IN_PROGRESS, COMPLETED"))
-            }
-        }
-
-        if (householdId == null) {
-            errors.add(ValidationError("householdId", "Household ID is required"))
-        } else if (householdId.isBlank()) {
-            errors.add(ValidationError("householdId", "Household ID cannot be blank"))
-        } else if (!Guid.isValid(householdId)) {
-            errors.add(ValidationError("householdId", "Household ID must be a valid GUID"))
-        }
-
-        tagIds?.forEach { tagId ->
-            if (tagId.isBlank()) {
-                errors.add(ValidationError("tagIds", "Tag ID cannot be blank"))
-            } else if (!Guid.isValid(tagId)) {
-                errors.add(ValidationError("tagIds", "Tag ID must be a valid GUID"))
-            }
-        }
-
-        if (errors.isNotEmpty()) {
-            throw ValidationException("Validation failed", errors)
-        }
+        validate(this)
 
         return TaskCreationHandler.Request(
             id = id ?: Guid.generate(),
@@ -82,5 +28,45 @@ data class TaskCreationRequest(
             householdId = householdId!!,
             tagIds = tagIds ?: emptyList(),
         )
+    }
+
+    companion object {
+        private fun validate(request: TaskCreationRequest) {
+          val errors = mutableListOf<ValidationError>()
+
+          if (request.id == null || !Guid.isValid(request.id)) {
+              errors.add(ValidationError(TaskCreationHandler.Request::id.name, "Task ID is required and must be a valid GUID"))
+          }
+
+          if (request.title == null || request.title.isBlank() || request.title.length > 255) {
+              errors.add(ValidationError(TaskCreationHandler.Request::title.name, "Title is required and must be between 1 and 255 characters"))
+          }
+
+          if (request.description == null || request.description.length > 1000) {
+              errors.add(ValidationError(TaskCreationHandler.Request::description.name, "Description is required and must be at most 1000 characters long"))
+          }
+
+          if (request.status == null) {
+              errors.add(ValidationError(TaskCreationHandler.Request::status.name, "Status is required and must be one of: ${TaskStatus.allTaskStatusesString()}"))
+          } else {
+              try {
+                  TaskStatus.valueOf(request.status)
+              } catch (e: IllegalArgumentException) {
+                  errors.add(ValidationError(TaskCreationHandler.Request::status.name, "Status must be one of: ${TaskStatus.allTaskStatusesString()}"))
+              }
+          }
+
+          if (request.householdId == null || !Guid.isValid(request.householdId)) {
+              errors.add(ValidationError(TaskCreationHandler.Request::householdId.name, "Household ID is required and must be a valid GUID"))
+          }
+
+          if (request.tagIds?.any { tagId -> !Guid.isValid(tagId) } == true) {
+              errors.add(ValidationError(TaskCreationHandler.Request::tagIds.name, "All tag IDs must be valid GUIDs"))
+          }
+
+          if (errors.isNotEmpty()) {
+              throw ValidationException("Validation failed", errors)
+          }
+        }
     }
 }

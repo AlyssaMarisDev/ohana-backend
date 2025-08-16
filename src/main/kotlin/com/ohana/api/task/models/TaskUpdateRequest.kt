@@ -15,46 +15,7 @@ data class TaskUpdateRequest(
     val tagIds: List<String>? = emptyList(),
 ) {
     fun toDomain(): TaskUpdateByIdHandler.Request {
-        val errors = mutableListOf<ValidationError>()
-
-        if (title == null) {
-            errors.add(ValidationError("title", "Title is required"))
-        } else if (title.isBlank()) {
-            errors.add(ValidationError("title", "Title cannot be blank"))
-        } else if (title.length > 255) {
-            errors.add(ValidationError("title", "Title must be at most 255 characters long"))
-        }
-
-        if (description == null) {
-            errors.add(ValidationError("description", "Description is required"))
-        } else if (description.length > 1000) {
-            errors.add(ValidationError("description", "Description must be at most 1000 characters long"))
-        }
-
-        // Due date is optional, so no validation needed
-
-        if (status == null) {
-            errors.add(ValidationError("status", "Status is required"))
-        } else {
-            try {
-                TaskStatus.valueOf(status)
-            } catch (e: IllegalArgumentException) {
-                errors.add(ValidationError("status", "Status must be one of: PENDING, IN_PROGRESS, COMPLETED"))
-            }
-        }
-
-        // Validate tag IDs
-        tagIds?.forEach { tagId ->
-            if (tagId.isBlank()) {
-                errors.add(ValidationError("tagIds", "Tag ID cannot be blank"))
-            } else if (!Guid.isValid(tagId)) {
-                errors.add(ValidationError("tagIds", "Tag ID must be a valid GUID"))
-            }
-        }
-
-        if (errors.isNotEmpty()) {
-            throw ValidationException("Validation failed", errors)
-        }
+        validate(this)
 
         return TaskUpdateByIdHandler.Request(
             title = title!!,
@@ -63,5 +24,37 @@ data class TaskUpdateRequest(
             status = TaskStatus.valueOf(status!!),
             tagIds = tagIds ?: emptyList(),
         )
+    }
+
+    companion object {
+        private fun validate(request: TaskUpdateRequest) {
+            val errors = mutableListOf<ValidationError>()
+
+            if (request.title == null || request.title.isBlank() || request.title.length > 255) {
+                errors.add(ValidationError(TaskUpdateByIdHandler.Request::title.name, "Title is required and must be between 1 and 255 characters"))
+            }
+
+            if (request.description == null || request.description.length > 1000) {
+                errors.add(ValidationError(TaskUpdateByIdHandler.Request::description.name, "Description is required and must be at most 1000 characters long"))
+            }
+
+            if (request.status == null) {
+                errors.add(ValidationError(TaskUpdateByIdHandler.Request::status.name, "Status is required and must be one of: ${TaskStatus.allTaskStatusesString()}"))
+            } else {
+                try {
+                    TaskStatus.valueOf(request.status)
+                } catch (e: IllegalArgumentException) {
+                    errors.add(ValidationError(TaskUpdateByIdHandler.Request::status.name, "Status must be one of: ${TaskStatus.allTaskStatusesString()}"))
+                }
+            }
+
+            if (request.tagIds?.any { tagId -> !Guid.isValid(tagId) } == true) {
+                errors.add(ValidationError(TaskUpdateByIdHandler.Request::tagIds.name, "All tag IDs must be valid GUIDs"))
+            }
+
+            if (errors.isNotEmpty()) {
+                throw ValidationException("Validation failed", errors)
+            }
+        }
     }
 }
