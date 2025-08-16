@@ -45,15 +45,20 @@ data class TaskGetAllRequest(
             val dueDateToInstant = validateAndParseDate(request.dueDateTo, TaskGetAllHandler.Request::dueDateTo.name, errors)
 
             // Validate completed date range
-            val completedDateFromInstant = validateAndParseDate(request.completedDateFrom, TaskGetAllHandler.Request::completedDateFrom.name, errors)
-            val completedDateToInstant = validateAndParseDate(request.completedDateTo, TaskGetAllHandler.Request::completedDateTo.name, errors)
+            val completedDateFromInstant =
+                validateAndParseDate(request.completedDateFrom, TaskGetAllHandler.Request::completedDateFrom.name, errors)
+            val completedDateToInstant =
+                validateAndParseDate(request.completedDateTo, TaskGetAllHandler.Request::completedDateTo.name, errors)
 
             // Validate date range logic
             if (dueDateFromInstant != null && dueDateToInstant != null && dueDateFromInstant.isAfter(dueDateToInstant)) {
                 errors.add(ValidationError("dueDateRange", "Due date 'from' must be before or equal to 'to'"))
             }
 
-            if (completedDateFromInstant != null && completedDateToInstant != null && completedDateFromInstant.isAfter(completedDateToInstant)) {
+            if (completedDateFromInstant != null &&
+                completedDateToInstant != null &&
+                completedDateFromInstant.isAfter(completedDateToInstant)
+            ) {
                 errors.add(ValidationError("completedDateRange", "Completed date 'from' must be before or equal to 'to'"))
             }
 

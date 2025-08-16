@@ -7,8 +7,6 @@ enum class TaskStatus {
     ;
 
     companion object {
-        fun allTaskStatusesString(): String {
-            return TaskStatus.values().joinToString(", ")
-        }
+        fun allTaskStatusesString(): String = TaskStatus.values().joinToString(", ")
     }
 }

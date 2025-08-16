@@ -22,7 +22,9 @@ data class TagUpdateRequest(
             val errors = mutableListOf<ValidationError>()
 
             if (request.name.isBlank() || request.name.length > 50) {
-                errors.add(ValidationError(TagUpdateHandler.Request::name.name, "Tag name is required and must be between 1 and 50 characters"))
+                errors.add(
+                    ValidationError(TagUpdateHandler.Request::name.name, "Tag name is required and must be between 1 and 50 characters"),
+                )
             }
 
             if (!request.color.matches(Regex("^#[0-9A-Fa-f]{6}$"))) {

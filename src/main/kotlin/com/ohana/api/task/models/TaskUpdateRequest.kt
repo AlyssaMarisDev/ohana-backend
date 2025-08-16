@@ -31,20 +31,40 @@ data class TaskUpdateRequest(
             val errors = mutableListOf<ValidationError>()
 
             if (request.title == null || request.title.isBlank() || request.title.length > 255) {
-                errors.add(ValidationError(TaskUpdateByIdHandler.Request::title.name, "Title is required and must be between 1 and 255 characters"))
+                errors.add(
+                    ValidationError(
+                        TaskUpdateByIdHandler.Request::title.name,
+                        "Title is required and must be between 1 and 255 characters",
+                    ),
+                )
             }
 
             if (request.description == null || request.description.length > 1000) {
-                errors.add(ValidationError(TaskUpdateByIdHandler.Request::description.name, "Description is required and must be at most 1000 characters long"))
+                errors.add(
+                    ValidationError(
+                        TaskUpdateByIdHandler.Request::description.name,
+                        "Description is required and must be at most 1000 characters long",
+                    ),
+                )
             }
 
             if (request.status == null) {
-                errors.add(ValidationError(TaskUpdateByIdHandler.Request::status.name, "Status is required and must be one of: ${TaskStatus.allTaskStatusesString()}"))
+                errors.add(
+                    ValidationError(
+                        TaskUpdateByIdHandler.Request::status.name,
+                        "Status is required and must be one of: ${TaskStatus.allTaskStatusesString()}",
+                    ),
+                )
             } else {
                 try {
                     TaskStatus.valueOf(request.status)
                 } catch (e: IllegalArgumentException) {
-                    errors.add(ValidationError(TaskUpdateByIdHandler.Request::status.name, "Status must be one of: ${TaskStatus.allTaskStatusesString()}"))
+                    errors.add(
+                        ValidationError(
+                            TaskUpdateByIdHandler.Request::status.name,
+                            "Status must be one of: ${TaskStatus.allTaskStatusesString()}",
+                        ),
+                    )
                 }
             }
 

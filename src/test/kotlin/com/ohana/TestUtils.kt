@@ -15,7 +15,6 @@ import com.ohana.shared.enums.HouseholdMemberStatus
 import com.ohana.shared.enums.TaskStatus
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
-import kotlinx.coroutines.runBlocking
 import java.time.Instant
 import java.util.UUID
 
@@ -125,8 +124,8 @@ class TestUtils {
             unitOfWork: UnitOfWork,
             context: UnitOfWorkContext,
         ) {
-            whenever(unitOfWork.execute(any())).thenAnswer { invocation ->
-                val block = invocation.getArgument<suspend (com.ohana.data.unitOfWork.UnitOfWorkContext) -> Any>(0)
+            whenever(unitOfWork.execute(any<(UnitOfWorkContext) -> Any>())).thenAnswer { invocation ->
+                val block = invocation.getArgument<(UnitOfWorkContext) -> Any>(0)
                 block(context)
             }
         }

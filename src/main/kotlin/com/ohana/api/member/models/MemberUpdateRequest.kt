@@ -24,7 +24,12 @@ data class MemberUpdateRequest(
             val errors = mutableListOf<ValidationError>()
 
             if (request.name == null || request.name.isBlank() || request.name.length > 255) {
-                errors.add(ValidationError(MemberUpdateByIdHandler.Request::name.name, "Name is required and must be between 1 and 255 characters"))
+                errors.add(
+                    ValidationError(
+                        MemberUpdateByIdHandler.Request::name.name,
+                        "Name is required and must be between 1 and 255 characters",
+                    ),
+                )
             }
 
             if (request.age != null && request.age < 0) {

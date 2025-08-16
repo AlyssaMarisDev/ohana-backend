@@ -21,7 +21,10 @@ data class LoginRequest(
         private fun validate(request: LoginRequest) {
             val errors = mutableListOf<ValidationError>()
 
-            if (request.email == null || request.email.isBlank() || !request.email.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))) {
+            if (request.email == null ||
+                request.email.isBlank() ||
+                !request.email.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))
+            ) {
                 errors.add(ValidationError(LoginHandler.Request::email.name, "Email is required and must be in a valid format"))
             }
 

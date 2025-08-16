@@ -65,6 +65,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.2")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.2")
     testImplementation("mysql:mysql-connector-mxj:5.0.12")
     testImplementation("com.h2database:h2:1.4.200")
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")

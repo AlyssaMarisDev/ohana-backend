@@ -26,16 +26,28 @@ data class HouseholdInviteMemberRequest(
             val errors = mutableListOf<ValidationError>()
 
             if (request.memberId == null || !Guid.isValid(request.memberId)) {
-                errors.add(ValidationError(HouseholdInviteMemberHandler.Request::memberId.name, "Member ID is required and must be a valid GUID"))
+                errors.add(
+                    ValidationError(HouseholdInviteMemberHandler.Request::memberId.name, "Member ID is required and must be a valid GUID"),
+                )
             }
 
             if (request.role == null) {
-                errors.add(ValidationError(HouseholdInviteMemberHandler.Request::role.name, "Role is required and must be one of: ${HouseholdMemberRole.values().joinToString(", ")}"))
+                errors.add(
+                    ValidationError(
+                        HouseholdInviteMemberHandler.Request::role.name,
+                        "Role is required and must be one of: ${HouseholdMemberRole.values().joinToString(", ")}",
+                    ),
+                )
             } else {
                 try {
                     HouseholdMemberRole.valueOf(request.role)
                 } catch (e: IllegalArgumentException) {
-                    errors.add(ValidationError(HouseholdInviteMemberHandler.Request::role.name, "Role must be one of: ${HouseholdMemberRole.values().joinToString(", ")}"))
+                    errors.add(
+                        ValidationError(
+                            HouseholdInviteMemberHandler.Request::role.name,
+                            "Role must be one of: ${HouseholdMemberRole.values().joinToString(", ")}",
+                        ),
+                    )
                 }
             }
 
