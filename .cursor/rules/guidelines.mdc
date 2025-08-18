@@ -249,6 +249,10 @@ CREATE INDEX idx_new_field ON existing_table(new_field);
 - ISO 8601 format for API date strings
 - Proper timezone handling in database queries
 
+### 6. Imports
+
+- Do not use fully qualified names in code. Always add imports at the top of the file.
+
 ## Performance Considerations
 
 ### 1. Database
