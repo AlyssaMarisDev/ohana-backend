@@ -8,6 +8,8 @@ import org.koin.ktor.plugin.Koin
 
 fun main() {
     val config = AppConfig.fromEnvironment()
+    // Run Flyway migrations before starting the server
+    runDatabaseMigrations(config.database)
 
     embeddedServer(
         Netty,
@@ -19,6 +21,8 @@ fun main() {
 
 fun Application.module() {
     val config = AppConfig.fromEnvironment()
+    // Ensure migrations also run in test hosts that call module() directly
+    runDatabaseMigrations(config.database)
 
     install(Koin) {
         modules(appModule)

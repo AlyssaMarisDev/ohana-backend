@@ -12,6 +12,7 @@ val h2Version: String by project
 val coroutinesTestVersion: String by project
 val mockitoCoreVersion: String by project
 val mockitoKotlinVersion: String by project
+val flywayVersion: String by project
 
 plugins {
     kotlin("jvm")
@@ -73,8 +74,8 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
     // Database migrations
-    implementation("org.flywaydb:flyway-core:10.17.2")
-    implementation("org.flywaydb:flyway-mysql:10.17.2")
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.flywaydb:flyway-mysql:$flywayVersion")
 
     // Testing
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")

@@ -27,13 +27,18 @@ class JdbiAuthMemberRepositoryIT {
                 password = ""
             }
 
-        Flyway
-            .configure()
-            .dataSource(dataSource)
-            .locations("classpath:db/migration")
-            .baselineOnMigrate(true)
-            .load()
-            .migrate()
+        val flyway =
+            Flyway
+                .configure()
+                .dataSource(dataSource)
+                .locations("classpath:db/migration")
+                .baselineOnMigrate(true)
+                .cleanDisabled(false)
+                .cleanOnValidationError(true)
+                .load()
+
+        flyway.clean()
+        flyway.migrate()
 
         jdbi = Jdbi.create(dataSource)
         handle = jdbi.open()
