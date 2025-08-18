@@ -24,7 +24,11 @@ class TaskDeleteByIdHandlerTest {
     fun setUp() {
         taskRepository = mock()
         validator = mock()
-        context = mock { on { tasks } doReturn taskRepository; on { households } doReturn mock() }
+        context =
+            mock {
+                on { tasks } doReturn taskRepository
+                on { households } doReturn mock()
+            }
         unitOfWork = mock()
         handler = TaskDeleteByIdHandler(unitOfWork, validator)
     }
@@ -57,5 +61,3 @@ class TaskDeleteByIdHandlerTest {
             assertEquals("Task not found", ex.message)
         }
 }
-
-

@@ -67,5 +67,3 @@ class MemberGetByIdHandlerTest {
             assertEquals("Member not found", ex.message)
         }
 }
-
-

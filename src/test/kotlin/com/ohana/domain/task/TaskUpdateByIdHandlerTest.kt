@@ -29,7 +29,11 @@ class TaskUpdateByIdHandlerTest {
         taskRepository = mock()
         validator = mock()
         taskTagManager = mock()
-        context = mock { on { tasks } doReturn taskRepository; on { households } doReturn mock() }
+        context =
+            mock {
+                on { tasks } doReturn taskRepository
+                on { households } doReturn mock()
+            }
         unitOfWork = mock()
         handler = TaskUpdateByIdHandler(unitOfWork, validator, taskTagManager)
     }
@@ -45,13 +49,14 @@ class TaskUpdateByIdHandlerTest {
             whenever(taskRepository.update(any())).thenAnswer { it.getArgument(0) }
             whenever(taskTagManager.assignTagsToTask(eq(context), eq(existing.id), any())).thenReturn(emptyList())
 
-            val req = TaskUpdateByIdHandler.Request(
-                title = "T",
-                description = "D",
-                dueDate = Instant.now(),
-                status = TaskStatus.COMPLETED,
-                tagIds = listOf(UUID.randomUUID().toString()),
-            )
+            val req =
+                TaskUpdateByIdHandler.Request(
+                    title = "T",
+                    description = "D",
+                    dueDate = Instant.now(),
+                    status = TaskStatus.COMPLETED,
+                    tagIds = listOf(UUID.randomUUID().toString()),
+                )
             val res = handler.handle(userId, existing.id, req)
             assertEquals("T", res.title)
             assertEquals(TaskStatus.COMPLETED, res.status)
@@ -68,7 +73,14 @@ class TaskUpdateByIdHandlerTest {
             whenever(taskRepository.update(any())).thenAnswer { it.getArgument(0) }
             whenever(taskTagManager.assignTagsToTask(eq(context), eq(existing.id), any())).thenReturn(emptyList())
 
-            val req = TaskUpdateByIdHandler.Request(existing.title, existing.description, existing.dueDate, TaskStatus.COMPLETED, emptyList())
+            val req =
+                TaskUpdateByIdHandler.Request(
+                    existing.title,
+                    existing.description,
+                    existing.dueDate,
+                    TaskStatus.COMPLETED,
+                    emptyList(),
+                )
             val res = handler.handle(userId, existing.id, req)
             // completedAt should be set recently
             requireNotNull(res.completedAt)
@@ -83,9 +95,9 @@ class TaskUpdateByIdHandlerTest {
             whenever(taskRepository.findById(id)).thenReturn(null)
 
             val ex =
-                assertThrows<NotFoundException> { handler.handle(userId, id, TaskUpdateByIdHandler.Request("t", "d", null, TaskStatus.PENDING, emptyList())) }
+                assertThrows<NotFoundException> {
+                    handler.handle(userId, id, TaskUpdateByIdHandler.Request("t", "d", null, TaskStatus.PENDING, emptyList()))
+                }
             assertEquals("Task not found", ex.message)
         }
 }
-
-

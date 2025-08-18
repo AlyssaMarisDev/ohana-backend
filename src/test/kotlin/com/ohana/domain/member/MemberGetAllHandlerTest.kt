@@ -44,5 +44,3 @@ class MemberGetAllHandlerTest {
             assertEquals(m2.email, res[1].email)
         }
 }
-
-

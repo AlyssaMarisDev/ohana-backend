@@ -10,7 +10,7 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 group = "com.ohana"
@@ -61,6 +61,10 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
 
+    // Database migrations
+    implementation("org.flywaydb:flyway-core:10.17.2")
+    implementation("org.flywaydb:flyway-mysql:10.17.2")
+
     // Testing
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.2")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.2")
@@ -95,6 +99,8 @@ tasks.jar {
 
 tasks.test {
     useJUnitPlatform()
+    // Ensure tests run on Java 17 (required by Flyway 10+)
+    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(17)) })
 
     testLogging {
         events("passed", "skipped", "failed")

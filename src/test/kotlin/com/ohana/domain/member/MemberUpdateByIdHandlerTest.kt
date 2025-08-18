@@ -37,7 +37,12 @@ class MemberUpdateByIdHandlerTest {
             whenever(memberRepository.findById(userId)).thenReturn(existing)
             whenever(memberRepository.update(any())).thenReturn(updated)
 
-            val res = handler.handle(userId, userId, MemberUpdateByIdHandler.Request(name = updated.name, age = updated.age, gender = updated.gender))
+            val res =
+                handler.handle(
+                    userId,
+                    userId,
+                    MemberUpdateByIdHandler.Request(name = updated.name, age = updated.age, gender = updated.gender),
+                )
             assertEquals(updated.name, res.name)
             assertEquals(updated.age, res.age)
             assertEquals(updated.gender, res.gender)
@@ -71,5 +76,3 @@ class MemberUpdateByIdHandlerTest {
             assertEquals("Member not found", ex.message)
         }
 }
-
-

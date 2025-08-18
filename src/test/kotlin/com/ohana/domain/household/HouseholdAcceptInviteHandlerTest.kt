@@ -79,5 +79,3 @@ class HouseholdAcceptInviteHandlerTest {
             verify(householdRepository, never()).updateMember(any())
         }
 }
-
-
