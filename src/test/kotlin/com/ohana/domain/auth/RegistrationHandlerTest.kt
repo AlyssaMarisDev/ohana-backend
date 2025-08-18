@@ -5,6 +5,8 @@ import com.ohana.data.auth.AuthMemberRepository
 import com.ohana.data.auth.RefreshTokenRepository
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.auth.utils.Hasher
+import com.ohana.domain.auth.utils.JwtService
+import com.ohana.domain.auth.utils.TokenPair
 import com.ohana.shared.exceptions.ConflictException
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -22,6 +24,7 @@ class RegistrationHandlerTest {
     private lateinit var authMemberRepository: AuthMemberRepository
     private lateinit var refreshTokenRepository: RefreshTokenRepository
     private lateinit var handler: RegistrationHandler
+    private lateinit var jwtService: JwtService
 
     @BeforeEach
     fun setUp() {
@@ -33,7 +36,9 @@ class RegistrationHandlerTest {
                 on { refreshTokens } doReturn refreshTokenRepository
             }
         unitOfWork = mock()
-        handler = RegistrationHandler(unitOfWork)
+        jwtService = mock()
+        whenever(jwtService.generateTokenPair(any())).thenReturn(TokenPair("access", "refresh"))
+        handler = RegistrationHandler(unitOfWork, jwtService)
     }
 
     @Test

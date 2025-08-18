@@ -2,7 +2,8 @@ package com.ohana.domain.auth
 
 import com.ohana.data.auth.RefreshToken
 import com.ohana.data.unitOfWork.*
-import com.ohana.domain.auth.utils.*
+import com.ohana.domain.auth.utils.Hasher
+import com.ohana.domain.auth.utils.JwtService
 import com.ohana.shared.exceptions.AuthorizationException
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -10,6 +11,7 @@ import java.util.UUID
 
 class LoginHandler(
     private val unitOfWork: UnitOfWork,
+    private val jwtService: JwtService,
 ) {
     data class Request(
         val email: String,
@@ -30,7 +32,7 @@ class LoginHandler(
             }
 
             // Generate token pair
-            val tokenPair = JwtManager.generateTokenPair(member.id)
+            val tokenPair = jwtService.generateTokenPair(member.id)
 
             // Store refresh token
             val refreshToken =
