@@ -6,9 +6,30 @@
  * This project uses @Incubating APIs which are subject to change.
  */
 
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+    plugins {
+        // Read versions from gradle.properties in the correct compilation phase
+        val kotlinVersion: String by settings
+        val ktorVersion: String by settings
+        val ktlintPluginVersion: String by settings
+        val versionsPluginVersion: String by settings
+        val foojayResolverVersion: String by settings
+
+        kotlin("jvm") version kotlinVersion
+        id("io.ktor.plugin") version ktorVersion
+        id("org.jlleitschuh.gradle.ktlint") version ktlintPluginVersion
+        id("com.github.ben-manes.versions") version versionsPluginVersion
+        id("org.gradle.toolchains.foojay-resolver-convention") version foojayResolverVersion
+    }
+}
+
 plugins {
     // Apply the foojay-resolver plugin to allow automatic download of JDKs
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+    id("org.gradle.toolchains.foojay-resolver-convention")
 }
 
 rootProject.name = "ohana-backend"
