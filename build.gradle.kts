@@ -2,11 +2,22 @@ val kotlinVersion: String by project
 val ktorVersion: String by project
 val koinVersion: String by project
 val logbackVersion: String by project
+val ktlintPluginVersion: String by project
+val versionsPluginVersion: String by project
+val jdbiVersion: String by project
+val mysqlConnectorVersion: String by project
+val jacksonVersion: String by project
+val junitVersion: String by project
+val h2Version: String by project
+val coroutinesTestVersion: String by project
+val mockitoCoreVersion: String by project
+val mockitoKotlinVersion: String by project
 
 plugins {
-    kotlin("jvm") version "2.1.20"
-    id("io.ktor.plugin") version "3.1.2"
-    id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
+    kotlin("jvm")
+    id("io.ktor.plugin")
+    id("org.jlleitschuh.gradle.ktlint")
+    id("com.github.ben-manes.versions")
 }
 
 kotlin {
@@ -50,34 +61,33 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
 
     // Database
-    implementation("org.jdbi:jdbi3-core:3.27.0")
-    implementation("org.jdbi:jdbi3-kotlin:3.27.0")
-    implementation("org.jdbi:jdbi3-sqlobject:3.27.0")
-    implementation("org.jdbi:jdbi3-kotlin-sqlobject:3.27.0")
-    implementation("com.mysql:mysql-connector-j:9.0.0")
+    implementation("org.jdbi:jdbi3-core:$jdbiVersion")
+    implementation("org.jdbi:jdbi3-kotlin:$jdbiVersion")
+    implementation("org.jdbi:jdbi3-sqlobject:$jdbiVersion")
+    implementation("org.jdbi:jdbi3-kotlin-sqlobject:$jdbiVersion")
+    implementation("com.mysql:mysql-connector-j:$mysqlConnectorVersion")
 
     // Jackson JSON library
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
     // Database migrations
     implementation("org.flywaydb:flyway-core:10.17.2")
     implementation("org.flywaydb:flyway-mysql:10.17.2")
 
     // Testing
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
     testImplementation("mysql:mysql-connector-mxj:5.0.12")
-    testImplementation("com.h2database:h2:1.4.200")
+    testImplementation("com.h2database:h2:$h2Version")
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation("org.mockito:mockito-core:5.2.0")
-    testImplementation("org.mockito:mockito-inline:5.2.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesTestVersion")
+    testImplementation("org.mockito:mockito-core:$mockitoCoreVersion")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
 }
 
 // Configure the JAR task to create an executable JAR
