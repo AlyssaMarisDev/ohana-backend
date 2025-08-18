@@ -54,8 +54,8 @@ val appModule =
         single<JwtService> { DefaultJwtService() }
 
         // Auth handlers
-        single { RegistrationHandler(get()) }
-        single { LoginHandler(get()) }
+        single { RegistrationHandler(get(), get()) }
+        single { LoginHandler(get(), get()) }
         single { TokenRefreshHandler(get(), get()) }
         single { LogoutHandler(get(), get()) }
 
