@@ -106,10 +106,6 @@ tasks.test {
     }
 }
 
-tasks.named("build") {
-    dependsOn("ktlintFormat")
-}
-
 ktlint {
     version.set("1.5.0")
     android.set(false)

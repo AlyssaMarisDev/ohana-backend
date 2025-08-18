@@ -9,6 +9,8 @@ import com.ohana.api.task.TaskController
 import com.ohana.data.unitOfWork.JdbiUnitOfWork
 import com.ohana.data.unitOfWork.UnitOfWork
 import com.ohana.domain.auth.*
+import com.ohana.domain.auth.utils.DefaultJwtService
+import com.ohana.domain.auth.utils.JwtService
 import com.ohana.domain.household.*
 import com.ohana.domain.member.*
 import com.ohana.domain.permissions.TagPermissionManager
@@ -49,12 +51,13 @@ val appModule =
         single { TaskTagManager() }
         single { TagPermissionManager(get()) }
         single { DefaultTagService() }
+        single<JwtService> { DefaultJwtService() }
 
         // Auth handlers
         single { RegistrationHandler(get()) }
         single { LoginHandler(get()) }
-        single { TokenRefreshHandler(get()) }
-        single { LogoutHandler(get()) }
+        single { TokenRefreshHandler(get(), get()) }
+        single { LogoutHandler(get(), get()) }
 
         // Members handlers - now only need UnitOfWork
         single { MemberGetAllHandler(get(), get()) }
@@ -69,7 +72,7 @@ val appModule =
         single { TaskUpdateByIdHandler(get(), get(), get()) }
 
         // Household handlers
-        single { HouseholdAcceptInviteHandler(get()) }
+        single { HouseholdAcceptInviteHandler(JdbiUnitOfWork(get())) }
         single { HouseholdCreationHandler(get(), get(), get()) }
         single { HouseholdGetAllHandler(get()) }
         single { HouseholdGetByIdHandler(get(), get()) }

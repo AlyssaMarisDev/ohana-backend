@@ -2,7 +2,7 @@ package com.ohana.domain.auth
 
 import com.ohana.data.auth.RefreshToken
 import com.ohana.data.unitOfWork.*
-import com.ohana.domain.auth.utils.*
+import com.ohana.domain.auth.utils.JwtService
 import com.ohana.shared.exceptions.AuthorizationException
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -10,6 +10,7 @@ import java.util.UUID
 
 class TokenRefreshHandler(
     private val unitOfWork: UnitOfWork,
+    private val jwtService: JwtService,
 ) {
     data class Request(
         val refreshToken: String,
@@ -24,7 +25,7 @@ class TokenRefreshHandler(
         unitOfWork.execute { context ->
             // Validate the refresh token
             val decodedToken =
-                JwtManager.validateRefreshToken(request.refreshToken)
+                jwtService.validateRefreshToken(request.refreshToken)
                     ?: throw AuthorizationException("Invalid refresh token")
 
             val userId =
@@ -53,7 +54,7 @@ class TokenRefreshHandler(
             context.refreshTokens.revokeToken(request.refreshToken)
 
             // Generate new token pair
-            val newTokenPair = JwtManager.generateTokenPair(userId)
+            val newTokenPair = jwtService.generateTokenPair(userId)
 
             // Store new refresh token
             val newRefreshToken =

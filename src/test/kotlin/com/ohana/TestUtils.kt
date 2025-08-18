@@ -1,5 +1,7 @@
 package com.ohana
 
+import com.auth0.jwt.interfaces.Claim
+import com.auth0.jwt.interfaces.DecodedJWT
 import com.ohana.data.auth.AuthMember
 import com.ohana.data.auth.RefreshToken
 import com.ohana.data.household.Household
@@ -14,12 +16,22 @@ import com.ohana.shared.enums.HouseholdMemberRole
 import com.ohana.shared.enums.HouseholdMemberStatus
 import com.ohana.shared.enums.TaskStatus
 import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import java.time.Instant
 import java.util.UUID
 
 class TestUtils {
     companion object {
+        fun mockDecodedJwt(userId: String?): DecodedJWT {
+            val claim = mock<Claim>()
+            whenever(claim.asString()).thenReturn(userId)
+
+            val decoded = mock<DecodedJWT>()
+            whenever(decoded.getClaim("userId")).thenReturn(claim)
+            return decoded
+        }
+
         fun getHousehold(
             id: String = UUID.randomUUID().toString(),
             name: String = "Test Household",
