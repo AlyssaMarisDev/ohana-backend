@@ -2,7 +2,6 @@ package com.ohana.domain.tags
 
 import com.ohana.TestUtils
 import com.ohana.data.tags.TagRepository
-import com.ohana.data.task.TaskRepository
 import com.ohana.data.unitOfWork.*
 import com.ohana.domain.validators.HouseholdMemberValidator
 import com.ohana.shared.exceptions.NotFoundException
@@ -70,5 +69,3 @@ class TagDeleteHandlerTest {
             assertEquals("Tag not found in this household", ex.message)
         }
 }
-
-

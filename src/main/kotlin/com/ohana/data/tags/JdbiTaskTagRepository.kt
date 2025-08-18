@@ -1,6 +1,6 @@
 package com.ohana.data.tags
 
-import com.ohana.data.utils.DatabaseUtils
+import com.ohana.data.utils.*
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.mapper.RowMapper
 import org.jdbi.v3.core.statement.StatementContext
@@ -21,13 +21,12 @@ class JdbiTaskTagRepository(
             ORDER BY created_at
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("taskId" to taskId),
-                TaskTag::class,
-            )
+        return get(
+            handle,
+            selectQuery,
+            mapOf("taskId" to taskId),
+            TaskTag::class,
+        )
     }
 
     override fun findByTaskIds(taskIds: List<String>): List<TaskTag> {
@@ -45,13 +44,12 @@ class JdbiTaskTagRepository(
 
         val params = taskIds.mapIndexed { index, id -> "taskId_$index" to id }.toMap()
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                params,
-                TaskTag::class,
-            )
+        return get(
+            handle,
+            selectQuery,
+            params,
+            TaskTag::class,
+        )
     }
 
     override fun create(taskTag: TaskTag): TaskTag {
@@ -61,7 +59,7 @@ class JdbiTaskTagRepository(
         """
 
         val insertedRows =
-            DatabaseUtils.insert(
+            insert(
                 handle,
                 insertQuery,
                 mapOf(
@@ -113,7 +111,7 @@ class JdbiTaskTagRepository(
         """
 
         val deletedRows =
-            DatabaseUtils.delete(
+            delete(
                 handle,
                 deleteQuery,
                 mapOf("taskId" to taskId),
@@ -139,7 +137,7 @@ class JdbiTaskTagRepository(
         val params = mapOf("taskId" to taskId) + tagIds.mapIndexed { index, id -> "tagId_$index" to id }.toMap()
 
         val deletedRows =
-            DatabaseUtils.delete(
+            delete(
                 handle,
                 deleteQuery,
                 params,
@@ -154,7 +152,7 @@ class JdbiTaskTagRepository(
         """
 
         val deletedRows =
-            DatabaseUtils.delete(
+            delete(
                 handle,
                 deleteQuery,
                 mapOf("tagId" to tagId),

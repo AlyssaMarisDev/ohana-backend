@@ -10,12 +10,10 @@ import com.ohana.data.tags.TagRepository
 import com.ohana.data.tags.TaskTagRepository
 import com.ohana.data.task.TaskRepository
 
-// Unit of Work interface
 interface UnitOfWork {
     suspend fun <T> execute(block: (UnitOfWorkContext) -> T): T
 }
 
-// Unit of Work context interface
 interface UnitOfWorkContext {
     val tasks: TaskRepository
     val taskTags: TaskTagRepository

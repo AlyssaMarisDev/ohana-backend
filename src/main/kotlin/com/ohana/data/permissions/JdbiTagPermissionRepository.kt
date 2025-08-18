@@ -1,6 +1,6 @@
 package com.ohana.data.permissions
 
-import com.ohana.data.utils.DatabaseUtils
+import com.ohana.data.utils.*
 import com.ohana.shared.exceptions.DbException
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.mapper.RowMapper
@@ -10,16 +10,19 @@ import java.sql.ResultSet
 class JdbiTagPermissionRepository(
     private val handle: Handle,
 ) : TagPermissionRepository {
-    private val rowMapper = TagPermissionRowMapper()
+    init {
+        handle.registerRowMapper(TagPermissionRowMapper())
+    }
 
     override fun findByPermissionId(permissionId: String): List<TagPermission> {
         val sql = "SELECT * FROM tag_permissions WHERE permission_id = :permissionId"
 
-        return handle
-            .createQuery(sql)
-            .bind("permissionId", permissionId)
-            .map(rowMapper)
-            .list()
+        return get(
+            handle,
+            sql,
+            mapOf("permissionId" to permissionId),
+            TagPermission::class,
+        )
     }
 
     override fun create(tagPermission: TagPermission): TagPermission {
@@ -29,7 +32,7 @@ class JdbiTagPermissionRepository(
         """
 
         val insertedRows =
-            DatabaseUtils.insert(
+            insert(
                 handle,
                 insertQuery,
                 mapOf(

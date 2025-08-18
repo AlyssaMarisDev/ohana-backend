@@ -1,6 +1,6 @@
 package com.ohana.data.tags
 
-import com.ohana.data.utils.DatabaseUtils
+import com.ohana.data.utils.*
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
@@ -22,13 +22,12 @@ class JdbiTagRepository(
             WHERE id = :id
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("id" to id),
-                Tag::class,
-            ).firstOrNull()
+        return get(
+            handle,
+            selectQuery,
+            mapOf("id" to id),
+            Tag::class,
+        ).firstOrNull()
     }
 
     override fun findByIds(ids: List<String>): List<Tag> {
@@ -45,13 +44,12 @@ class JdbiTagRepository(
 
         val params = ids.mapIndexed { index, id -> "id_$index" to id }.toMap()
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                params,
-                Tag::class,
-            )
+        return get(
+            handle,
+            selectQuery,
+            params,
+            Tag::class,
+        )
     }
 
     override fun findByHouseholdId(householdId: String): List<Tag> {
@@ -62,13 +60,12 @@ class JdbiTagRepository(
             ORDER BY name
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("householdId" to householdId),
-                Tag::class,
-            )
+        return get(
+            handle,
+            selectQuery,
+            mapOf("householdId" to householdId),
+            Tag::class,
+        )
     }
 
     override fun create(tag: Tag): Tag {
@@ -78,7 +75,7 @@ class JdbiTagRepository(
         """
 
         val insertedRows =
-            DatabaseUtils.insert(
+            insert(
                 handle,
                 insertQuery,
                 mapOf(
@@ -104,7 +101,7 @@ class JdbiTagRepository(
         """
 
         val updatedRows =
-            DatabaseUtils.update(
+            update(
                 handle,
                 updateQuery,
                 mapOf(
@@ -124,7 +121,7 @@ class JdbiTagRepository(
         val deleteQuery = "DELETE FROM tags WHERE id = :id"
 
         val deletedRows =
-            DatabaseUtils.delete(
+            delete(
                 handle,
                 deleteQuery,
                 mapOf("id" to id),

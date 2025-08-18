@@ -1,6 +1,6 @@
 package com.ohana.data.member
 
-import com.ohana.data.utils.DatabaseUtils
+import com.ohana.data.utils.*
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
@@ -22,13 +22,12 @@ class JdbiMemberRepository(
             WHERE id = :id
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("id" to id),
-                Member::class,
-            ).firstOrNull()
+        return get(
+            handle,
+            selectQuery,
+            mapOf("id" to id),
+            Member::class,
+        ).firstOrNull()
     }
 
     override fun findAll(): List<Member> {
@@ -37,13 +36,12 @@ class JdbiMemberRepository(
             FROM members
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf(),
-                Member::class,
-            )
+        return get(
+            handle,
+            selectQuery,
+            mapOf(),
+            Member::class,
+        )
     }
 
     override fun findByEmail(email: String): Member? {
@@ -53,13 +51,12 @@ class JdbiMemberRepository(
             WHERE email = :email
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("email" to email),
-                Member::class,
-            ).firstOrNull()
+        return get(
+            handle,
+            selectQuery,
+            mapOf("email" to email),
+            Member::class,
+        ).firstOrNull()
     }
 
     override fun findByHouseholdId(householdId: String): List<Member> {
@@ -70,13 +67,12 @@ class JdbiMemberRepository(
             WHERE hm.household_id = :householdId AND hm.status = 'active'
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("householdId" to householdId),
-                Member::class,
-            )
+        return get(
+            handle,
+            selectQuery,
+            mapOf("householdId" to householdId),
+            Member::class,
+        )
     }
 
     override fun create(member: Member): Member {
@@ -86,7 +82,7 @@ class JdbiMemberRepository(
         """
 
         val insertedRows =
-            DatabaseUtils.insert(
+            insert(
                 handle,
                 insertQuery,
                 mapOf(
@@ -111,7 +107,7 @@ class JdbiMemberRepository(
         """
 
         val updatedRows =
-            DatabaseUtils.update(
+            update(
                 handle,
                 updateQuery,
                 mapOf(

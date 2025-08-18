@@ -1,6 +1,6 @@
 package com.ohana.data.auth
 
-import com.ohana.data.utils.DatabaseUtils
+import com.ohana.data.utils.*
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
@@ -23,7 +23,7 @@ class JdbiRefreshTokenRepository(
         """
 
         val insertedRows =
-            DatabaseUtils.insert(
+            insert(
                 handle,
                 insertQuery,
                 mapOf(
@@ -48,13 +48,12 @@ class JdbiRefreshTokenRepository(
             WHERE token = :token
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("token" to token),
-                RefreshToken::class,
-            ).firstOrNull()
+        return get(
+            handle,
+            selectQuery,
+            mapOf("token" to token),
+            RefreshToken::class,
+        ).firstOrNull()
     }
 
     override fun findByUserId(userId: String): List<RefreshToken> {
@@ -65,13 +64,12 @@ class JdbiRefreshTokenRepository(
             ORDER BY created_at DESC
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("user_id" to userId),
-                RefreshToken::class,
-            )
+        return get(
+            handle,
+            selectQuery,
+            mapOf("user_id" to userId),
+            RefreshToken::class,
+        )
     }
 
     override fun revokeToken(token: String): Boolean {
@@ -82,7 +80,7 @@ class JdbiRefreshTokenRepository(
         """
 
         val updatedRows =
-            DatabaseUtils.update(
+            update(
                 handle,
                 updateQuery,
                 mapOf(
@@ -102,7 +100,7 @@ class JdbiRefreshTokenRepository(
         """
 
         val updatedRows =
-            DatabaseUtils.update(
+            update(
                 handle,
                 updateQuery,
                 mapOf(
@@ -120,7 +118,7 @@ class JdbiRefreshTokenRepository(
             WHERE expires_at < :now
         """
 
-        return DatabaseUtils.delete(
+        return delete(
             handle,
             deleteQuery,
             mapOf("now" to Instant.now()),
@@ -134,13 +132,12 @@ class JdbiRefreshTokenRepository(
             WHERE id = :id
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("id" to id),
-                RefreshToken::class,
-            ).firstOrNull()
+        return get(
+            handle,
+            selectQuery,
+            mapOf("id" to id),
+            RefreshToken::class,
+        ).firstOrNull()
     }
 
     private class RefreshTokenRowMapper : RowMapper<RefreshToken> {

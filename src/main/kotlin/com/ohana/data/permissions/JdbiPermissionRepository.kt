@@ -1,6 +1,6 @@
 package com.ohana.data.permissions
 
-import com.ohana.data.utils.DatabaseUtils
+import com.ohana.data.utils.*
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
@@ -11,17 +11,19 @@ import java.sql.ResultSet
 class JdbiPermissionRepository(
     private val handle: Handle,
 ) : PermissionRepository {
-    private val rowMapper = PermissionRowMapper()
+    init {
+        handle.registerRowMapper(PermissionRowMapper())
+    }
 
     override fun findByHouseholdMemberId(householdMemberId: String): Permission? {
         val sql = "SELECT * FROM permissions WHERE household_member_id = :householdMemberId"
 
-        return handle
-            .createQuery(sql)
-            .bind("householdMemberId", householdMemberId)
-            .map(rowMapper)
-            .findFirst()
-            .orElse(null)
+        return get(
+            handle,
+            sql,
+            mapOf("householdMemberId" to householdMemberId),
+            Permission::class,
+        ).firstOrNull()
     }
 
     override fun create(permission: Permission): Permission {
@@ -31,7 +33,7 @@ class JdbiPermissionRepository(
         """
 
         val insertedRows =
-            DatabaseUtils.insert(
+            insert(
                 handle,
                 insertQuery,
                 mapOf(

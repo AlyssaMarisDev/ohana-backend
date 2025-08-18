@@ -1,6 +1,6 @@
 package com.ohana.data.auth
 
-import com.ohana.data.utils.DatabaseUtils
+import com.ohana.data.utils.*
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
@@ -22,13 +22,12 @@ class JdbiAuthMemberRepository(
             WHERE email = :email
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("email" to email),
-                AuthMember::class,
-            ).firstOrNull()
+        return get(
+            handle,
+            selectQuery,
+            mapOf("email" to email),
+            AuthMember::class,
+        ).firstOrNull()
     }
 
     private class AuthMemberRowMapper : RowMapper<AuthMember> {
@@ -54,7 +53,7 @@ class JdbiAuthMemberRepository(
         """
 
         val insertedRows =
-            DatabaseUtils.insert(
+            insert(
                 handle,
                 insertQuery,
                 mapOf(

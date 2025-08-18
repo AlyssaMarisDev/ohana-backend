@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
-import java.time.Instant
 import java.util.UUID
 
 class TaskGetAllHandlerTest {
@@ -59,7 +58,11 @@ class TaskGetAllHandlerTest {
             val t2 = TestUtils.getTask(householdId = h2.id)
             whenever(
                 taskRepository.findByHouseholdIdsWithDateFilters(
-                    any(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(),
+                    any(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
                 ),
             ).thenReturn(listOf(t1, t2))
 
@@ -76,5 +79,3 @@ class TaskGetAllHandlerTest {
             assertEquals(t1.id, res[0].id)
         }
 }
-
-

@@ -39,19 +39,33 @@ class HouseholdInviteMemberHandlerTest {
             val adminId = UUID.randomUUID().toString()
             val householdId = UUID.randomUUID().toString()
             val targetMemberId = UUID.randomUUID().toString()
-            val adminMember = TestUtils.getHouseholdMember(householdId = householdId, memberId = adminId, role = HouseholdMemberRole.ADMIN, status = HouseholdMemberStatus.ACTIVE)
+            val adminMember =
+                TestUtils.getHouseholdMember(
+                    householdId = householdId,
+                    memberId = adminId,
+                    role = HouseholdMemberRole.ADMIN,
+                    status = HouseholdMemberStatus.ACTIVE,
+                )
 
             whenever(householdRepository.findMemberById(householdId, adminId)).thenReturn(adminMember)
             whenever(householdRepository.findMemberById(householdId, targetMemberId)).thenReturn(null)
             whenever(householdRepository.createMember(any())).thenAnswer { it.getArgument(0) }
 
-            val request = HouseholdInviteMemberHandler.Request(memberId = targetMemberId, role = HouseholdMemberRole.MEMBER, tagIds = listOf(UUID.randomUUID().toString()))
+            val request =
+                HouseholdInviteMemberHandler.Request(
+                    memberId = targetMemberId,
+                    role = HouseholdMemberRole.MEMBER,
+                    tagIds = listOf(UUID.randomUUID().toString()),
+                )
 
             handler.handle(adminId, householdId, request)
 
             verify(householdRepository).createMember(
                 argThat { m ->
-                    m.householdId == householdId && m.memberId == targetMemberId && m.status == HouseholdMemberStatus.INVITED && m.invitedBy == adminId
+                    m.householdId == householdId &&
+                        m.memberId == targetMemberId &&
+                        m.status == HouseholdMemberStatus.INVITED &&
+                        m.invitedBy == adminId
                 },
             )
             verify(tagPermissionManager).createPermissionsWithTags(eq(context), any(), eq(request.tagIds))
@@ -68,7 +82,11 @@ class HouseholdInviteMemberHandlerTest {
 
             val ex =
                 assertThrows<AuthorizationException> {
-                    handler.handle(userId, householdId, HouseholdInviteMemberHandler.Request(UUID.randomUUID().toString(), HouseholdMemberRole.MEMBER, emptyList()))
+                    handler.handle(
+                        userId,
+                        householdId,
+                        HouseholdInviteMemberHandler.Request(UUID.randomUUID().toString(), HouseholdMemberRole.MEMBER, emptyList()),
+                    )
                 }
             assertEquals("User is not a member of the household", ex.message)
         }
@@ -79,13 +97,23 @@ class HouseholdInviteMemberHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
             val userId = UUID.randomUUID().toString()
             val householdId = UUID.randomUUID().toString()
-            val member = TestUtils.getHouseholdMember(householdId = householdId, memberId = userId, role = HouseholdMemberRole.MEMBER, status = HouseholdMemberStatus.ACTIVE)
+            val member =
+                TestUtils.getHouseholdMember(
+                    householdId = householdId,
+                    memberId = userId,
+                    role = HouseholdMemberRole.MEMBER,
+                    status = HouseholdMemberStatus.ACTIVE,
+                )
 
             whenever(householdRepository.findMemberById(householdId, userId)).thenReturn(member)
 
             val ex =
                 assertThrows<AuthorizationException> {
-                    handler.handle(userId, householdId, HouseholdInviteMemberHandler.Request(UUID.randomUUID().toString(), HouseholdMemberRole.MEMBER, emptyList()))
+                    handler.handle(
+                        userId,
+                        householdId,
+                        HouseholdInviteMemberHandler.Request(UUID.randomUUID().toString(), HouseholdMemberRole.MEMBER, emptyList()),
+                    )
                 }
             assertEquals("User is not an admin of the household", ex.message)
         }
@@ -96,7 +124,13 @@ class HouseholdInviteMemberHandlerTest {
             TestUtils.mockUnitOfWork(unitOfWork, context)
             val userId = UUID.randomUUID().toString()
             val householdId = UUID.randomUUID().toString()
-            val member = TestUtils.getHouseholdMember(householdId = householdId, memberId = userId, role = HouseholdMemberRole.ADMIN, status = HouseholdMemberStatus.ACTIVE)
+            val member =
+                TestUtils.getHouseholdMember(
+                    householdId = householdId,
+                    memberId = userId,
+                    role = HouseholdMemberRole.ADMIN,
+                    status = HouseholdMemberStatus.ACTIVE,
+                )
             val target = TestUtils.getHouseholdMember(householdId = householdId)
 
             whenever(householdRepository.findMemberById(householdId, userId)).thenReturn(member)
@@ -104,10 +138,12 @@ class HouseholdInviteMemberHandlerTest {
 
             val ex =
                 assertThrows<ConflictException> {
-                    handler.handle(userId, householdId, HouseholdInviteMemberHandler.Request(target.memberId, HouseholdMemberRole.MEMBER, emptyList()))
+                    handler.handle(
+                        userId,
+                        householdId,
+                        HouseholdInviteMemberHandler.Request(target.memberId, HouseholdMemberRole.MEMBER, emptyList()),
+                    )
                 }
             assertEquals("User is already a member of the household", ex.message)
         }
 }
-
-

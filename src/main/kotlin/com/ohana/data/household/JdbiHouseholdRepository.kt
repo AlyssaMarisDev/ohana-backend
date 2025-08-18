@@ -1,6 +1,6 @@
 package com.ohana.data.household
 
-import com.ohana.data.utils.DatabaseUtils
+import com.ohana.data.utils.*
 import com.ohana.shared.enums.HouseholdMemberStatus
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
@@ -24,13 +24,12 @@ class JdbiHouseholdRepository(
             WHERE id = :id
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("id" to id),
-                Household::class,
-            ).firstOrNull()
+        return get(
+            handle,
+            selectQuery,
+            mapOf("id" to id),
+            Household::class,
+        ).firstOrNull()
     }
 
     override fun findAll(): List<Household> {
@@ -39,13 +38,12 @@ class JdbiHouseholdRepository(
             FROM households
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf(),
-                Household::class,
-            )
+        return get(
+            handle,
+            selectQuery,
+            mapOf(),
+            Household::class,
+        )
     }
 
     override fun findByMemberId(memberId: String): List<Household> {
@@ -56,13 +54,12 @@ class JdbiHouseholdRepository(
             WHERE hm.member_id = :memberId AND hm.status = 'active'
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("memberId" to memberId),
-                Household::class,
-            )
+        return get(
+            handle,
+            selectQuery,
+            mapOf("memberId" to memberId),
+            Household::class,
+        )
     }
 
     override fun create(household: Household): Household {
@@ -72,7 +69,7 @@ class JdbiHouseholdRepository(
         """
 
         val insertedRows =
-            DatabaseUtils.insert(
+            insert(
                 handle,
                 insertQuery,
                 mapOf(
@@ -98,16 +95,15 @@ class JdbiHouseholdRepository(
             WHERE household_id = :householdId AND member_id = :memberId
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf(
-                    "householdId" to householdId,
-                    "memberId" to memberId,
-                ),
-                HouseholdMember::class,
-            ).firstOrNull()
+        return get(
+            handle,
+            selectQuery,
+            mapOf(
+                "householdId" to householdId,
+                "memberId" to memberId,
+            ),
+            HouseholdMember::class,
+        ).firstOrNull()
     }
 
     override fun findHouseholdMemberById(householdMemberId: String): HouseholdMember? {
@@ -117,13 +113,12 @@ class JdbiHouseholdRepository(
             WHERE id = :householdMemberId
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("householdMemberId" to householdMemberId),
-                HouseholdMember::class,
-            ).firstOrNull()
+        return get(
+            handle,
+            selectQuery,
+            mapOf("householdMemberId" to householdMemberId),
+            HouseholdMember::class,
+        ).firstOrNull()
     }
 
     override fun findMembersByHouseholdId(householdId: String): List<HouseholdMember> {
@@ -133,13 +128,12 @@ class JdbiHouseholdRepository(
             WHERE household_id = :householdId
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("householdId" to householdId),
-                HouseholdMember::class,
-            )
+        return get(
+            handle,
+            selectQuery,
+            mapOf("householdId" to householdId),
+            HouseholdMember::class,
+        )
     }
 
     override fun createMember(member: HouseholdMember): HouseholdMember {
@@ -149,7 +143,7 @@ class JdbiHouseholdRepository(
         """
 
         val insertedRows =
-            DatabaseUtils.insert(
+            insert(
                 handle,
                 insertQuery,
                 mapOf(
@@ -180,7 +174,7 @@ class JdbiHouseholdRepository(
         """
 
         val updatedRows =
-            DatabaseUtils.update(
+            update(
                 handle,
                 updateQuery,
                 mapOf(
@@ -205,13 +199,12 @@ class JdbiHouseholdRepository(
             WHERE member_id = :memberId AND is_default = true
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("memberId" to memberId),
-                HouseholdMember::class,
-            ).firstOrNull()
+        return get(
+            handle,
+            selectQuery,
+            mapOf("memberId" to memberId),
+            HouseholdMember::class,
+        ).firstOrNull()
     }
 
     override fun setDefaultHousehold(
@@ -225,7 +218,7 @@ class JdbiHouseholdRepository(
             WHERE member_id = :memberId AND is_default = true
         """
 
-        DatabaseUtils.update(
+        update(
             handle,
             clearDefaultQuery,
             mapOf("memberId" to memberId),
@@ -239,7 +232,7 @@ class JdbiHouseholdRepository(
         """
 
         val updatedRows =
-            DatabaseUtils.update(
+            update(
                 handle,
                 setDefaultQuery,
                 mapOf(

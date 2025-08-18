@@ -1,6 +1,6 @@
 package com.ohana.data.task
 
-import com.ohana.data.utils.DatabaseUtils
+import com.ohana.data.utils.*
 import com.ohana.shared.exceptions.DbException
 import com.ohana.shared.exceptions.NotFoundException
 import org.jdbi.v3.core.Handle
@@ -23,7 +23,7 @@ class JdbiTaskRepository(
         """
 
         val insertedRows =
-            DatabaseUtils.insert(
+            insert(
                 handle,
                 insertQuery,
                 mapOf(
@@ -50,13 +50,12 @@ class JdbiTaskRepository(
             WHERE id = :id
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("id" to id),
-                Task::class,
-            ).firstOrNull()
+        return get(
+            handle,
+            selectQuery,
+            mapOf("id" to id),
+            Task::class,
+        ).firstOrNull()
     }
 
     override fun findAll(): List<Task> {
@@ -65,13 +64,12 @@ class JdbiTaskRepository(
             FROM tasks
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf(),
-                Task::class,
-            )
+        return get(
+            handle,
+            selectQuery,
+            mapOf(),
+            Task::class,
+        )
     }
 
     override fun findByHouseholdId(householdId: String): List<Task> {
@@ -81,13 +79,12 @@ class JdbiTaskRepository(
             WHERE household_id = :household_id
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                mapOf("household_id" to householdId),
-                Task::class,
-            )
+        return get(
+            handle,
+            selectQuery,
+            mapOf("household_id" to householdId),
+            Task::class,
+        )
     }
 
     override fun findByHouseholdIds(householdIds: List<String>): List<Task> {
@@ -105,13 +102,12 @@ class JdbiTaskRepository(
 
         val params = householdIds.mapIndexed { index, id -> "household_id_$index" to id }.toMap()
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                params,
-                Task::class,
-            )
+        return get(
+            handle,
+            selectQuery,
+            params,
+            Task::class,
+        )
     }
 
     override fun findByHouseholdIdsWithDateFilters(
@@ -165,13 +161,12 @@ class JdbiTaskRepository(
             ORDER BY created_at DESC
         """
 
-        return DatabaseUtils
-            .get(
-                handle,
-                selectQuery,
-                params,
-                Task::class,
-            )
+        return get(
+            handle,
+            selectQuery,
+            params,
+            Task::class,
+        )
     }
 
     override fun update(task: Task): Task {
@@ -182,7 +177,7 @@ class JdbiTaskRepository(
         """
 
         val updatedRows =
-            DatabaseUtils.update(
+            update(
                 handle,
                 updateQuery,
                 mapOf(
@@ -207,7 +202,7 @@ class JdbiTaskRepository(
         """
 
         val deletedRows =
-            DatabaseUtils.delete(
+            delete(
                 handle,
                 deleteQuery,
                 mapOf("id" to id),

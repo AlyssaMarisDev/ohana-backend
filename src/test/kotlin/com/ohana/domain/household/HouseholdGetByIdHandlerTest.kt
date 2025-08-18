@@ -63,5 +63,3 @@ class HouseholdGetByIdHandlerTest {
             assertEquals("Household not found", ex.message)
         }
 }
-
-

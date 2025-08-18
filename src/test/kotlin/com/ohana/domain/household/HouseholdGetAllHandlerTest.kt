@@ -41,5 +41,3 @@ class HouseholdGetAllHandlerTest {
             assertEquals(h2.id, result[1].id)
         }
 }
-
-

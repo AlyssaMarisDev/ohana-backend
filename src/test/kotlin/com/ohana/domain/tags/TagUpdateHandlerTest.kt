@@ -83,5 +83,3 @@ class TagUpdateHandlerTest {
             assertEquals("A tag with the name 'B' already exists in this household", ex.message)
         }
 }
-
-
